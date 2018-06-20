@@ -2,6 +2,9 @@
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.7.3.
 
+Angular Material setup: followed https://appdividend.com/2018/01/18/angular-5-material-tutorial-scratch/
+manual change version numbers to match angular core
+
 ## Development server
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
