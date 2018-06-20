@@ -29,7 +29,7 @@ export class AppComponent implements OnInit {
       secondCtrl: ['', Validators.required]
     });
 
-    // this.policyHolderGeneratorService.generatePolicyholders(100, 50, 5.5, 1, 7, tolMean, claimPercent, claimPercentStdev, defectRate);
+    console.log(this.policyHolderGeneratorService.generatePolicyholders(100, 50, 5.5, 1, 7, 100000, .05, .01, .03));
   }
 
   openDialog(): void {
