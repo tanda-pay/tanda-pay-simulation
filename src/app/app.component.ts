@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {MatDialog} from '@angular/material';
 import {ExampleDialogComponent} from './component/dialog/example-dialog.component';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {PolicyHolderGenerationService} from './service/policy-holder-generation.service';
 
 @Component({
   selector: 'app-root',
@@ -17,7 +18,8 @@ export class AppComponent implements OnInit {
   secondFormGroup: FormGroup;
 
   constructor(public dialog: MatDialog,
-              private _formBuilder: FormBuilder) {}
+              private _formBuilder: FormBuilder,
+              private policyHolderGeneratorService: PolicyHolderGenerationService) {}
 
   ngOnInit() {
     this.firstFormGroup = this._formBuilder.group({
@@ -26,6 +28,8 @@ export class AppComponent implements OnInit {
     this.secondFormGroup = this._formBuilder.group({
       secondCtrl: ['', Validators.required]
     });
+
+    // this.policyHolderGeneratorService.generatePolicyholders(100, 50, 5.5, 1, 7, tolMean, claimPercent, claimPercentStdev, defectRate);
   }
 
   openDialog(): void {

@@ -1,7 +1,7 @@
 import {Period} from './period';
 
 export class PolicyHolder {
-  coverage: number; // Coverage units purchased per period
+  coverage: number; // Coverage units purchased per period.ts
   premium: number; // Desired premium per coverage unit
   claim: number; // Probability of submitting a claim, as a number from 0 to 1
   claimVal: number; // When there is a claim, what is its proportional value compared to this.coverage
@@ -51,7 +51,7 @@ export class PolicyHolder {
     */
     const defect_mulitplier = 1;
 
-    // var anticipated_rebate = Math.max(((period.committedPremiums - period.totalOutstandingLiability) / period.committedPremiums), 0)
+    // var anticipated_rebate = Math.max(((period.ts.committedPremiums - period.ts.totalOutstandingLiability) / period.ts.committedPremiums), 0)
     // defect_multiplier *= (1 - anticipated_rebate)
 
     return Math.random() < (this.defectRate);
@@ -63,7 +63,7 @@ export class PolicyHolder {
     -Claims should generally be made if they are likely to be greater than the value of the rebate
     -Claims cannot usefully exceed the coverage purchased by the policyholder, but we may want to model frustration that a coverage amount wasn't enough to cover damages
     -Maybe we can submit very small claims if there is a history of underpaid claims, and therefore no rebates
-    -Claim likelihoods per user are not independent variables. Occurrences such as community-wide disasters could make all policyholders submit a claim for one policy period.
+    -Claim likelihoods per user are not independent variables. Occurrences such as community-wide disasters could make all policyholders submit a claim for one policy period.ts.
     */
     if (Math.random() < this.claim) {
       return this.claimVal * this.coverage;

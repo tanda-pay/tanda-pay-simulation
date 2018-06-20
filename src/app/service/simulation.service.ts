@@ -70,7 +70,7 @@ export class SimulationService {
     }
     curPeriod.committedOverpayments = arrSubgroupOverpayments;
 
-    // Step 4: Aggregate claims of participating policyholders during the policy period
+    // Step 4: Aggregate claims of participating policyholders during the policy period.ts
     const arrSubgroupClaims = [];
     for (let i = 0; i < curPeriod.subgroups.length; i++) {
       const currentGroupSize = curPeriod.subgroups[i].length;
@@ -103,7 +103,7 @@ export class SimulationService {
     }
     curPeriod.defectorStatuses = arrSubgroupDefectorStatus;
 
-    // Step 6: All policyholders have made the choices they can make within a policy period, the only thing left is to crunch numbers
+    // Step 6: All policyholders have made the choices they can make within a policy period.ts, the only thing left is to crunch numbers
 
     // Figure out the claim payout ratio, defined as the ratio of a claim's value to its payout
     // We take the overpayment and premium money of the loyalists who are in a subgroup with at least one defector

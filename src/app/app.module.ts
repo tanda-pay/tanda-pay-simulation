@@ -6,7 +6,9 @@ import { MaterialAppModule } from './module/ngmaterial.module';
 
 import { AppComponent } from './app.component';
 import {ExampleDialogComponent} from './component/dialog/example-dialog.component';
-
+import {PolicyHolderGenerationService} from './service/policy-holder-generation.service';
+import {SimulationService} from './service/simulation.service';
+import {UtilService} from './service/util.service';
 
 @NgModule({
   declarations: [
@@ -23,7 +25,11 @@ import {ExampleDialogComponent} from './component/dialog/example-dialog.componen
     BrowserAnimationsModule,
     MaterialAppModule
   ],
-  providers: [],
+  providers: [
+    PolicyHolderGenerationService,
+    SimulationService,
+    UtilService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

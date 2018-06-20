@@ -34,7 +34,7 @@ export class PolicyHolderGenerationService {
       arrClaimFrequency[i] = cf_sample;
     }
 
-    // Use tol and claim frequency to determine what % of coverage a policyholder need during the policy periods that they have a claim. Currently, a single policyholder will always have the same claim value for every policy period they need a claim.
+    // Use tol and claim frequency to determine what % of coverage a policyholder need during the policy periods that they have a claim. Currently, a single policyholder will always have the same claim value for every policy period.ts they need a claim.
     const arrClaimValues = [];
     const totalClaimFrequency = jStat.sum(arrClaimFrequency);
     for (let i = 0; i < count; i++) {
