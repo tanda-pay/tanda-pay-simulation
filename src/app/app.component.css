@@ -1,0 +1,11 @@
+.container {
+  height: 100vh;
+}
+
+.side {
+  background-color: #f1f1f1;
+}
+
+.content-top {
+  margin: 10px;
+}

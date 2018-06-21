@@ -1,54 +1,13 @@
-<button mat-button>Material Button</button>
-<mat-slider min="1" max="5" step="0.5" value="1.5"></mat-slider>
-<ol>
-  <li>
-    <mat-form-field>
-      <input matInput [(ngModel)]="name" placeholder="What's your name?">
-    </mat-form-field>
-  </li>
-  <li>
-    <button mat-raised-button (click)="openDialog()">Pick one</button>
-  </li>
-  <li *ngIf="animal">
-    You chose: <i>{{animal}}</i>
-  </li>
-</ol>
-
-
-
-<button mat-raised-button (click)="isLinear = !isLinear" id="toggle-linear">
-  {{!isLinear ? 'Enable linear mode' : 'Disable linear mode'}}
-</button>
-<mat-horizontal-stepper [linear]="isLinear" #stepper>
-  <mat-step [stepControl]="firstFormGroup">
-    <form [formGroup]="firstFormGroup">
-      <ng-template matStepLabel>Fill out your name</ng-template>
-      <mat-form-field>
-        <input matInput placeholder="Last name, First name" formControlName="firstCtrl" required>
-      </mat-form-field>
-      <div>
-        <button mat-button matStepperNext>Next</button>
-      </div>
-    </form>
-  </mat-step>
-  <mat-step [stepControl]="secondFormGroup">
-    <form [formGroup]="secondFormGroup">
-      <ng-template matStepLabel>Fill out your address</ng-template>
-      <mat-form-field>
-        <input matInput placeholder="Address" formControlName="secondCtrl" required>
-      </mat-form-field>
-      <div>
-        <button mat-button matStepperPrevious>Back</button>
-        <button mat-button matStepperNext>Next</button>
-      </div>
-    </form>
-  </mat-step>
-  <mat-step>
-    <ng-template matStepLabel>Done</ng-template>
-    You are now done.
-    <div>
-      <button mat-button matStepperPrevious>Back</button>
-      <button mat-button (click)="stepper.reset()">Reset</button>
+<mat-drawer-container class="container" autosize>
+  <mat-drawer #drawer class="side" mode="side" opened="true">
+    <app-input [userInput]="userInput" (userInputChanged)="startSimulation()"></app-input>
+  </mat-drawer>
+  <div>
+    <div class="content-top">
+      <button mat-mini-fab (click)="drawer.toggle()">
+        <mat-icon>edit</mat-icon>
+      </button>
     </div>
-  </mat-step>
-</mat-horizontal-stepper>
+    <app-content></app-content>
+  </div>
+</mat-drawer-container>

@@ -1,26 +1,35 @@
 import {NgModule} from '@angular/core';
-import {MatButtonModule, MatFormFieldModule, MatInputModule} from '@angular/material';
-import {MatSliderModule} from '@angular/material/slider';
-import {MatDialogModule} from '@angular/material/dialog';
-import {MatStepperModule} from '@angular/material/stepper';
+import {
+  MatButtonModule,
+  MatDialogModule,
+  MatExpansionModule,
+  MatFormFieldModule,
+  MatIconModule,
+  MatInputModule,
+  MatRippleModule,
+  MatSidenavModule,
+  MatSliderModule,
+  MatStepperModule,
+  MatTooltipModule
+} from '@angular/material';
 
+const modules = [
+  MatButtonModule,
+  MatDialogModule,
+  MatExpansionModule,
+  MatFormFieldModule,
+  MatIconModule,
+  MatInputModule,
+  MatRippleModule,
+  MatSidenavModule,
+  MatSliderModule,
+  MatStepperModule,
+  MatTooltipModule,
+];
 
 @NgModule({
-  imports: [
-    MatButtonModule,
-    MatSliderModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatStepperModule
-  ],
-  exports: [
-    MatButtonModule,
-    MatSliderModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatStepperModule
-  ]
+  imports: [modules],
+  exports: [modules]
 })
-export class MaterialAppModule { }
+export class MaterialAppModule {
+}

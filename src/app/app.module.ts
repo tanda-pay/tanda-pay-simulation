@@ -1,19 +1,23 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MaterialAppModule } from './module/ngmaterial.module';
+import {BrowserModule} from '@angular/platform-browser';
+import {NgModule} from '@angular/core';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {MaterialAppModule} from './module/ngmaterial.module';
 
-import { AppComponent } from './app.component';
+import {AppComponent} from './app.component';
 import {ExampleDialogComponent} from './component/dialog/example-dialog.component';
 import {PolicyHolderGenerationService} from './service/policy-holder-generation.service';
 import {SimulationService} from './service/simulation.service';
 import {UtilService} from './service/util.service';
+import {InputComponent} from './component/input/input.component';
+import {ContentComponent} from './component/content/content.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    ExampleDialogComponent
+    ExampleDialogComponent,
+    InputComponent,
+    ContentComponent,
   ],
   entryComponents: [
     ExampleDialogComponent
@@ -32,4 +36,5 @@ import {UtilService} from './service/util.service';
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}

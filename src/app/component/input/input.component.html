@@ -1,0 +1,68 @@
+<div class="container">
+  <div>
+    <div>Number of Policyholders <i matTooltip="Info about the action" class="fas fa-question-circle"></i></div>
+    <mat-slider min="50" max="1000" [(ngModel)]="userInput.numPH"
+                (input)="userInput.numPH = $event.value; userInputChanged.emit(true)"></mat-slider>
+    <div>{{userInput.numPH}}</div>
+  </div>
+  <div>
+    <div>Average Group Size <i matTooltip="Info about the action" class="fas fa-question-circle"></i></div>
+    <mat-slider min="4" max="11" [(ngModel)]="userInput.avgGroupSize"
+                (input)="userInput.avgGroupSize = $event.value; userInputChanged.emit(true)"></mat-slider>
+    <div>{{userInput.avgGroupSize}}</div>
+  </div>
+  <div>
+    <div>TUL <i matTooltip="Info about the action" class="fas fa-question-circle"></i></div>
+    <mat-slider min="10000" max="100000" [(ngModel)]="userInput.tul"
+                (input)="userInput.tul = $event.value; userInputChanged.emit(true)"></mat-slider>
+    <div>${{userInput.tul}}</div>
+  </div>
+  <div>
+    <div>Coverage Unit Value <i matTooltip="Info about the action" class="fas fa-question-circle"></i></div>
+    <mat-slider min="100" max="5000" [(ngModel)]="userInput.cuValue"
+                (input)="userInput.cuValue = $event.value; userInputChanged.emit(true)"></mat-slider>
+    <div>${{userInput.cuValue}}</div>
+  </div>
+  <div>
+    <div>Desired Premium per Policyholder <i matTooltip="Info about the action" class="fas fa-question-circle"></i>
+    </div>
+    <div>
+      <mat-slider min="1" max="100" [(ngModel)]="userInput.desiredPremiumMean"
+                  (input)="userInput.desiredPremiumMean = $event.value; userInputChanged.emit(true)"></mat-slider>
+      <div>${{userInput.desiredPremiumMean}} mean</div>
+    </div>
+    <div>
+      <mat-slider [step]=".25" min="0" max="5" [(ngModel)]="userInput.desiredPremiumStdev"
+                  (input)="userInput.desiredPremiumStdev = $event.value; userInputChanged.emit(true)"></mat-slider>
+      <div>{{userInput.desiredPremiumStdev}} stdev</div>
+    </div>
+  </div>
+  <div>
+    <div>Percentage of TUL paid to claims <i matTooltip="Info about the action" class="fas fa-question-circle"></i>
+    </div>
+    <mat-slider min="0" max="100" [(ngModel)]="userInput.percentageOfTUL2Claims"
+                (input)="userInput.percentageOfTUL2Claims = $event.value; userInputChanged.emit(true)"></mat-slider>
+    <div>{{userInput.percentageOfTUL2Claims}}</div>
+  </div>
+  <div>
+    <div>Likelihood a PolicyHolder would open claim <i matTooltip="Info about the action"
+                                                       class="fas fa-question-circle"></i></div>
+    <div>
+      <mat-slider [step]="0.005" min="0" max=".1" [(ngModel)]="userInput.likelihoodOpenClaimMean"
+                  (input)="userInput.likelihoodOpenClaimMean = $event.value; userInputChanged.emit(true)"></mat-slider>
+      <div>{{userInput.likelihoodOpenClaimMean}} mean</div>
+    </div>
+    <div>
+      <mat-slider [step]=".25" min="0" max="5" [(ngModel)]="userInput.likelihoodOpenClaimStdev"
+                  (input)="userInput.likelihoodOpenClaimStdev = $event.value; userInputChanged.emit(true)"></mat-slider>
+      <div>{{userInput.likelihoodOpenClaimStdev}} stdev</div>
+    </div>
+  </div>
+  <div>
+    <div>Likelihood a Policyholder would defect <i matTooltip="Info about the action"
+                                                   class="fas fa-question-circle"></i></div>
+    <mat-slider [step]="0.005" min="0" max=".1" [(ngModel)]="userInput.likelihoodToDefect"
+                (input)="userInput.likelihoodToDefect = $event.value; userInputChanged.emit(true)"></mat-slider>
+    <div>{{userInput.likelihoodToDefect}}</div>
+  </div>
+</div>

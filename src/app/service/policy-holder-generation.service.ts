@@ -7,7 +7,8 @@ declare var jStat: any;
 @Injectable()
 export class PolicyHolderGenerationService {
 
-  constructor(private utilService: UtilService) { }
+  constructor(private utilService: UtilService) {
+  }
 
   generatePolicyholders(count, coverageUnitsTotal, premiumMean, premiumStdev, groupSize, tolMean, claimPercent, claimPercentStdev, defectRate) {
     const numGroups = (groupSize < 8 ? Math.floor(count / groupSize) : Math.ceil(count / groupSize));

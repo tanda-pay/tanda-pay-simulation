@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {Period} from '../model/period';
 import {PolicyHolder} from '../model/policy-holder';
 import {UtilService} from './util.service';
@@ -8,7 +8,8 @@ declare var jStat: any;
 @Injectable()
 export class SimulationService {
 
-  constructor(private utilService: UtilService) { }
+  constructor(private utilService: UtilService) {
+  }
 
   doPolicyPeriod(subgroups: PolicyHolder[][], prevPeriod: Period) {
     const curPeriod = new Period(subgroups, prevPeriod);
@@ -21,7 +22,9 @@ export class SimulationService {
         arrPremiums.push(curPeriod.subgroups[i][j].choosePremium(curPeriod));
       }
     }
-    arrPremiums.sort(function(a, b) { return a - b; });
+    arrPremiums.sort(function (a, b) {
+      return a - b;
+    });
     arrPremiums = arrPremiums.slice(Math.floor(arrPremiums.length * .1), Math.floor(arrPremiums.length * .9));
     const premiumMean = jStat.mean(arrPremiums);
     const premiumMedian = jStat.median(arrPremiums);
@@ -195,6 +198,8 @@ export class SimulationService {
     //   curPeriod = new PeriodRecord(arrPeriods[i-1], premium, arrPolicyholders, arrSubgroupClaims)
     // }
     // arrPeriods.push(curPeriod)
+
+    return curPeriod;
   }
 
   // This has the problem of slowing down as iterations go up.
