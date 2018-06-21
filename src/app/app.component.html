@@ -1,13 +1,21 @@
-<mat-drawer-container class="container" autosize>
-  <mat-drawer #drawer class="side" mode="side" opened="true">
+<mat-sidenav-container class="container">
+  <mat-sidenav #sidenav mode="side" class="side" [opened]="true">
     <app-input [userInput]="userInput" (userInputChanged)="startSimulation()"></app-input>
-  </mat-drawer>
-  <div>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
     <div class="content-top">
-      <button mat-mini-fab (click)="drawer.toggle()">
+      <button mat-fab (click)="sidenav.toggle()">
         <mat-icon>edit</mat-icon>
       </button>
     </div>
-    <app-content></app-content>
-  </div>
-</mat-drawer-container>
+    <div class="content-bottom">
+      <!--<app-content></app-content>-->
+      <div *ngFor="let subGroup of subGroups">
+        <i *ngFor="let policyHolder of subGroup" class="fas fa-male"
+           matTooltip="coverage: {{policyHolder.coverage}}&#13;premium: {{policyHolder.premium}}&#13;claim: {{policyHolder.claim}}&#13;claim value: {{policyHolder.claimVal}}&#13;participation rate: {{policyHolder.partipationRate}}&#13;defect rate: {{policyHolder.defectRate}}"
+           [matTooltipClass]="'primary-tooltip'"></i>
+      </div>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

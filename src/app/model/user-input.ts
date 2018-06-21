@@ -18,7 +18,7 @@ export class UserInput {
     this.cuValue = 1000;
     this.desiredPremiumMean = 5;
     this.desiredPremiumStdev = 1;
-    this.percentageOfTUL2Claims = 2;
+    this.percentageOfTUL2Claims = .02;
     this.likelihoodOpenClaimMean = .06;
     this.likelihoodOpenClaimStdev = 1;
     this.likelihoodToDefect = .03;

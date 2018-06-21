@@ -4,3 +4,8 @@
 body {
   margin: 0;
 }
+
+.primary-tooltip {
+  white-space: pre-line;
+  font-size: 15px;
+}

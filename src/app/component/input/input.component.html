@@ -40,7 +40,7 @@
   <div>
     <div>Percentage of TUL paid to claims <i matTooltip="Info about the action" class="fas fa-question-circle"></i>
     </div>
-    <mat-slider min="0" max="100" [(ngModel)]="userInput.percentageOfTUL2Claims"
+    <mat-slider [step]=".005" min="0" max="1" [(ngModel)]="userInput.percentageOfTUL2Claims"
                 (input)="userInput.percentageOfTUL2Claims = $event.value; userInputChanged.emit(true)"></mat-slider>
     <div>{{userInput.percentageOfTUL2Claims}}</div>
   </div>
