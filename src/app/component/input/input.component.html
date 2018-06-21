@@ -1,7 +1,7 @@
 <div class="container">
   <div>
     <div>Number of Policyholders <i matTooltip="Info about the action" class="fas fa-question-circle"></i></div>
-    <mat-slider min="50" max="1000" [(ngModel)]="userInput.numPH"
+    <mat-slider min="50" max="300" [(ngModel)]="userInput.numPH"
                 (input)="userInput.numPH = $event.value; userInputChanged.emit(true)"></mat-slider>
     <div>{{userInput.numPH}}</div>
   </div>
