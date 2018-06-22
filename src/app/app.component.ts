@@ -39,15 +39,6 @@ export class AppComponent implements OnInit {
     const claimStdev = this.userInput.likelihoodOpenClaimStdev / 100;
     const defectpercent = this.userInput.likelihoodToDefect;
 
-    return this.policyHolderGeneratorService.generatePolicyholders(
-      numPH,
-      coverageUnits,
-      premeiumMean,
-      premiumstdev,
-      avgSubGroupSize,
-      tolMean,
-      claimfreqmean,
-      claimStdev,
-      defectpercent);
+    return null;
   }
 }
