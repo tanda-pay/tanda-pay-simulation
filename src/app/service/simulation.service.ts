@@ -44,10 +44,13 @@ export class SimulationService {
         curPolicyHolderStuff = curSubGroupStuff.policyHolderStuffs[j];
 
         const choseToDefect = this.simulateDefectPolicyHolder(curPolicyHolder, periods);
+        // TODO maybe have also call simulateClaim... here? if so prob move all this into simulateNextPolicyPeriod()
       }
 
       // do post logic
     }
+
+    // do post logic
   }
 
   simulateDefectPolicyHolder(policyHolder: PolicyHolder, periods: Period[]): boolean {
