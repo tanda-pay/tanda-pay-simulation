@@ -1,3 +1,4 @@
 export enum PremiumVoteType {
-  DEFAULT
+  Constant,
+  Exec
 }

@@ -1,3 +1,4 @@
 export enum ParticipationType {
-  DEFAULT
+  Random,
+  Exec
 }

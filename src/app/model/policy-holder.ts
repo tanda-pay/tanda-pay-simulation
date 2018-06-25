@@ -1,47 +1,51 @@
-import {DefectType} from './enum/DefectType';
-import {ClaimType} from './enum/ClaimType';
-import {ParticipationType} from './enum/ParticipationType';
-import {PremiumVoteType} from './enum/PremiumVoteType';
+import { ClaimType } from './enum/ClaimType';
+import { CoverageType } from './enum/CoverageType';
+import { DefectType } from './enum/DefectType';
+import { ParticipationType } from './enum/ParticipationType';
+import { PremiumVoteType } from './enum/PremiumVoteType';
 
 export class PolicyHolder {
-  static numPolicyHolder = 0;
+    static numPolicyHolder = 0;
 
-  id: number;
+    id: number;
 
-  defectType: DefectType;
-  defectValue: any;
+    coverageType: CoverageType;
+    coverageValue: any;
 
-  claimType: ClaimType;
-  claimValue: any;
+    defectType: DefectType;
+    defectValue: any;
 
-  participationType: ParticipationType;
-  participationValue: any;
+    claimType: ClaimType;
+    claimValue: any;
 
-  premiumVoteType: PremiumVoteType;
-  premiumVoteValue: any;
+    participationType: ParticipationType;
+    participationValue: any;
 
-  coverageUnitsBought: number;
+    premiumVoteType: PremiumVoteType;
+    premiumVoteValue: any;
 
-  constructor(defectType: DefectType, defectValue: any,
-              claimType: ClaimType, claimValue: any,
-              participationType: ParticipationType, participationValue: any,
-              premiumVoteType: PremiumVoteType, premiumVoteValue: any,
-              coverageUnitsBought: number) {
-    this.id = PolicyHolder.numPolicyHolder;
-    PolicyHolder.numPolicyHolder++;
+    // coverageUnitsBought: number;
 
-    this.defectType = defectType;
-    this.defectValue = defectValue;
+    constructor() {
+        this.id = PolicyHolder.numPolicyHolder;
+        PolicyHolder.numPolicyHolder++;
 
-    this.claimType = claimType;
-    this.claimValue = claimValue;
+        //    this.defectType = defectType;
+        //    this.defectValue = defectValue;
+        //
+        //    this.claimType = claimType;
+        //    this.claimValue = claimValue;
+        //
+        //    this.participationType = participationType;
+        //    this.participationValue = participationValue;
+        //
+        //    this.premiumVoteType = premiumVoteType;
+        //    this.premiumVoteValue = premiumVoteValue;
+        //
+        //    this.coverageUnitsBought = coverageUnitsBought;
+    }
 
-    this.participationType = participationType;
-    this.participationValue = participationValue;
-
-    this.premiumVoteType = premiumVoteType;
-    this.premiumVoteValue = premiumVoteValue;
-
-    this.coverageUnitsBought = coverageUnitsBought;
-  }
+    static reset() {
+        PolicyHolder.numPolicyHolder = 0;
+    }
 }

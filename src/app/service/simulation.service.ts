@@ -1,61 +1,52 @@
-import {Injectable} from '@angular/core';
-import {Period} from '../model/period';
-import {PolicyHolder} from '../model/policy-holder';
-import {UtilService} from './util.service';
-import {SubGroup} from '../model/sub-group';
-import {SubGroupStuff} from '../model/sub-group-stuff';
-import {PolicyHolderStuff} from '../model/policy-holder-stuff';
+import { Injectable } from '@angular/core';
+import { Period } from '../model/period';
+import { PolicyHolder } from '../model/policy-holder';
+import { PolicyHolderDB } from '../model/policy-holder-database';
 
 declare var jStat: any;
 
 @Injectable()
 export class SimulationService {
 
-  constructor(private utilService: UtilService) {
-  }
-
-  simulateNextPolicyPeriod(subGroups: SubGroup[], periods: Period[]): Period {
-    const nextPeriod = new Period();
-    nextPeriod.subGroupStuffs = this.initializeSubGroupStuff(subGroups);
-
-    this.simulateDefectSubGroups(subGroups, periods, nextPeriod);
-    // TODO other methods
-
-    return nextPeriod;
-  }
-
-  initializeSubGroupStuff(subGroups: SubGroup[]): SubGroupStuff[] {
-    // copy same structure
-    return null;
-  }
-
-  simulateDefectSubGroups(subGroups: SubGroup[], periods: Period[], nextPeriod: Period) {
-    let curSubGroup: SubGroup;
-    let curPolicyHolder: PolicyHolder;
-    let curSubGroupStuff: SubGroupStuff;
-    let curPolicyHolderStuff: PolicyHolderStuff;
-
-    for (let i = 0; i < subGroups.length; i++) {
-      curSubGroup = subGroups[i];
-      curSubGroupStuff = nextPeriod.subGroupStuffs[i];
-
-      for (let j = 0; j < curSubGroup.policyHolders.length; j++) {
-        curPolicyHolder = curSubGroup.policyHolders[j];
-        curPolicyHolderStuff = curSubGroupStuff.policyHolderStuffs[j];
-
-        const choseToDefect = this.simulateDefectPolicyHolder(curPolicyHolder, periods);
-        // TODO maybe have also call simulateClaim... here? if so prob move all this into simulateNextPolicyPeriod()
-      }
-
-      // do post logic
+    constructor() {
     }
 
-    // do post logic
-  }
+    simulateNextPolicyPeriod( subGroups: PolicyHolderDB, periods: Period[] ): Period {
+        const nextPeriod = new Period();
+        this.simulateDefectSubGroups( subGroups, periods, nextPeriod );
+        // TODO other methods
 
-  simulateDefectPolicyHolder(policyHolder: PolicyHolder, periods: Period[]): boolean {
-    return false;
-  }
+        return nextPeriod;
+    }
 
-  // TODO add other methods
+
+
+    simulateDefectSubGroups( subGroups: PolicyHolderDB, periods: Period[], nextPeriod: Period ) {
+        //Maw comment: this should be low priority
+        let curSubGroup: Number;
+        let curPolicyHolder: PolicyHolder;
+
+        //    for (let i = 0; i < subGroups.length; i++) {
+        //      curSubGroup = subGroups[i];
+        //      curSubGroupStuff = nextPeriod.subGroupStuffs[i];
+        //
+        //      for (let j = 0; j < curSubGroup.policyHolders.length; j++) {
+        //        curPolicyHolder = curSubGroup.policyHolders[j];
+        //        curPolicyHolderStuff = curSubGroupStuff.policyHolderStuffs[j];
+        //
+        //        const choseToDefect = this.simulateDefectPolicyHolder(curPolicyHolder, periods);
+        //        // TODO maybe have also call simulateClaim... here? if so prob move all this into simulateNextPolicyPeriod()
+        //      }
+
+        // do post logic
+        //}
+
+        // do post logic
+    }
+
+    simulateDefectPolicyHolder( policyHolder: PolicyHolder, periods: Period[] ): boolean {
+        return false;
+    }
+
+    // TODO add other methods
 }

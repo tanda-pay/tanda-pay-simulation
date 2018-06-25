@@ -1,8 +1,5 @@
-import {SubGroupStuff} from './sub-group-stuff';
-
 export class Period {
   chosenPremium: number;
-  subGroupStuffs: SubGroupStuff[];
   tul: number;
   tol: number;
   totalPremiumPayment: number; // includes confiscated overpayments
@@ -13,7 +10,6 @@ export class Period {
 
   constructor() {
     this.chosenPremium = null;
-    this.subGroupStuffs = null;
 
     this.tul = null;
     this.tol = null;

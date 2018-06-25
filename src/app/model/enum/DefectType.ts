@@ -1,3 +1,4 @@
 export enum DefectType {
-  DEFAULT
+  Random,
+  Exec
 }
