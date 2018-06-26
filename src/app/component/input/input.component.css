@@ -25,3 +25,11 @@ mat-form-field {
 .fa-question-circle {
   color: #cdcdcd;
 }
+
+.inline-block-child {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.derived-value-block {
+}

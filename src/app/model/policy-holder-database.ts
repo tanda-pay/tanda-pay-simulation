@@ -5,14 +5,15 @@ export class PolicyHolderDB {
     policyHolders: PolicyHolder[];
     policyHolderSubgroups: PolicyHolder[][];
 
-    policyHoldersCoverageUnits: number[];
-    // premiumVoteHistory: number[][];
+    premiumVoteHistory: number[][];
+    purchasedCoverageHistory: number[][];
     premiumCommittedHistory: number[][];
     overpaymentCommittedHistory: number[][];
     claimSubmittedHistory: number[][];
     defectHistory: Boolean[][];
     rebateReceivedHistory: number[][];
-
+    overpaymentReturnedHistory: number[][];
+    claimAwardHistory: number[][];
 
     constructor( policyHolders: PolicyHolder[][] ) {
         this.policyHolderSubgroups = policyHolders;

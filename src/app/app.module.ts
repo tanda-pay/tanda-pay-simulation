@@ -3,6 +3,7 @@ import {NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MaterialAppModule} from './ngmaterial.module';
+import {MatInputModule} from '@angular/material/input';
 
 import {AppComponent} from './app.component';
 import {ExampleDialogComponent} from './component/dialog/example-dialog.component';
@@ -25,6 +26,7 @@ import {ContentComponent} from './component/content/content.component';
   imports: [
     BrowserModule,
     FormsModule,
+    MatInputModule,
     ReactiveFormsModule,
     BrowserAnimationsModule,
     MaterialAppModule
