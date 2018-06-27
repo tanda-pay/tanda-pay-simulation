@@ -154,7 +154,7 @@ export class SimulationService {
         }
       }
     }
-    nextPeriod.claimPaymentRatio = Math.min(nextPeriod.totalEligibleClaims/nextPeriod.totalPremiumsAfterDefect, 1)
+    nextPeriod.claimPaymentRatio = Math.min(nextPeriod.totalPremiumsAfterDefect/nextPeriod.totalEligibleClaims, 1)
     nextPeriod.totalRebates = Math.max(nextPeriod.totalPremiumsAfterDefect - nextPeriod.totalEligibleClaims, 0)
     //Award the Claims. In this code, all non-defectors are awarded their claims, and then the punished subgroups have their awards set to zero
     for (let iter_ph_arr of ph_subgroups_arr) {
