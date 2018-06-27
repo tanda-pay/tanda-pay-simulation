@@ -1,4 +1,4 @@
 export enum ClaimType {
   LikelihoodAndClaimAmount,
-  Exec
+  Eval
 }

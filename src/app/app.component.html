@@ -1,6 +1,6 @@
 <mat-sidenav-container class="container">
   <mat-sidenav #sidenav mode="side" class="side" [opened]="true">
-    <app-input [userInput]="userInput" (userInputChanged)="startSimulation()"></app-input>
+    <app-input [userInput]="userInput" (userInputChanged)="updateInput()"></app-input>
   </mat-sidenav>
 
   <mat-sidenav-content>
@@ -10,12 +10,12 @@
       </button>
     </div>
     <div class="content-bottom">
-      <!--<app-content></app-content>-->
+      <!--<app-content></app-content>
       <div *ngFor="let subGroup of ph_db.policyHolderSubgroups">
         <i *ngFor="let policyHolder of subGroup" class="fas fa-male"
-           matTooltip="id: {{policyHolder.id}}&#13;premium: {{policyHolder.premiumVoteValue}}&#13;claim likelihood: {{policyHolder.claimValue[0]}}&#13;claim value: {{policyHolder.claimValue[1]}}&#13;participation rate: {{policyHolder.participationValue}}&#13;defect rate: {{policyHolder.defectValue}}"
+           matTooltip="id: {{policyHolder.id}}&#13;coverage: {{policyHolder.coverageValue}}&#13;premium: {{policyHolder.premiumVoteValue}}&#13;claim likelihood: {{policyHolder.claimValue[0]}}&#13;claim value: {{policyHolder.claimValue[1]}}&#13;participation rate: {{policyHolder.participationValue}}&#13;defect rate: {{policyHolder.defectValue}}"
            [matTooltipClass]="'primary-tooltip'"></i>
-      </div>
+      </div>-->
     </div>
   </mat-sidenav-content>
 </mat-sidenav-container>

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { UtilService } from './util.service';
 import { PolicyHolder } from '../model/policy-holder';
 import { PolicyHolderDB } from '../model/policy-holder-database';
+import { UserInput } from '../model/user-input';
 import { ClaimType } from '../model/enum/ClaimType';
 import { CoverageType } from '../model/enum/CoverageType';
 import { DefectType } from '../model/enum/DefectType';
@@ -14,6 +15,30 @@ declare var jStat: any;
 export class PolicyHolderGenerationService {
 
   constructor( private utilService: UtilService ) {
+  }
+
+  userInputToDB( userInput: UserInput ): PolicyHolderDB {
+    var numPH = userInput.numPH;
+    var avgGroupSize = userInput.avgGroupSize;
+    var tul = userInput.tul;
+    var cuValue = userInput.cuValue;
+    var desiredPremiumMean = userInput.desiredPremiumMean;
+    var desiredPremiumStdev = userInput.desiredPremiumStdev;
+
+    var probabilityToDefect = userInput.percentageToDefect / 100;
+    var ratioOfTUL2Claims = userInput.percentageOfTUL2Claims / 100;
+    var probabilityOpenClaimMean = userInput.percentageOpenClaimMean / 100;
+    var probabilityOpenClaimStdev = userInput.percentageOpenClaimStdev / 100;
+
+    var ph_db = this.generatePolicyHolders( numPH, avgGroupSize );
+
+
+    this.setParticipation( ph_db );
+    this.setPremiumVote( ph_db, desiredPremiumMean, desiredPremiumStdev )
+    this.setCoverageUnitsBought( ph_db, tul, cuValue )
+    this.setClaim( ph_db, probabilityOpenClaimMean, probabilityOpenClaimStdev, tul, cuValue, ratioOfTUL2Claims );
+    this.setDefect( ph_db, probabilityToDefect );
+    return ph_db
   }
 
   generatePolicyHolders( numPH, AvgGroupSize ): PolicyHolderDB {
@@ -38,9 +63,9 @@ export class PolicyHolderGenerationService {
     return new PolicyHolderDB( subgroups );
   }
 
-  setDefect( db: PolicyHolderDB, defectPercentage ): void {
+  setDefect( db: PolicyHolderDB, defectRate ): void {
     var count = db.policyHolders.length
-    var numDefectors = Math.floor( count * defectPercentage )
+    var numDefectors = Math.floor( count * defectRate )
     var chosenDefectors = []
     while ( numDefectors > 0 ) {
       let random_ph = Math.floor( Math.random() * count )
@@ -61,12 +86,12 @@ export class PolicyHolderGenerationService {
     }
   }
 
-  setClaim( db: PolicyHolderDB, claimPercentage: number, claimPercentageStdev: number, tul: number, coverageUnitValue: number, percentageTUL2Claims: number ): void {
+  setClaim( db: PolicyHolderDB, claimRate: number, claimProbabilityStdev: number, tul: number, coverageUnitValue: number, ratioTUL2Claims: number ): void {
     var count = db.policyHolders.length
 
     var arrClaimFrequency = []
     for ( let i = 0; i < count; i++ ) {
-      let cf_sample = jStat.normal.sample( claimPercentage, claimPercentageStdev )
+      let cf_sample = jStat.normal.sample( claimRate, claimProbabilityStdev )
       cf_sample = Math.max( cf_sample, 0 )
       arrClaimFrequency[i] = cf_sample
     }
@@ -74,7 +99,7 @@ export class PolicyHolderGenerationService {
     var totalClaimFrequency = jStat.sum( arrClaimFrequency )
 
     var coverageUnitsTotal = tul / coverageUnitValue
-    var tolmean = coverageUnitsTotal * percentageTUL2Claims
+    var tolmean = coverageUnitsTotal * ratioTUL2Claims
 
     for ( let i = 0; i < count; i++ ) {
       let claimFreqRatio = arrClaimFrequency[i] / totalClaimFrequency

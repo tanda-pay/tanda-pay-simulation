@@ -11,6 +11,7 @@
 }
 
 .side {
+  width: 50%;
   background-color: #f1f1f1;
 }
 
@@ -18,4 +19,8 @@
   margin: 5px;
   font-size: 40px;
   display: inline-block;
+}
+
+::ng-deep .mat-tooltip  {
+    max-width: 60px;
 }

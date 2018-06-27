@@ -1,98 +1,150 @@
 <div class="container">
-  <div>
-    <mat-form-field> <input matInput
-      placeholder="Number of policyholders"
-      [(ngModel)]="userInput.numPH" type="number"> </mat-form-field>
-  </div>
-  <div>
-    <div>
-      Average Overpayment Group Size <i
-        matTooltip="Info about the action"
-        class="fas fa-question-circle"></i>
-    </div>
-    <mat-slider min="4" max="11" [(ngModel)]="userInput.avgGroupSize"
-      (input)="userInput.avgGroupSize = $event.value; userInputChanged.emit(true)"></mat-slider>
-    <div>{{userInput.avgGroupSize}}</div>
-  </div>
+
   <div class='parent'>
-    <div class='inline-block-child'>
+    <div class='input-value-block'>
+      <h1>
+        Inputs
+      </h1>
+    </div>
+    <div class='separator-block'></div>
+    <div class='derived-value-block'> 
+      <h1>
+        Projections
+      </h1>
+    </div>
+  </div>
+  
+  <div class='parent'>
+    <div class='input-value-block'>
+      <div>
+        <mat-form-field> <input matInput
+          placeholder="# of policyholders"
+          [(ngModel)]="userInput.numPH" (input)="userInputChanged.emit(true)" type="number"> </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field> <input matInput
+          placeholder="% of policyholders that defect"
+          [(ngModel)]="userInput.percentageToDefect" (input)="userInputChanged.emit(true)" type="number"> <span matSuffix>% &nbsp;</span></mat-form-field>
+      </div>
+    </div>
+    <div class='separator-block'></div>
+    <div class='derived-value-block'> 
+      <mat-form-field>
+        <input matInput placeholder="Number of defectors" [(ngModel)]="userInput.numDefectors" disabled>
+      </mat-form-field>
+    </div>
+  </div>
+  
+  <div class='parent'>
+    <div class='input-value-block'>
       <div>
         <mat-form-field> <span matPrefix>$ &nbsp;</span> <input
           matInput placeholder="Total value of all underwritten policies"
-          [(ngModel)]="userInput.tul" type="number"> </mat-form-field>
+          [(ngModel)]="userInput.tul" (input)="userInputChanged.emit(true)" type="number"> </mat-form-field>
       </div>
       <div>
         <mat-form-field> <span matPrefix>$ &nbsp;</span> <input
           matInput placeholder="Value of a single coverage unit"
-          [(ngModel)]="userInput.cuValue" type="number"> </mat-form-field>
+          [(ngModel)]="userInput.cuValue" (input)="userInputChanged.emit(true)" type="number"> </mat-form-field>
       </div>
-    </div>    
-    <div class='inline-block-child'>
-      <div class='derived-value-block'> 
-        <mat-form-field>
-          <input matInput placeholder="Number of coverage units" [(ngModel)]="userInput.numCu"disabled>
+    </div>
+    <div class='separator-block'></div>
+    <div class='derived-value-block'> 
+      <mat-form-field>
+        <input matInput placeholder="# of coverage units" [(ngModel)]="userInput.numCu" disabled>
+      </mat-form-field>
+    </div>
+  </div>
+  
+  <div class='parent'>
+    <div class='input-value-block'>
+      <div>
+        Premiums policyholders are willing to pay,<br>approximated by
+        samples from a bell curve:
+      </div>
+      <br>
+      <div>
+        <mat-form-field> <span matPrefix>$ &nbsp;</span>
+        <input matInput placeholder="Mean value of the bell curve"
+          [(ngModel)]="userInput.desiredPremiumMean" (input)="userInputChanged.emit(true)" type="number">
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field> <span matPrefix>$ &nbsp;</span>
+        <input matInput placeholder="Sigma value of bell curve"
+          [(ngModel)]="userInput.desiredPremiumStdev" (input)="userInputChanged.emit(true)" type="number">
+        </mat-form-field>
+      </div>
+      <div>
+        <div>
+          Average Overpayment Group Size <i
+            matTooltip="Info about the action"
+            class="fas fa-question-circle"></i>
+        </div>
+        <mat-slider min="4" max="11" [(ngModel)]="userInput.avgGroupSize"
+          (input)="userInput.avgGroupSize = $event.value; userInputChanged.emit(true)"></mat-slider>
+        <div>{{userInput.avgGroupSize}}</div>
+      </div>
+    </div>
+    <div class='separator-block'></div>
+    <div class='derived-value-block'>
+      <div> 
+        <mat-form-field> <span matPrefix>$ &nbsp;</span>
+          <input matInput placeholder="Total premiums collected" [(ngModel)]="userInput.totalPremiums" disabled>
+        </mat-form-field>
+      </div>
+      <div> 
+        <mat-form-field> 
+          <input matInput placeholder="Average premium increase due to overpayment" [(ngModel)]="userInput.overpaymentIncrease" disabled> <span matSuffix>% &nbsp;</span>
         </mat-form-field>
       </div>
     </div>
   </div>
-  <div>
-    <div>
-      Premiums policyholders are willing to pay,<br>approximated by
-      samples from a bell curve:
+  
+  <div class='parent'>
+    <div class='input-value-block'>
+      <div>
+        <mat-form-field>
+        <input matInput placeholder="% of underwritten value that will be paid out in claims"
+          [(ngModel)]="userInput.percentageOfTUL2Claims" (input)="userInputChanged.emit(true)" type="number"> <span matSuffix>% &nbsp;</span>
+        </mat-form-field>
+      </div>
+      <div>
+        Percentage of policyholders that open claims every period,<br>approximated by
+        samples from a bell curve:
+      </div>
+      <br>
+      <div>
+        <mat-form-field>
+        <input matInput placeholder="Mean value of the bell curve"
+          [(ngModel)]="userInput.percentageOpenClaimMean" (input)="userInputChanged.emit(true)" type="number"> <span matSuffix>% &nbsp;</span>
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field>
+        <input matInput placeholder="Sigma value of bell curve"
+          [(ngModel)]="userInput.percentageOpenClaimStdev" (input)="userInputChanged.emit(true)" type="number"> <span matSuffix>% &nbsp;</span>
+        </mat-form-field>
+      </div>
     </div>
-    <br>
-    <div>
-      <mat-form-field> <span matPrefix>$ &nbsp;</span>
-      <input matInput placeholder="Mean value of the bell curve"
-        [(ngModel)]="userInput.desiredPremiumMean" type="number">
-      </mat-form-field>
-    </div>
-    <div>
-      <mat-form-field> <span matPrefix>$ &nbsp;</span>
-      <input matInput placeholder="Sigma value of bell curve"
-        [(ngModel)]="userInput.desiredPremiumStdev" type="number">
-      </mat-form-field>
-    </div>
-  </div>
-  <div>
-    <div>
-      Percentage of TUL paid to claims <i
-        matTooltip="Info about the action"
-        class="fas fa-question-circle"></i>
-    </div>
-    <mat-slider [step]=".005" min="0" max="1"
-      [(ngModel)]="userInput.percentageOfTUL2Claims"
-      (input)="userInput.percentageOfTUL2Claims = $event.value; userInputChanged.emit(true)"></mat-slider>
-    <div>{{userInput.percentageOfTUL2Claims}}</div>
-  </div>
-  <div>
-    <div>
-      Likelihood a PolicyHolder would open claim <i
-        matTooltip="Info about the action"
-        class="fas fa-question-circle"></i>
-    </div>
-    <div>
-      <mat-slider [step]="0.005" min="0" max=".1"
-        [(ngModel)]="userInput.likelihoodOpenClaimMean"
-        (input)="userInput.likelihoodOpenClaimMean = $event.value; userInputChanged.emit(true)"></mat-slider>
-      <div>{{userInput.likelihoodOpenClaimMean}} mean</div>
-    </div>
-    <div>
-      <mat-slider [step]=".25" min="0" max="5"
-        [(ngModel)]="userInput.likelihoodOpenClaimStdev"
-        (input)="userInput.likelihoodOpenClaimStdev = $event.value; userInputChanged.emit(true)"></mat-slider>
-      <div>{{userInput.likelihoodOpenClaimStdev}} stdev</div>
+    <div class='separator-block'></div>
+    <div class='derived-value-block'>
+      <div> 
+        <mat-form-field> <span matPrefix>$ &nbsp;</span>
+          <input matInput placeholder="Total value of outstanding claims" [(ngModel)]="userInput.tol" disabled>
+        </mat-form-field>
+      </div>
+      <div> 
+        <mat-form-field>
+          <input matInput placeholder="Total number of claims" [(ngModel)]="userInput.totalClaimCount" disabled>
+        </mat-form-field>
+      </div>
+      <div> 
+        <mat-form-field> <span matPrefix>$ &nbsp;</span>
+          <input matInput placeholder="Average claim value" [(ngModel)]="userInput.averageClaimValue" disabled>
+        </mat-form-field>
+      </div>
     </div>
   </div>
-  <div>
-    <div>
-      Likelihood a Policyholder would defect <i
-        matTooltip="Info about the action"
-        class="fas fa-question-circle"></i>
-    </div>
-    <mat-slider [step]="0.005" min="0" max=".1"
-      [(ngModel)]="userInput.likelihoodToDefect"
-      (input)="userInput.likelihoodToDefect = $event.value; userInputChanged.emit(true)"></mat-slider>
-    <div>{{userInput.likelihoodToDefect}}</div>
-  </div>
+
 </div>
