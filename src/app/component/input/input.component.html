@@ -7,55 +7,57 @@
       </h1>
     </div>
     <div class='separator-block'></div>
-    <div class='derived-value-block'> 
+    <div class='derived-value-block'>
       <h1>
         Projections
       </h1>
     </div>
   </div>
-  
+
   <div class='parent'>
     <div class='input-value-block'>
       <div>
-        <mat-form-field> <input matInput
-          placeholder="# of policyholders"
-          [(ngModel)]="userInput.numPH" (input)="userInputChanged.emit(true)" type="number"> </mat-form-field>
+        <mat-form-field><input matInput
+                               placeholder="# of policyholders"
+                               [(ngModel)]="userInput.numPH" (input)="userInputChanged.emit(true)" type="number">
+        </mat-form-field>
       </div>
       <div>
-        <mat-form-field> <input matInput
-          placeholder="% of policyholders that defect"
-          [(ngModel)]="userInput.percentageToDefect" (input)="userInputChanged.emit(true)" type="number"> <span matSuffix>% &nbsp;</span></mat-form-field>
+        <mat-form-field><input matInput
+                               placeholder="% of policyholders that defect"
+                               [(ngModel)]="userInput.percentageToDefect" (input)="userInputChanged.emit(true)"
+                               type="number"> <span matSuffix>% &nbsp;</span></mat-form-field>
       </div>
     </div>
     <div class='separator-block'></div>
-    <div class='derived-value-block'> 
+    <div class='derived-value-block'>
       <mat-form-field>
         <input matInput placeholder="Number of defectors" [(ngModel)]="userInput.numDefectors" disabled>
       </mat-form-field>
     </div>
   </div>
-  
+
   <div class='parent'>
     <div class='input-value-block'>
       <div>
-        <mat-form-field> <span matPrefix>$ &nbsp;</span> <input
+        <mat-form-field><span matPrefix>$ &nbsp;</span> <input
           matInput placeholder="Total value of all underwritten policies"
-          [(ngModel)]="userInput.tul" (input)="userInputChanged.emit(true)" type="number"> </mat-form-field>
+          [(ngModel)]="userInput.tul" (input)="userInputChanged.emit(true)" type="number"></mat-form-field>
       </div>
       <div>
-        <mat-form-field> <span matPrefix>$ &nbsp;</span> <input
+        <mat-form-field><span matPrefix>$ &nbsp;</span> <input
           matInput placeholder="Value of a single coverage unit"
-          [(ngModel)]="userInput.cuValue" (input)="userInputChanged.emit(true)" type="number"> </mat-form-field>
+          [(ngModel)]="userInput.cuValue" (input)="userInputChanged.emit(true)" type="number"></mat-form-field>
       </div>
     </div>
     <div class='separator-block'></div>
-    <div class='derived-value-block'> 
+    <div class='derived-value-block'>
       <mat-form-field>
         <input matInput placeholder="# of coverage units" [(ngModel)]="userInput.numCu" disabled>
       </mat-form-field>
     </div>
   </div>
-  
+
   <div class='parent'>
     <div class='input-value-block'>
       <div>
@@ -64,49 +66,51 @@
       </div>
       <br>
       <div>
-        <mat-form-field> <span matPrefix>$ &nbsp;</span>
-        <input matInput placeholder="Mean value of the bell curve"
-          [(ngModel)]="userInput.desiredPremiumMean" (input)="userInputChanged.emit(true)" type="number">
+        <mat-form-field><span matPrefix>$ &nbsp;</span>
+          <input matInput placeholder="Mean value of the bell curve"
+                 [(ngModel)]="userInput.desiredPremiumMean" (input)="userInputChanged.emit(true)" type="number">
         </mat-form-field>
       </div>
       <div>
-        <mat-form-field> <span matPrefix>$ &nbsp;</span>
-        <input matInput placeholder="Sigma value of bell curve"
-          [(ngModel)]="userInput.desiredPremiumStdev" (input)="userInputChanged.emit(true)" type="number">
+        <mat-form-field><span matPrefix>$ &nbsp;</span>
+          <input matInput placeholder="Sigma value of bell curve"
+                 [(ngModel)]="userInput.desiredPremiumStdev" (input)="userInputChanged.emit(true)" type="number">
         </mat-form-field>
       </div>
       <div>
         <div>
           Average Overpayment Group Size <i
-            matTooltip="Info about the action"
-            class="fas fa-question-circle"></i>
+          matTooltip="Info about the action"
+          class="fas fa-question-circle"></i>
         </div>
         <mat-slider min="4" max="11" [(ngModel)]="userInput.avgGroupSize"
-          (input)="userInput.avgGroupSize = $event.value; userInputChanged.emit(true)"></mat-slider>
+                    (input)="userInput.avgGroupSize = $event.value; userInputChanged.emit(true)"></mat-slider>
         <div>{{userInput.avgGroupSize}}</div>
       </div>
     </div>
     <div class='separator-block'></div>
     <div class='derived-value-block'>
-      <div> 
-        <mat-form-field> <span matPrefix>$ &nbsp;</span>
+      <div>
+        <mat-form-field><span matPrefix>$ &nbsp;</span>
           <input matInput placeholder="Total premiums collected" [(ngModel)]="userInput.totalPremiums" disabled>
         </mat-form-field>
       </div>
-      <div> 
-        <mat-form-field> 
-          <input matInput placeholder="Average premium increase due to overpayment" [(ngModel)]="userInput.overpaymentIncrease" disabled> <span matSuffix>% &nbsp;</span>
+      <div>
+        <mat-form-field>
+          <input matInput placeholder="Average premium increase due to overpayment"
+                 [(ngModel)]="userInput.overpaymentIncrease" disabled> <span matSuffix>% &nbsp;</span>
         </mat-form-field>
       </div>
     </div>
   </div>
-  
+
   <div class='parent'>
     <div class='input-value-block'>
       <div>
         <mat-form-field>
-        <input matInput placeholder="% of underwritten value that will be paid out in claims"
-          [(ngModel)]="userInput.percentageOfTUL2Claims" (input)="userInputChanged.emit(true)" type="number"> <span matSuffix>% &nbsp;</span>
+          <input matInput placeholder="% of underwritten value that will be paid out in claims"
+                 [(ngModel)]="userInput.percentageOfTUL2Claims" (input)="userInputChanged.emit(true)" type="number">
+          <span matSuffix>% &nbsp;</span>
         </mat-form-field>
       </div>
       <div>
@@ -116,31 +120,33 @@
       <br>
       <div>
         <mat-form-field>
-        <input matInput placeholder="Mean value of the bell curve"
-          [(ngModel)]="userInput.percentageOpenClaimMean" (input)="userInputChanged.emit(true)" type="number"> <span matSuffix>% &nbsp;</span>
+          <input matInput placeholder="Mean value of the bell curve"
+                 [(ngModel)]="userInput.percentageOpenClaimMean" (input)="userInputChanged.emit(true)" type="number">
+          <span matSuffix>% &nbsp;</span>
         </mat-form-field>
       </div>
       <div>
         <mat-form-field>
-        <input matInput placeholder="Sigma value of bell curve"
-          [(ngModel)]="userInput.percentageOpenClaimStdev" (input)="userInputChanged.emit(true)" type="number"> <span matSuffix>% &nbsp;</span>
+          <input matInput placeholder="Sigma value of bell curve"
+                 [(ngModel)]="userInput.percentageOpenClaimStdev" (input)="userInputChanged.emit(true)" type="number">
+          <span matSuffix>% &nbsp;</span>
         </mat-form-field>
       </div>
     </div>
     <div class='separator-block'></div>
     <div class='derived-value-block'>
-      <div> 
-        <mat-form-field> <span matPrefix>$ &nbsp;</span>
+      <div>
+        <mat-form-field><span matPrefix>$ &nbsp;</span>
           <input matInput placeholder="Total value of outstanding claims" [(ngModel)]="userInput.tol" disabled>
         </mat-form-field>
       </div>
-      <div> 
+      <div>
         <mat-form-field>
           <input matInput placeholder="Total number of claims" [(ngModel)]="userInput.totalClaimCount" disabled>
         </mat-form-field>
       </div>
-      <div> 
-        <mat-form-field> <span matPrefix>$ &nbsp;</span>
+      <div>
+        <mat-form-field><span matPrefix>$ &nbsp;</span>
           <input matInput placeholder="Average claim value" [(ngModel)]="userInput.averageClaimValue" disabled>
         </mat-form-field>
       </div>

@@ -5,7 +5,7 @@ export class Period {
   totalPremiumPayment: number;
   totalOverpayments: number;
   totalEligibleClaims: number;
-  
+
   totalPremiumsAfterDefect: number;
   totalRebateCoverageUnits: number;
   rebateRatio: number; //
@@ -22,12 +22,12 @@ export class Period {
     this.tol = null;
     this.totalPremiumPayment = null;
     this.totalEligibleClaims = null;
-    
+
     this.totalPremiumsAfterDefect = null;
     this.totalRebateCoverageUnits = null;
     this.rebateRatio = null;
-    
-    this.totalRebates = null
+
+    this.totalRebates = null;
     this.claimPaymentRatio = null;
     this.effectiveCost = null;
     this.averageClaimPayment = null;
