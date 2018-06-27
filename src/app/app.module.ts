@@ -11,13 +11,17 @@ import {SimulationService} from './service/simulation.service';
 import {UtilService} from './service/util.service';
 import {InputComponent} from './component/input/input.component';
 import {ContentComponent} from './component/content/content.component';
+import {GraphComponent} from './component/graph/graph.component';
+import {DatePipe} from './pipe/date/date.pipe';
 
 @NgModule({
   declarations: [
     AppComponent,
     ExampleDialogComponent,
+    GraphComponent,
     InputComponent,
     ContentComponent,
+    DatePipe,
   ],
   entryComponents: [
     ExampleDialogComponent

@@ -1,13 +1,13 @@
-import { Injectable } from '@angular/core';
-import { Period } from '../model/period';
-import { PolicyHolder } from '../model/policy-holder';
-import { PolicyHolderDB } from '../model/policy-holder-database';
+import {Injectable} from '@angular/core';
+import {Period} from '../model/period';
+import {PolicyHolder} from '../model/policy-holder';
+import {PolicyHolderDB} from '../model/policy-holder-database';
 
-import { ClaimType } from '../model/enum/ClaimType';
-import { CoverageType } from '../model/enum/CoverageType';
-import { DefectType } from '../model/enum/DefectType';
-import { ParticipationType } from '../model/enum/ParticipationType';
-import { PremiumVoteType } from '../model/enum/PremiumVoteType';
+import {ClaimType} from '../model/enum/ClaimType';
+import {CoverageType} from '../model/enum/CoverageType';
+import {DefectType} from '../model/enum/DefectType';
+import {ParticipationType} from '../model/enum/ParticipationType';
+import {PremiumVoteType} from '../model/enum/PremiumVoteType';
 
 declare var jStat: any;
 
@@ -17,32 +17,34 @@ export class SimulationService {
   constructor() {
   }
 
-  simulateNextPolicyPeriod( phDB: PolicyHolderDB, periods: Period[] ): Period {
+  simulateNextPolicyPeriod(phDB: PolicyHolderDB, periods: Period[]): Period {
     const nextPeriod = new Period();
-    var periodIndex = periods.length
-    
+    var periodIndex = periods.length;
+
     var ph_arr = phDB.policyHolders;
     var ph_subgroups_arr = phDB.policyHolderSubgroups;
-    phDB.premiumVoteHistory[periodIndex] = []
-    phDB.purchasedCoverageHistory[periodIndex] = []
-    phDB.premiumCommittedHistory[periodIndex] = []
-    phDB.overpaymentCommittedHistory[periodIndex] = []
-    phDB.claimSubmittedHistory[periodIndex] = []
-    phDB.defectHistory[periodIndex] = []
-    phDB.rebateReceivedHistory[periodIndex] = []
-    phDB.overpaymentReturnedHistory[periodIndex] = []
-    phDB.claimAwardHistory[periodIndex] = []
-    
+    phDB.premiumVoteHistory[periodIndex] = [];
+    phDB.purchasedCoverageHistory[periodIndex] = [];
+    phDB.premiumCommittedHistory[periodIndex] = [];
+    phDB.overpaymentCommittedHistory[periodIndex] = [];
+    phDB.claimSubmittedHistory[periodIndex] = [];
+    phDB.defectHistory[periodIndex] = [];
+    phDB.rebateReceivedHistory[periodIndex] = [];
+    phDB.overpaymentReturnedHistory[periodIndex] = [];
+    phDB.claimAwardHistory[periodIndex] = [];
+
     //Step 1: Secretary determines premium by taking an average of all policyholders' votes
     var arrPremiums = [];
-    var chosenPremium
-    
+    var chosenPremium;
+
     for (let ph of ph_arr) {
-      let premiumVote = this.simulateDecision_PremiumVote(ph)
+      let premiumVote = this.simulateDecision_PremiumVote(ph);
       phDB.premiumVoteHistory[periodIndex][ph.id] = premiumVote;
       arrPremiums[ph.id] = premiumVote;
     }
-    arrPremiums.sort(function(a, b){return a - b});
+    arrPremiums.sort(function (a, b) {
+      return a - b;
+    });
     arrPremiums = arrPremiums.slice(Math.floor(arrPremiums.length * .1), Math.floor(arrPremiums.length * .9));
     let premiumMean = jStat.mean(arrPremiums);
     let premiumMedian = jStat.median(arrPremiums);
@@ -53,13 +55,13 @@ export class SimulationService {
 //    }
     phDB.chosenPremiumHistory[periodIndex] = chosenPremium;
     nextPeriod.chosenPremium = chosenPremium;
-    
+
     //Step 2: Offer chosen premium, accept premium commitments, and note participants who opt-out
-    var arrCollectedPremiums = []
+    var arrCollectedPremiums = [];
     for (let ph of ph_arr) {
-      let participation = this.simulateDecision_Participation(ph)
+      let participation = this.simulateDecision_Participation(ph);
       if (participation) {
-        let purchasedCoverage = this.simulateDecision_CoveragePurchase(ph)
+        let purchasedCoverage = this.simulateDecision_CoveragePurchase(ph);
         phDB.purchasedCoverageHistory[periodIndex][ph.id] = purchasedCoverage;
         phDB.premiumCommittedHistory[periodIndex][ph.id] = purchasedCoverage * chosenPremium;
         nextPeriod.tul += purchasedCoverage;
@@ -68,7 +70,7 @@ export class SimulationService {
         phDB.purchasedCoverageHistory[periodIndex][ph.id] = 0;
       }
     }
-    
+
     //Step 3: Commit overpayments
     for (let iter_ph_arr of ph_subgroups_arr) {
       var participantCount = 0;
@@ -79,13 +81,13 @@ export class SimulationService {
       }
       for (let ph of iter_ph_arr) {
         if (phDB.purchasedCoverageHistory[periodIndex][ph.id] != 0) {
-          let overpayment = phDB.purchasedCoverageHistory[periodIndex][ph.id]*(1/(participantCount-1));
+          let overpayment = phDB.purchasedCoverageHistory[periodIndex][ph.id] * (1 / (participantCount - 1));
           nextPeriod.totalOverpayments += overpayment;
           phDB.overpaymentCommittedHistory[periodIndex][ph.id] = overpayment;
         }
       }
     }
-    
+
     //Step 4: Aggregate claims of participating policyholders during the policy period
     for (let ph of ph_arr) {
       let participation = (phDB.purchasedCoverageHistory[periodIndex][ph.id] != 0);
@@ -97,7 +99,7 @@ export class SimulationService {
         phDB.claimSubmittedHistory[periodIndex][ph.id] = 0;
       }
     }
-    
+
     //Step 5: Determine loyalists and defectors
     for (let ph of ph_arr) {
       let participation = (phDB.purchasedCoverageHistory[periodIndex][ph.id] != 0);
@@ -108,8 +110,8 @@ export class SimulationService {
         phDB.defectHistory[periodIndex][ph.id] = false;
       }
     }
-    
-    nextPeriod.totalPremiumsAfterDefect = jStat.sum(phDB.premiumCommittedHistory[periodIndex])
+
+    nextPeriod.totalPremiumsAfterDefect = jStat.sum(phDB.premiumCommittedHistory[periodIndex]);
     //Subtract premiums paid by defectors
     for (let ph of ph_arr) {
       let defectChosen = (phDB.defectHistory[periodIndex][ph.id]);
@@ -135,9 +137,9 @@ export class SimulationService {
         }
       }
     }
-    
+
     //Nullify claim values of (defectors) and (loyalists in a subgroup with at least two defectors)
-    nextPeriod.totalEligibleClaims = nextPeriod.tol
+    nextPeriod.totalEligibleClaims = nextPeriod.tol;
     for (let iter_ph_arr of ph_subgroups_arr) {
       let defectCount = 0;
       for (let ph of iter_ph_arr) {
@@ -154,8 +156,8 @@ export class SimulationService {
         }
       }
     }
-    nextPeriod.claimPaymentRatio = Math.min(nextPeriod.totalEligibleClaims/nextPeriod.totalPremiumsAfterDefect, 1)
-    nextPeriod.totalRebates = Math.max(nextPeriod.totalPremiumsAfterDefect - nextPeriod.totalEligibleClaims, 0)
+    nextPeriod.claimPaymentRatio = Math.min(nextPeriod.totalPremiumsAfterDefect/nextPeriod.totalEligibleClaims, 1);
+    nextPeriod.totalRebates = Math.max(nextPeriod.totalPremiumsAfterDefect - nextPeriod.totalEligibleClaims, 0);
     //Award the Claims. In this code, all non-defectors are awarded their claims, and then the punished subgroups have their awards set to zero
     for (let iter_ph_arr of ph_subgroups_arr) {
       let defectCount = 0;
@@ -163,22 +165,22 @@ export class SimulationService {
         if (phDB.defectHistory[periodIndex][ph.id]) {
           defectCount++;
         } else {
-          phDB.claimAwardHistory[periodIndex][ph.id] = phDB.claimSubmittedHistory[periodIndex][ph.id] * nextPeriod.claimPaymentRatio
+          phDB.claimAwardHistory[periodIndex][ph.id] = phDB.claimSubmittedHistory[periodIndex][ph.id] * nextPeriod.claimPaymentRatio;
         }
       }
       if (defectCount > 1) {
         for (let ph of iter_ph_arr) {
-          phDB.claimAwardHistory[periodIndex][ph.id] = 0
+          phDB.claimAwardHistory[periodIndex][ph.id] = 0;
         }
       }
     }
-    
+
     if (nextPeriod.totalRebates > 0) {
       //Only Policyholders with the following qualities are eligible for a rebate:
       //-Non-claimant
       //-Loyalist
       //-In a subgroup with fewer than 2 defectors
-      nextPeriod.totalRebateCoverageUnits = 0
+      nextPeriod.totalRebateCoverageUnits = 0;
       for (let iter_ph_arr of ph_subgroups_arr) {
         let defectCount = 0;
         for (let ph of iter_ph_arr) {
@@ -194,7 +196,7 @@ export class SimulationService {
           }
         }
       }
-      nextPeriod.rebateRatio = (nextPeriod.totalRebates) / nextPeriod.totalRebateCoverageUnits
+      nextPeriod.rebateRatio = (nextPeriod.totalRebates) / nextPeriod.totalRebateCoverageUnits;
       //Return the rebates to eligible policyholders
       for (let iter_ph_arr of ph_subgroups_arr) {
         let defectCount = 0;
@@ -217,54 +219,54 @@ export class SimulationService {
 
   simulateDecision_CoveragePurchase(p: PolicyHolder): number {
     if (p.coverageType === CoverageType.Constant) {
-      return p.coverageValue
+      return p.coverageValue;
     } else if (p.coverageType === CoverageType.Eval) {
-      return eval(p.coverageValue)
+      return eval(p.coverageValue);
     }
-    return 0
+    return 0;
   }
-  
+
   simulateDecision_PremiumVote(p: PolicyHolder): number {
     if (p.premiumVoteType === PremiumVoteType.Constant) {
-      return p.premiumVoteValue
+      return p.premiumVoteValue;
     } else if (p.premiumVoteType === PremiumVoteType.Eval) {
-      return eval(p.premiumVoteValue)
+      return eval(p.premiumVoteValue);
     }
-    return 0
+    return 0;
   }
-  
+
   simulateDecision_Participation(p: PolicyHolder): boolean {
     if (p.participationType === ParticipationType.Random) {
-      return Math.random() < p.participationValue
+      return Math.random() < p.participationValue;
     } else if (p.participationType === ParticipationType.Eval) {
-      return eval(p.participationValue)
+      return eval(p.participationValue);
     }
-    return true
+    return true;
   }
-  
+
   simulateDecision_SubmitClaim(p: PolicyHolder): number {
     if (p.claimType === ClaimType.LikelihoodAndClaimAmount) {
       if (Math.random() < p.claimValue[0]) {
-        return p.claimValue[1]
+        return p.claimValue[1];
       } else {
-        return 0
+        return 0;
       }
     } else if (p.claimType === ClaimType.Eval) {
-      return eval(p.claimValue)
+      return eval(p.claimValue);
     }
-    return 0
-  }
-  
-  simulateDecision_Defect(p: PolicyHolder): boolean {
-    if (p.defectType === DefectType.Random) {
-      return Math.random() < p.defectValue
-    } else if (p.defectType === DefectType.Eval) {
-      return eval(p.defectValue)
-    }
-    return false
+    return 0;
   }
 
-  simulateDefectSubGroups( subGroups: PolicyHolderDB, periods: Period[], nextPeriod: Period ) {
+  simulateDecision_Defect(p: PolicyHolder): boolean {
+    if (p.defectType === DefectType.Random) {
+      return Math.random() < p.defectValue;
+    } else if (p.defectType === DefectType.Eval) {
+      return eval(p.defectValue);
+    }
+    return false;
+  }
+
+  simulateDefectSubGroups(subGroups: PolicyHolderDB, periods: Period[], nextPeriod: Period) {
     //Maw comment: this should be low priority
     let curSubGroup: Number;
     let curPolicyHolder: PolicyHolder;
@@ -287,7 +289,7 @@ export class SimulationService {
     // do post logic
   }
 
-  simulateDefectPolicyHolder( policyHolder: PolicyHolder, periods: Period[] ): boolean {
+  simulateDefectPolicyHolder(policyHolder: PolicyHolder, periods: Period[]): boolean {
     return false;
   }
 

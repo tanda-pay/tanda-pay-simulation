@@ -31,12 +31,14 @@ mat-form-field {
   display: inline-block;
   vertical-align: top;
 }
+
 .separator-block {
   width: 10%;
   height: 100%;
   display: inline-block;
   background-color: #cdcdcd;
 }
+
 .derived-value-block {
   width: 45%;
   display: inline-block;

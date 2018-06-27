@@ -2,7 +2,6 @@ import {Component, OnInit} from '@angular/core';
 import {PolicyHolderGenerationService} from './service/policy-holder-generation.service';
 import {SimulationService} from './service/simulation.service';
 import {UserInput} from './model/user-input';
-import {PolicyHolder} from './model/policy-holder';
 import {PolicyHolderDB} from './model/policy-holder-database';
 
 @Component({
@@ -26,7 +25,7 @@ export class AppComponent implements OnInit {
   }
 
   updateInput() {
-    this.userInput.calculateDerivedValues()
+    this.userInput.calculateDerivedValues();
     // const period = this.simulationService.doPolicyPeriod(subgroups, null);
   }
 

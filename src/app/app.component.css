@@ -21,6 +21,6 @@
   display: inline-block;
 }
 
-::ng-deep .mat-tooltip  {
-    max-width: 60px;
+::ng-deep .mat-tooltip {
+  max-width: 60px;
 }

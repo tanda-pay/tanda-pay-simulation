@@ -1,8 +1,8 @@
-import { ClaimType } from './enum/ClaimType';
-import { CoverageType } from './enum/CoverageType';
-import { DefectType } from './enum/DefectType';
-import { ParticipationType } from './enum/ParticipationType';
-import { PremiumVoteType } from './enum/PremiumVoteType';
+import {ClaimType} from './enum/ClaimType';
+import {CoverageType} from './enum/CoverageType';
+import {DefectType} from './enum/DefectType';
+import {ParticipationType} from './enum/ParticipationType';
+import {PremiumVoteType} from './enum/PremiumVoteType';
 
 export class PolicyHolder {
   static numPolicyHolder = 0;
