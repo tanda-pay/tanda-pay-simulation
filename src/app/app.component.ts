@@ -13,7 +13,7 @@ import {PolicyHolderDB} from './model/policy-holder-database';
 export class AppComponent implements OnInit {
 
   userInput: UserInput;
-  ph_db: PolicyHolderDB;
+  phDB: PolicyHolderDB;
 
   constructor(private policyHolderGeneratorService: PolicyHolderGenerationService,
               private simulationService: SimulationService) {
@@ -31,6 +31,6 @@ export class AppComponent implements OnInit {
   }
 
   renderPolicyHolders() {
-    this.ph_db = this.policyHolderGeneratorService.userInputToDB(this.userInput);
+    this.phDB = this.policyHolderGeneratorService.userInputToDB(this.userInput);
   }
 }

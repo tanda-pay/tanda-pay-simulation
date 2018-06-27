@@ -20,25 +20,25 @@ export class PolicyHolderGenerationService {
   userInputToDB( userInput: UserInput ): PolicyHolderDB {
     var numPH = userInput.numPH;
     var avgGroupSize = userInput.avgGroupSize;
-    var tul = userInput.tul;
     var cuValue = userInput.cuValue;
-    var desiredPremiumMean = userInput.desiredPremiumMean;
-    var desiredPremiumStdev = userInput.desiredPremiumStdev;
+    var tul = userInput.tul / cuValue;
+    var desiredPremiumMean = userInput.desiredPremiumMean / cuValue;
+    var desiredPremiumStdev = userInput.desiredPremiumStdev / cuValue;
 
     var probabilityToDefect = userInput.percentageToDefect / 100;
     var ratioOfTUL2Claims = userInput.percentageOfTUL2Claims / 100;
     var probabilityOpenClaimMean = userInput.percentageOpenClaimMean / 100;
     var probabilityOpenClaimStdev = userInput.percentageOpenClaimStdev / 100;
 
-    var ph_db = this.generatePolicyHolders( numPH, avgGroupSize );
+    var phDB = this.generatePolicyHolders( numPH, avgGroupSize );
 
 
-    this.setParticipation( ph_db );
-    this.setPremiumVote( ph_db, desiredPremiumMean, desiredPremiumStdev )
-    this.setCoverageUnitsBought( ph_db, tul, cuValue )
-    this.setClaim( ph_db, probabilityOpenClaimMean, probabilityOpenClaimStdev, tul, cuValue, ratioOfTUL2Claims );
-    this.setDefect( ph_db, probabilityToDefect );
-    return ph_db
+    this.setParticipation( phDB );
+    this.setPremiumVote( phDB, desiredPremiumMean, desiredPremiumStdev )
+    this.setCoverageUnitsBought( phDB, tul)
+    this.setClaim( phDB, probabilityOpenClaimMean, probabilityOpenClaimStdev, tul, cuValue, ratioOfTUL2Claims );
+    this.setDefect( phDB, probabilityToDefect );
+    return phDB
   }
 
   generatePolicyHolders( numPH, AvgGroupSize ): PolicyHolderDB {
@@ -130,8 +130,8 @@ export class PolicyHolderGenerationService {
     }
   }
 
-  setCoverageUnitsBought( db: PolicyHolderDB, tul: number, coverageUnitValue: number ): void {
-    var totalCoverageUnits = tul / coverageUnitValue
+  setCoverageUnitsBought( db: PolicyHolderDB, tul: number): void {
+    var totalCoverageUnits = tul
     var arrCoverageUnits = []
     for ( let i = 0; i < db.policyHolders.length; i++ ) {
       var cu_sample = jStat.normal.sample( 5, 1 )

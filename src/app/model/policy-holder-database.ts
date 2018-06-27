@@ -6,6 +6,7 @@ export class PolicyHolderDB {
     policyHolderSubgroups: PolicyHolder[][];
 
     premiumVoteHistory: number[][];
+    chosenPremiumHistory: number[];
     purchasedCoverageHistory: number[][];
     premiumCommittedHistory: number[][];
     overpaymentCommittedHistory: number[][];
@@ -23,5 +24,15 @@ export class PolicyHolderDB {
                 this.policyHolders.push( policyHolders[i][j] )
             }
         }
+        this.premiumVoteHistory = []
+        this.chosenPremiumHistory = []
+        this.purchasedCoverageHistory = []
+        this.premiumCommittedHistory = []
+        this.overpaymentCommittedHistory = []
+        this.claimSubmittedHistory = []
+        this.defectHistory = []
+        this.rebateReceivedHistory = []
+        this.overpaymentReturnedHistory = []
+        this.claimAwardHistory = []
     }
 }
