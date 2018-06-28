@@ -1,6 +1,6 @@
 <mat-sidenav-container class="container">
   <mat-sidenav #sidenav mode="side" class="side" [opened]="true">
-    <app-input [userInput]="userInput" (userInputChanged)="updateInput()"></app-input>
+    <app-input [userInput]="userInput"></app-input>
   </mat-sidenav>
 
   <mat-sidenav-content>
@@ -19,4 +19,3 @@
     </div>
   </mat-sidenav-content>
 </mat-sidenav-container>
-<app-graph [mean]="5" [stdDeviation]="1"></app-graph>

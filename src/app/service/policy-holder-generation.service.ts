@@ -18,19 +18,19 @@ export class PolicyHolderGenerationService {
   }
 
   userInputToDB(userInput: UserInput): PolicyHolderDB {
-    var numPH = userInput.numPH;
-    var avgGroupSize = userInput.avgGroupSize;
-    var cuValue = userInput.cuValue;
-    var tul = userInput.tul / cuValue;
-    var desiredPremiumMean = userInput.desiredPremiumMean / cuValue;
-    var desiredPremiumStdev = userInput.desiredPremiumStdev / cuValue;
+    const numPH = userInput.numPH;
+    const avgGroupSize = userInput.avgGroupSize;
+    const cuValue = userInput.cuValue;
+    const tul = userInput.tul / cuValue;
+    const desiredPremiumMean = userInput.desiredPremiumMean / cuValue;
+    const desiredPremiumStdev = userInput.desiredPremiumStdev / cuValue;
 
-    var probabilityToDefect = userInput.percentageToDefect / 100;
-    var ratioOfTUL2Claims = userInput.percentageOfTUL2Claims / 100;
-    var probabilityOpenClaimMean = userInput.percentageOpenClaimMean / 100;
-    var probabilityOpenClaimStdev = userInput.percentageOpenClaimStdev / 100;
+    const probabilityToDefect = userInput.percentageToDefect;
+    const ratioOfTUL2Claims = userInput.ratio_Claims2TUL;
+    const probabilityOpenClaimMean = userInput.mean_claimLikelihood;
+    const probabilityOpenClaimStdev = userInput.stdev_claimLikelihood;
 
-    var phDB = this.generatePolicyHolders(numPH, avgGroupSize);
+    const phDB = this.generatePolicyHolders(numPH, avgGroupSize);
 
 
     this.setParticipation(phDB);
@@ -43,13 +43,13 @@ export class PolicyHolderGenerationService {
 
   generatePolicyHolders(numPH, AvgGroupSize): PolicyHolderDB {
     PolicyHolder.reset();
-    var numGroups = (AvgGroupSize < 8 ? Math.floor(numPH / AvgGroupSize) : Math.ceil(numPH / AvgGroupSize));
-    var subgroups = [];
-    for (var i = 0; i < numGroups; i++) {
+    const numGroups = (AvgGroupSize < 8 ? Math.floor(numPH / AvgGroupSize) : Math.ceil(numPH / AvgGroupSize));
+    const subgroups = [];
+    for (let i = 0; i < numGroups; i++) {
       subgroups.push([]);
     }
     for (let i = 0; i < numPH; i++) {
-      var ph = new PolicyHolder();
+      const ph = new PolicyHolder();
       if (i < numGroups * 4) {
         subgroups[i % subgroups.length].push(ph);
       } else {
@@ -64,9 +64,9 @@ export class PolicyHolderGenerationService {
   }
 
   setDefect(db: PolicyHolderDB, defectRate): void {
-    var count = db.policyHolders.length;
+    const count = db.policyHolders.length;
     var numDefectors = Math.floor(count * defectRate);
-    var chosenDefectors = [];
+    const chosenDefectors = [];
     while (numDefectors > 0) {
       let random_ph = Math.floor(Math.random() * count);
       while (chosenDefectors.indexOf(random_ph) != -1) {
@@ -80,33 +80,33 @@ export class PolicyHolderGenerationService {
       db.policyHolders[i].defectValue = 0;
     }
     for (let i = 0; i < chosenDefectors.length; i++) {
-      let chosenDefector = chosenDefectors[i];
+      const chosenDefector = chosenDefectors[i];
       db.policyHolders[chosenDefector].defectType = DefectType.Random;
       db.policyHolders[chosenDefector].defectValue = .5;
     }
   }
 
   setClaim(db: PolicyHolderDB, claimRate: number, claimProbabilityStdev: number, tul: number, coverageUnitValue: number, ratioTUL2Claims: number): void {
-    var count = db.policyHolders.length;
+    const count = db.policyHolders.length;
 
-    var arrClaimFrequency = [];
+    const arrClaimFrequency = [];
     for (let i = 0; i < count; i++) {
       let cf_sample = jStat.normal.sample(claimRate, claimProbabilityStdev);
       cf_sample = Math.max(cf_sample, 0);
       arrClaimFrequency[i] = cf_sample;
     }
 
-    var totalClaimFrequency = jStat.sum(arrClaimFrequency);
+    const totalClaimFrequency = jStat.sum(arrClaimFrequency);
 
-    var coverageUnitsTotal = tul / coverageUnitValue;
-    var tolmean = coverageUnitsTotal * ratioTUL2Claims;
+    const coverageUnitsTotal = tul / coverageUnitValue;
+    const tolmean = coverageUnitsTotal * ratioTUL2Claims;
 
     for (let i = 0; i < count; i++) {
-      let claimFreqRatio = arrClaimFrequency[i] / totalClaimFrequency;
-      let coverageUnitRatio = db.policyHolders[i].coverageValue / coverageUnitsTotal;
-      let tol_contribution = (claimFreqRatio + coverageUnitRatio) / 2;
+      const claimFreqRatio = arrClaimFrequency[i] / totalClaimFrequency;
+      const coverageUnitRatio = db.policyHolders[i].coverageValue / coverageUnitsTotal;
+      const tol_contribution = coverageUnitRatio;
 
-      let cv = tolmean * tol_contribution / arrClaimFrequency[i];
+      const cv = tolmean * tol_contribution / arrClaimFrequency[i];
       var cv_ratio = 1;
       if (cv <= db.policyHolders[i].coverageValue) {
         cv_ratio = cv / db.policyHolders[i].coverageValue;
@@ -131,7 +131,7 @@ export class PolicyHolderGenerationService {
   }
 
   setCoverageUnitsBought(db: PolicyHolderDB, tul: number): void {
-    var totalCoverageUnits = tul;
+    const totalCoverageUnits = tul;
     var arrCoverageUnits = [];
     for (let i = 0; i < db.policyHolders.length; i++) {
       var cu_sample = jStat.normal.sample(5, 1);

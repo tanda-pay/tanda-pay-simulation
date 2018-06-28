@@ -21,7 +21,7 @@ export class ContentComponent {
     private policyHolderGeneratorService: PolicyHolderGenerationService,
     private simulationService: SimulationService
   ) {
-    this.iterations = 3;
+    this.iterations = 20;
   }
 
   runSimulation(): void {

@@ -19,20 +19,23 @@
       <div>
         <mat-form-field><input matInput
                                placeholder="# of policyholders"
-                               [(ngModel)]="userInput.numPH" (input)="userInputChanged.emit(true)" type="number">
+                               [(ngModel)]="userInput.numPH" (input)="updateProjections()" type="number">
         </mat-form-field>
       </div>
       <div>
-        <mat-form-field><input matInput
-                               placeholder="% of policyholders that defect"
-                               [(ngModel)]="userInput.percentageToDefect" (input)="userInputChanged.emit(true)"
-                               type="number"> <span matSuffix>% &nbsp;</span></mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="% of policyholders that defect"
+                 [ngModel]="userInput.percentageToDefect*100"
+                 (ngModelChange)="userInput.percentageToDefect=$event*.01"
+                 (input)="updateProjections()"
+                 type="number">
+        </mat-form-field>
       </div>
     </div>
     <div class='separator-block'></div>
     <div class='derived-value-block'>
       <mat-form-field>
-        <input matInput placeholder="Number of defectors" [(ngModel)]="userInput.numDefectors" disabled>
+        <input matInput placeholder="Number of defectors" [ngModel]="userInput.numDefectors" disabled>
       </mat-form-field>
     </div>
   </div>
@@ -40,20 +43,20 @@
   <div class='parent'>
     <div class='input-value-block'>
       <div>
-        <mat-form-field><span matPrefix>$ &nbsp;</span> <input
-          matInput placeholder="Total value of all underwritten policies"
-          [(ngModel)]="userInput.tul" (input)="userInputChanged.emit(true)" type="number"></mat-form-field>
+        <mat-form-field><span matPrefix>$ &nbsp;</span>
+          <input matInput placeholder="Total value of all underwritten policies" [(ngModel)]="userInput.tul" (input)="updateProjections()" type="number">
+        </mat-form-field>
       </div>
       <div>
-        <mat-form-field><span matPrefix>$ &nbsp;</span> <input
-          matInput placeholder="Value of a single coverage unit"
-          [(ngModel)]="userInput.cuValue" (input)="userInputChanged.emit(true)" type="number"></mat-form-field>
+        <mat-form-field><span matPrefix>$ &nbsp;</span>
+          <input matInput placeholder="Value of a single coverage unit" [(ngModel)]="userInput.cuValue" (input)="updateProjections()" type="number">
+        </mat-form-field>
       </div>
     </div>
     <div class='separator-block'></div>
     <div class='derived-value-block'>
       <mat-form-field>
-        <input matInput placeholder="# of coverage units" [(ngModel)]="userInput.numCu" disabled>
+        <input matInput placeholder="# of coverage units" [ngModel]="userInput.numCu | number:'1.0-4'" disabled>
       </mat-form-field>
     </div>
   </div>
@@ -68,13 +71,13 @@
       <div>
         <mat-form-field><span matPrefix>$ &nbsp;</span>
           <input matInput placeholder="Mean value of the bell curve"
-                 [(ngModel)]="userInput.desiredPremiumMean" (input)="userInputChanged.emit(true)" type="number">
+                 [(ngModel)]="userInput.desiredPremiumMean" (input)="updateProjections()" type="number">
         </mat-form-field>
       </div>
       <div>
         <mat-form-field><span matPrefix>$ &nbsp;</span>
           <input matInput placeholder="Sigma value of bell curve"
-                 [(ngModel)]="userInput.desiredPremiumStdev" (input)="userInputChanged.emit(true)" type="number">
+                 [(ngModel)]="userInput.desiredPremiumStdev" (input)="updateProjections()" type="number">
         </mat-form-field>
       </div>
       <div>
@@ -84,21 +87,22 @@
           class="fas fa-question-circle"></i>
         </div>
         <mat-slider min="4" max="11" [(ngModel)]="userInput.avgGroupSize"
-                    (input)="userInput.avgGroupSize = $event.value; userInputChanged.emit(true)"></mat-slider>
+                    (input)="userInput.avgGroupSize = $event.value; updateProjections()"></mat-slider>
         <div>{{userInput.avgGroupSize}}</div>
       </div>
     </div>
     <div class='separator-block'></div>
     <div class='derived-value-block'>
+      <div id="premiumgraph" style="width:100%; height:200px;"></div>
       <div>
-        <mat-form-field><span matPrefix>$ &nbsp;</span>
-          <input matInput placeholder="Total premiums collected" [(ngModel)]="userInput.totalPremiums" disabled>
+        <mat-form-field>
+          <input matInput placeholder="Total premiums collected" [ngModel]="userInput.totalPremiums | currency:'USD':'symbol':'1.2'" disabled>
         </mat-form-field>
       </div>
       <div>
         <mat-form-field>
           <input matInput placeholder="Average premium increase due to overpayment"
-                 [(ngModel)]="userInput.overpaymentIncrease" disabled> <span matSuffix>% &nbsp;</span>
+                 [ngModel]="userInput.overpaymentIncrease | percent:'1.0-2'" disabled>
         </mat-form-field>
       </div>
     </div>
@@ -109,7 +113,7 @@
       <div>
         <mat-form-field>
           <input matInput placeholder="% of underwritten value that will be paid out in claims"
-                 [(ngModel)]="userInput.percentageOfTUL2Claims" (input)="userInputChanged.emit(true)" type="number">
+                 [ngModel]="userInput.ratio_Claims2TUL*100" (ngModelChange)="userInput.ratio_Claims2TUL=$event*.01" (input)="updateProjections()" type="number">
           <span matSuffix>% &nbsp;</span>
         </mat-form-field>
       </div>
@@ -121,14 +125,14 @@
       <div>
         <mat-form-field>
           <input matInput placeholder="Mean value of the bell curve"
-                 [(ngModel)]="userInput.percentageOpenClaimMean" (input)="userInputChanged.emit(true)" type="number">
+                 [ngModel]="userInput.mean_claimLikelihood*100" (ngModelChange)="userInput.mean_claimLikelihood=$event*.01" (input)="updateProjections()" type="number">
           <span matSuffix>% &nbsp;</span>
         </mat-form-field>
       </div>
       <div>
         <mat-form-field>
           <input matInput placeholder="Sigma value of bell curve"
-                 [(ngModel)]="userInput.percentageOpenClaimStdev" (input)="userInputChanged.emit(true)" type="number">
+                 [ngModel]="userInput.stdev_claimLikelihood*100" (ngModelChange)="userInput.stdev_claimLikelihood=$event*.01" (input)="updateProjections()" type="number">
           <span matSuffix>% &nbsp;</span>
         </mat-form-field>
       </div>
@@ -136,18 +140,19 @@
     <div class='separator-block'></div>
     <div class='derived-value-block'>
       <div>
-        <mat-form-field><span matPrefix>$ &nbsp;</span>
-          <input matInput placeholder="Total value of outstanding claims" [(ngModel)]="userInput.tol" disabled>
+        <mat-form-field>
+          <input matInput placeholder="Total value of outstanding claims" [ngModel]="userInput.tol | currency:'USD':'symbol':'1.2'" disabled>
+        </mat-form-field>
+      </div>
+      <div id="claimantcountgraph" style="width:100%; height:200px;"></div>
+      <div>
+        <mat-form-field>
+          <input matInput placeholder="Total number of claims" [ngModel]="userInput.totalClaimCount | number:'1.0-0'" disabled>
         </mat-form-field>
       </div>
       <div>
         <mat-form-field>
-          <input matInput placeholder="Total number of claims" [(ngModel)]="userInput.totalClaimCount" disabled>
-        </mat-form-field>
-      </div>
-      <div>
-        <mat-form-field><span matPrefix>$ &nbsp;</span>
-          <input matInput placeholder="Average claim value" [(ngModel)]="userInput.averageClaimValue" disabled>
+          <input matInput placeholder="Average claim value" [ngModel]="userInput.averageClaimValue | currency:'USD':'symbol':'1.2'" disabled>
         </mat-form-field>
       </div>
     </div>

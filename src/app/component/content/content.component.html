@@ -8,20 +8,25 @@
   <mat-horizontal-stepper>
     <mat-step *ngFor="let period of periods">
       <div>chosenPremium: {{period.chosenPremium}}</div>
-      <div>tul: {{period.tul}}</div>
+      <div>tul: {{period.totalCoverageUnits}}</div>
       <div>tol: {{period.tol}}</div>
       <div>totalPremiumPayment: {{period.totalPremiumPayment}}</div>
+      <div>totalOverpayments: {{period.totalOverpayments}}</div>
+
+      <div>totalConfiscatedOverpayments: {{period.confiscatedOverpayments}}</div>
       <div>totalEligibleClaims: {{period.totalEligibleClaims}}</div>
+      <div>Defector Count: {{period.numDefectors}}</div>
       <div>totalPremiumsAfterDefect: {{period.totalPremiumsAfterDefect}}</div>
       <div>Total Rebates: {{period.totalRebates}}</div>
       <div>Claim Payment Ratio: {{period.claimPaymentRatio}}</div>
+      <div>EffectivePremium: {{period.effectivePremium}}</div>
       <div>EffectiveCost: {{period.effectiveCost}}</div>
       <div>EffectiveClaimPayment: {{period.averageClaimPayment}}</div>
     </mat-step>
   </mat-horizontal-stepper>
 </div>
 
-<div>
+<div *ngIf="summary !== undefined">
   <div>Claims were underpaid {{summary[0] | percent:'1.0-3'}} of the time</div>
   <div>On average claims were paid {{summary[1] | percent:'1.0-3'}} of their value</div>
   <div>When claims were not paid out in full, on average they were paid {{summary[2] | percent:'1.0-3'}} of their value</div>

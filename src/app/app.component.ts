@@ -25,7 +25,7 @@ export class AppComponent implements OnInit {
   }
 
   updateInput() {
-    this.userInput.calculateDerivedValues();
+    // this.userInput.calculateDerivedValues();
     // const period = this.simulationService.doPolicyPeriod(subgroups, null);
   }
 
