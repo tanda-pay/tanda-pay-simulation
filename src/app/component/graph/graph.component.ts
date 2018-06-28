@@ -1,6 +1,5 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import * as _ from 'underscore';
-
 declare var Highcharts: any;
 
 @Component({
@@ -8,62 +7,79 @@ declare var Highcharts: any;
   templateUrl: './graph.component.html',
   styleUrls: ['./graph.component.css'],
 })
-export class GraphComponent implements OnInit {
+export class GraphComponent {
 
-  constructor() {
-    const lowerBound2 = 3;
-    const upperBound2 = 10;
-    const mean = this.getMean(lowerBound2, upperBound2);
-    const stdDev = this.getStdDeviation(lowerBound2, upperBound2);
-    const points = this.generatePoints(lowerBound2, upperBound2);
-    const seriesData = points.map(x => ({x, y: this.normalY(x, mean, stdDev)}));
+  @Input() set stdDeviation(stdDeviation: number) {
+    this._stdDeviation = stdDeviation;
+    this.updateChart();
+  }
+  @Input() set mean(mean: number) {
+    this._mean = mean;
+    this.updateChart();
   }
 
-  ngOnInit() {
-    const myChart = Highcharts.chart('container', {
+  constructor() {
+    this._mean = 5;
+    this._stdDeviation = 1;
+  }
+
+  _stdDeviation: number;
+  _mean: number;
+
+  updateChart() {
+    const stdDeviation2 = this._stdDeviation * 2;
+    const lowerBound = this._mean - stdDeviation2;
+    const upperBound = this._mean + stdDeviation2;
+
+    const step = ((upperBound + 1) - (lowerBound - 1)) / 100;
+    const points = _.range((lowerBound - 1), (upperBound + 1), step);
+    const seriesData = points.map(x => ({ x, y: this.normalDistributionY(x, this._mean, this._stdDeviation)}));
+
+    Highcharts.chart('container', {
       chart: {
-        type: 'bar'
+        type: 'area'
       },
       title: {
-        text: 'Fruit Consumption'
-      },
-      xAxis: {
-        categories: ['Apples', 'Bananas', 'Oranges']
+        text: ''
       },
       yAxis: {
-        title: {
-          text: 'Fruit eaten'
-        }
+        labels: {
+          enabled: true,
+        },
+        gridLineWidth: 0,
+        title: ''
+      },
+      tooltip: {
+        enabled: true,
+      },
+      legend: {
+        enabled: false,
       },
       series: [{
-        name: 'Jane',
-        data: [1, 0, 4]
-      }, {
-        name: 'John',
-        data: [5, 7, 3]
-      }]
+        data: seriesData,
+      }],
+      plotOptions: {
+        area: {
+          enableMouseTracking: true,
+          color: 'rgb(226, 119, 122)',
+          fillColor: 'rgba(226, 119, 122, 0.5)',
+          zoneAxis: 'x',
+          zones: [{
+            // fillColor gets the inside of the graph, color would change the lines
+            fillColor: 'white',
+            // everything below this value has this style applied to it
+            value: lowerBound,
+          }, {
+            value: upperBound,
+          }, {
+            fillColor: 'white',
+          }]
+        }
+      }
     });
   }
 
-  normalY(x, mean, stdDev) {
+  normalDistributionY(x, mean, stdDev) {
     return Math.exp((-0.5) * Math.pow((x - mean) / stdDev, 2));
-  }
-
-  getMean(lowerBound, upperBound) {
-    return (upperBound + lowerBound) / 2;
-  }
-
-  // distance between mean and each bound of a 95% confidence interval
-  // is 2 stdDeviation, so distance between the bounds is 4
-  getStdDeviation(lowerBound, upperBound) {
-    return (upperBound - lowerBound) / 4;
-  }
-
-  generatePoints(lowerBound, upperBound) {
-    const stdDev = this.getStdDeviation(lowerBound, upperBound);
-    const min = lowerBound - 2 * stdDev;
-    const max = upperBound + 2 * stdDev;
-    const unit = max - min / 100;
-    return _.range(min, max, unit);
   }
 }
