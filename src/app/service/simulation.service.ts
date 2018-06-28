@@ -83,7 +83,7 @@ export class SimulationService {
         if (phDB.purchasedCoverageHistory[periodIndex][ph.id] != 0) {
           let overpayment = phDB.purchasedCoverageHistory[periodIndex][ph.id] * (1 / (participantCount - 1));
           nextPeriod.totalOverpayments += overpayment;
-          phDB.overpaymentCommittedHistory[periodIndex][ph.id] = overpayment;
+          phDB.overpaymentCommittedHistory[periodIndex][ph.id] = overpayment * phDB.premiumCommittedHistory[periodIndex][ph.id];
         }
       }
     }
@@ -95,6 +95,7 @@ export class SimulationService {
         let claimValue = this.simulateDecision_SubmitClaim(ph);
         phDB.claimSubmittedHistory[periodIndex][ph.id] = claimValue;
         nextPeriod.tol += claimValue;
+        nextPeriod.claimantCount++;
       } else {
         phDB.claimSubmittedHistory[periodIndex][ph.id] = 0;
       }
@@ -214,6 +215,9 @@ export class SimulationService {
         }
       }
     }
+
+    nextPeriod.effectiveCost = (nextPeriod.totalPremiumPayment + nextPeriod.totalOverpayments - nextPeriod.totalRebates) / ph_arr.length;
+    nextPeriod.averageClaimPayment = (nextPeriod.totalEligibleClaims / nextPeriod.claimantCount);
     return nextPeriod;
   }
 
@@ -293,5 +297,42 @@ export class SimulationService {
     return false;
   }
 
-  // TODO add other methods
+  generateSimulationSummary(periods: Period[]) {
+    let numClaims = 0;
+    let numUnderpaidClaims = 0;
+    for (const period of periods) {
+      numClaims += period.claimantCount;
+      if (period.claimPaymentRatio != 1) {
+        numUnderpaidClaims += period.claimantCount;
+      }
+    }
+    const claimUnderpaidFrequency = numUnderpaidClaims / numClaims;
+    let totalElligibleClaimsSum = 0
+    let claimAwardsSum = 0
+    for (const period of periods) {
+      totalElligibleClaimsSum += period.totalEligibleClaims;
+      claimAwardsSum += period.claimPaymentRatio * period.totalEligibleClaims;
+    }
+    const claimAwardRatio = claimAwardsSum / totalElligibleClaimsSum;
+    let totalElligibleUnderpaidClaimsSum = 0
+    let underpaidClaimAwardsSum = 0
+    for (const period of periods) {
+      if (period.claimPaymentRatio != 1) {
+        totalElligibleUnderpaidClaimsSum += period.totalEligibleClaims;
+        underpaidClaimAwardsSum += period.claimPaymentRatio * period.totalEligibleClaims;
+      }
+    }
+    const underpaidClaimAwardRatio = underpaidClaimAwardsSum / totalElligibleUnderpaidClaimsSum;
+    let effectivePremiumAvg = 0;
+    for (const period of periods) {
+      effectivePremiumAvg += period.effectiveCost;
+    }
+    effectivePremiumAvg /= periods.length;
+    let effectiveClaimAvg = 0;
+    for (const period of periods) {
+      effectiveClaimAvg += period.averageClaimPayment;
+    }
+    effectiveClaimAvg /= periods.length;
+    return [claimUnderpaidFrequency, claimAwardRatio, underpaidClaimAwardRatio, effectivePremiumAvg, effectiveClaimAvg];
+  }
 }

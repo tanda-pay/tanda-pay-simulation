@@ -15,6 +15,7 @@ export class ContentComponent {
   @Input() userInput: UserInput;
   periods: Period[];
   iterations: number;
+  summary: number[];
 
   constructor(
     private policyHolderGeneratorService: PolicyHolderGenerationService,
@@ -29,5 +30,6 @@ export class ContentComponent {
     for (let i = 0; i < this.iterations; i++) {
       this.periods.push(this.simulationService.simulateNextPolicyPeriod(this.phDB, this.periods));
     }
+    this.summary = this.simulationService.generateSimulationSummary(this.periods);
   }
 }

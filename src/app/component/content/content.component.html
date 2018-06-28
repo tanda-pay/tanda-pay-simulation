@@ -20,3 +20,11 @@
     </mat-step>
   </mat-horizontal-stepper>
 </div>
+
+<div>
+  <div>Claims were underpaid {{summary[0] | percent:'1.0-3'}} of the time</div>
+  <div>On average claims were paid {{summary[1] | percent:'1.0-3'}} of their value</div>
+  <div>When claims were not paid out in full, on average they were paid {{summary[2] | percent:'1.0-3'}} of their value</div>
+  <div>Effective monthly premium per person: {{summary[3]}}</div>
+  <div>Effective monthly claim value is: {{summary[4]}}</div>
+</div>

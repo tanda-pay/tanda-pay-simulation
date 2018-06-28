@@ -2,6 +2,7 @@ export class Period {
   chosenPremium: number;
   tul: number;
   tol: number;
+  claimantCount: number;
   totalPremiumPayment: number;
   totalOverpayments: number;
   totalEligibleClaims: number;
@@ -20,7 +21,9 @@ export class Period {
 
     this.tul = null;
     this.tol = null;
+    this.claimantCount = null;
     this.totalPremiumPayment = null;
+    this.totalOverpayments = null;
     this.totalEligibleClaims = null;
 
     this.totalPremiumsAfterDefect = null;
