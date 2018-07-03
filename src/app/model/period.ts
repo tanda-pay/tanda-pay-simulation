@@ -1,3 +1,5 @@
+import {PolicyHolder} from './policy-holder';
+
 export class Period {
   chosenPremium: number;
   totalCoverageUnits: number;
@@ -12,7 +14,8 @@ export class Period {
   loyalistCoverageUnits: number;
   totalPremiumsAfterDefect: number;
   totalRebateCoverageUnits: number;
-  rebateRatio: number; //
+  rebateRatio: number;
+  loyalists: PolicyHolder[];
 
   totalRebates: number;
   claimPaymentRatio: number;
@@ -21,13 +24,14 @@ export class Period {
   averageClaimPayment: number;
 
   constructor() {
+    this.loyalists = [];
     this.numDefectors = 0;
     this.loyalistCoverageUnits = 0;
     this.chosenPremium = null;
 
     this.totalCoverageUnits = null;
-    this.tol = null;
-    this.claimantCount = null;
+    this.tol = 0;
+    this.claimantCount = 0;
     this.totalPremiumPayment = null;
     this.totalOverpayments = null;
     this.confiscatedOverpayments = null;

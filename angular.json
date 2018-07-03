@@ -23,7 +23,9 @@
             "styles": [
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [
+              "src/assets/weighted-random-select.js"
+            ]
           },
           "configurations": {
             "production": {

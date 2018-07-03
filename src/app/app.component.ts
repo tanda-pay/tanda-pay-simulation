@@ -1,8 +1,8 @@
 import {Component, OnInit} from '@angular/core';
-import {PolicyHolderGenerationService} from './service/policy-holder-generation.service';
+import {SimulationSetupService} from './service/simulation-setup-service';
 import {SimulationService} from './service/simulation.service';
 import {UserInput} from './model/user-input';
-import {PolicyHolderDB} from './model/policy-holder-database';
+import {SimulationDatabase} from './model/simulation-database';
 
 @Component({
   selector: 'app-root',
@@ -12,16 +12,16 @@ import {PolicyHolderDB} from './model/policy-holder-database';
 export class AppComponent implements OnInit {
 
   userInput: UserInput;
-  phDB: PolicyHolderDB;
+  db: SimulationDatabase;
 
-  constructor(private policyHolderGeneratorService: PolicyHolderGenerationService,
+  constructor(private simulationSetupService: SimulationSetupService,
               private simulationService: SimulationService) {
   }
 
   ngOnInit() {
     this.userInput = new UserInput();
     this.updateInput();
-    this.renderPolicyHolders();
+    //this.renderPolicyHolders();
   }
 
   updateInput() {
@@ -30,6 +30,6 @@ export class AppComponent implements OnInit {
   }
 
   renderPolicyHolders() {
-    this.phDB = this.policyHolderGeneratorService.userInputToDB(this.userInput);
+    this.db = this.simulationSetupService.userInputToDB(this.userInput);
   }
 }

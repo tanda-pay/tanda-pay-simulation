@@ -110,12 +110,21 @@
 
   <div class='parent'>
     <div class='input-value-block'>
-      <div>
-        <mat-form-field>
-          <input matInput placeholder="% of underwritten value that will be paid out in claims"
-                 [ngModel]="userInput.ratio_Claims2TUL*100" (ngModelChange)="userInput.ratio_Claims2TUL=$event*.01" (input)="updateProjections()" type="number">
-          <span matSuffix>% &nbsp;</span>
-        </mat-form-field>
+      <div style="width:100%; height:200px;">
+        <div>
+          <mat-form-field>
+            <input matInput placeholder="Mean % of underwritten value that will be paid out in claims"
+                   [ngModel]="userInput.mean_Claims2TUL*100" (ngModelChange)="userInput.mean_Claims2TUL=$event*.01" (input)="updateProjections()" type="number">
+            <span matSuffix>% &nbsp;</span>
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field>
+            <input matInput placeholder="Sigma % of underwritten value that will be paid out in claims"
+                   [ngModel]="userInput.stdev_Claims2TUL*100" (ngModelChange)="userInput.stdev_Claims2TUL=$event*.01" (input)="updateProjections()" type="number">
+            <span matSuffix>% &nbsp;</span>
+          </mat-form-field>
+        </div>
       </div>
       <div>
         Percentage of policyholders that open claims every period,<br>approximated by
@@ -125,20 +134,21 @@
       <div>
         <mat-form-field>
           <input matInput placeholder="Mean value of the bell curve"
-                 [ngModel]="userInput.mean_claimLikelihood*100" (ngModelChange)="userInput.mean_claimLikelihood=$event*.01" (input)="updateProjections()" type="number">
+                 [ngModel]="userInput.mean_claimProportion*100" (ngModelChange)="userInput.mean_claimProportion=$event*.01" (input)="updateProjections()" type="number">
           <span matSuffix>% &nbsp;</span>
         </mat-form-field>
       </div>
       <div>
         <mat-form-field>
           <input matInput placeholder="Sigma value of bell curve"
-                 [ngModel]="userInput.stdev_claimLikelihood*100" (ngModelChange)="userInput.stdev_claimLikelihood=$event*.01" (input)="updateProjections()" type="number">
+                 [ngModel]="userInput.stdev_claimProportion*100" (ngModelChange)="userInput.stdev_claimProportion=$event*.01" (input)="updateProjections()" type="number">
           <span matSuffix>% &nbsp;</span>
         </mat-form-field>
       </div>
     </div>
     <div class='separator-block'></div>
     <div class='derived-value-block'>
+      <div id="tolgraph" style="width:100%; height:200px;"></div>
       <div>
         <mat-form-field>
           <input matInput placeholder="Total value of outstanding claims" [ngModel]="userInput.tol | currency:'USD':'symbol':'1.2'" disabled>

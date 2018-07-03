@@ -1,0 +1,12 @@
+.mat-expansion-panel-header,
+.mat-expansion-panel-header.mat-expanded {
+  border-bottom: 2px solid lightgray;
+  height: 32px;
+}
+
+
+::ng-deep .mat-tab-label, ::ng-deep .mat-tab-label-active{
+  min-width: 0!important;
+  padding: 3px!important;
+  margin: 3px!important;
+}

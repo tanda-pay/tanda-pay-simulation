@@ -1,8 +1,8 @@
 import {Component, Input} from '@angular/core';
 import {SimulationService} from '../../service/simulation.service';
 import {Period} from '../../model/period';
-import {PolicyHolderDB} from '../../model/policy-holder-database';
-import {PolicyHolderGenerationService} from '../../service/policy-holder-generation.service';
+import {SimulationDatabase} from '../../model/simulation-database';
+import {SimulationSetupService} from '../../service/simulation-setup-service';
 import {UserInput} from '../../model/user-input';
 
 @Component({
@@ -11,25 +11,26 @@ import {UserInput} from '../../model/user-input';
   styleUrls: ['./content.component.css'],
 })
 export class ContentComponent {
-  @Input() phDB: PolicyHolderDB;
+  // @Input() currentDB: SimulationDatabase;
   @Input() userInput: UserInput;
-  periods: Period[];
-  iterations: number;
-  summary: number[];
+  simulations: SimulationDatabase[];
+  iterations = 50;
+  policyPeriodLength = 45;
 
   constructor(
-    private policyHolderGeneratorService: PolicyHolderGenerationService,
+    private simulationSetupService: SimulationSetupService,
     private simulationService: SimulationService
   ) {
-    this.iterations = 20;
+    this.simulations = [];
   }
 
   runSimulation(): void {
-    this.phDB = this.policyHolderGeneratorService.userInputToDB(this.userInput);
-    this.periods = [];
+    const currentDB = this.simulationSetupService.userInputToDB(this.userInput);
+    currentDB.policyPeriodLength = this.policyPeriodLength;
     for (let i = 0; i < this.iterations; i++) {
-      this.periods.push(this.simulationService.simulateNextPolicyPeriod(this.phDB, this.periods));
+      this.simulationService.simulateNextPolicyPeriod(currentDB);
     }
-    this.summary = this.simulationService.generateSimulationSummary(this.periods);
+    this.simulationService.generateSimulationSummary(currentDB);
+    this.simulations.push(currentDB);
   }
 }

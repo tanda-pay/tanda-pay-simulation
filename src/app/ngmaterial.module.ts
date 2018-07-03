@@ -10,7 +10,10 @@ import {
   MatSidenavModule,
   MatSliderModule,
   MatStepperModule,
-  MatTooltipModule
+  MatTooltipModule,
+  MatCheckboxModule,
+  MatTabsModule,
+  MatGridListModule
 } from '@angular/material';
 
 const modules = [
@@ -25,6 +28,9 @@ const modules = [
   MatSliderModule,
   MatStepperModule,
   MatTooltipModule,
+  MatCheckboxModule,
+  MatTabsModule,
+  MatGridListModule
 ];
 
 @NgModule({

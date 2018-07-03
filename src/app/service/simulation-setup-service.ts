@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {UtilService} from './util.service';
 import {PolicyHolder} from '../model/policy-holder';
-import {PolicyHolderDB} from '../model/policy-holder-database';
+import {SimulationDatabase} from '../model/simulation-database';
 import {UserInput} from '../model/user-input';
 import {ClaimType} from '../model/enum/ClaimType';
 import {CoverageType} from '../model/enum/CoverageType';
@@ -12,12 +12,12 @@ import {PremiumVoteType} from '../model/enum/PremiumVoteType';
 declare var jStat: any;
 
 @Injectable()
-export class PolicyHolderGenerationService {
+export class SimulationSetupService {
 
   constructor(private utilService: UtilService) {
   }
 
-  userInputToDB(userInput: UserInput): PolicyHolderDB {
+  userInputToDB(userInput: UserInput): SimulationDatabase {
     const numPH = userInput.numPH;
     const avgGroupSize = userInput.avgGroupSize;
     const cuValue = userInput.cuValue;
@@ -26,22 +26,26 @@ export class PolicyHolderGenerationService {
     const desiredPremiumStdev = userInput.desiredPremiumStdev / cuValue;
 
     const probabilityToDefect = userInput.percentageToDefect;
-    const ratioOfTUL2Claims = userInput.ratio_Claims2TUL;
-    const probabilityOpenClaimMean = userInput.mean_claimLikelihood;
-    const probabilityOpenClaimStdev = userInput.stdev_claimLikelihood;
+    const mean_Claims2TUL = userInput.mean_Claims2TUL;
+    const stdev_Claims2TUL = userInput.stdev_Claims2TUL;
+    const probabilityOpenClaimMean = userInput.mean_claimProportion;
+    const probabilityOpenClaimStdev = userInput.stdev_claimProportion;
 
-    const phDB = this.generatePolicyHolders(numPH, avgGroupSize);
-
-
-    this.setParticipation(phDB);
-    this.setPremiumVote(phDB, desiredPremiumMean, desiredPremiumStdev);
-    this.setCoverageUnitsBought(phDB, tul);
-    this.setClaim(phDB, probabilityOpenClaimMean, probabilityOpenClaimStdev, tul, cuValue, ratioOfTUL2Claims);
-    this.setDefect(phDB, probabilityToDefect);
-    return phDB;
+    const db = this.initializeDB(numPH, avgGroupSize);
+    db.cuValue = userInput.cuValue;
+    this.setParticipation(db);
+    this.setPremiumVote(db, desiredPremiumMean, desiredPremiumStdev);
+    this.setCoverageUnitsBought(db, tul);
+    this.setClaim(db, probabilityOpenClaimMean, probabilityOpenClaimStdev, tul, cuValue, userInput.mean_Claims2TUL);
+    this.setDefect(db, probabilityToDefect);
+    db.mean_Claims2TUL = userInput.mean_Claims2TUL;
+    db.stdev_Claims2TUL = userInput.stdev_Claims2TUL;
+    db.mean_ClaimantProportion = userInput.mean_claimProportion;
+    db.stdev_ClaimantProportion = userInput.stdev_claimProportion;
+    return db;
   }
 
-  generatePolicyHolders(numPH, AvgGroupSize): PolicyHolderDB {
+  initializeDB(numPH, AvgGroupSize): SimulationDatabase {
     PolicyHolder.reset();
     const numGroups = (AvgGroupSize < 8 ? Math.floor(numPH / AvgGroupSize) : Math.ceil(numPH / AvgGroupSize));
     const subgroups = [];
@@ -60,16 +64,16 @@ export class PolicyHolderGenerationService {
         subgroups[randomGroup].push(ph);
       }
     }
-    return new PolicyHolderDB(subgroups);
+    return new SimulationDatabase(subgroups);
   }
 
-  setDefect(db: PolicyHolderDB, defectRate): void {
+  setDefect(db: SimulationDatabase, defectRate): void {
     const count = db.policyHolders.length;
-    var numDefectors = Math.floor(count * defectRate);
+    let numDefectors = Math.floor(count * defectRate);
     const chosenDefectors = [];
     while (numDefectors > 0) {
       let random_ph = Math.floor(Math.random() * count);
-      while (chosenDefectors.indexOf(random_ph) != -1) {
+      while (chosenDefectors.indexOf(random_ph) !== -1) {
         random_ph = (random_ph + 1) % count;
       }
       chosenDefectors.push(random_ph);
@@ -81,12 +85,22 @@ export class PolicyHolderGenerationService {
     }
     for (let i = 0; i < chosenDefectors.length; i++) {
       const chosenDefector = chosenDefectors[i];
-      db.policyHolders[chosenDefector].defectType = DefectType.Random;
-      db.policyHolders[chosenDefector].defectValue = .5;
+      db.policyHolders[chosenDefector].defectType = DefectType.Function;
+      db.policyHolders[chosenDefector].defectValue = function (db_in) {
+        const periodIndex = db_in.numCompletedPeriods;
+        const currentPeriod = db_in.periods[periodIndex];
+        if (db_in.claimSubmittedHistory[periodIndex][this.id] > 0) {
+          return false;
+        }
+        if (currentPeriod.tol / currentPeriod.totalPremiumPayment > Math.random() * .8 + .2) {
+          return true;
+        }
+        return false;
+      };
     }
   }
 
-  setClaim(db: PolicyHolderDB, claimRate: number, claimProbabilityStdev: number, tul: number, coverageUnitValue: number, ratioTUL2Claims: number): void {
+  setClaim(db: SimulationDatabase, claimRate: number, claimProbabilityStdev: number, tul: number, coverageUnitValue: number, ratioTUL2Claims: number): void {
     const count = db.policyHolders.length;
 
     const arrClaimFrequency = [];
@@ -107,7 +121,7 @@ export class PolicyHolderGenerationService {
       const tol_contribution = coverageUnitRatio;
 
       const cv = tolmean * tol_contribution / arrClaimFrequency[i];
-      var cv_ratio = 1;
+      let cv_ratio = 1;
       if (cv <= db.policyHolders[i].coverageValue) {
         cv_ratio = cv / db.policyHolders[i].coverageValue;
       }
@@ -116,25 +130,25 @@ export class PolicyHolderGenerationService {
     }
   }
 
-  setParticipation(db: PolicyHolderDB): void {
+  setParticipation(db: SimulationDatabase): void {
     for (let i = 0; i < db.policyHolders.length; i++) {
       db.policyHolders[i].participationType = ParticipationType.Random;
       db.policyHolders[i].participationValue = 1;
     }
   }
 
-  setPremiumVote(db: PolicyHolderDB, coverageUnitCostMean: number, CoverageUnitCostStdev: number): void {
+  setPremiumVote(db: SimulationDatabase, coverageUnitCostMean: number, CoverageUnitCostStdev: number): void {
     for (let i = 0; i < db.policyHolders.length; i++) {
       db.policyHolders[i].premiumVoteType = PremiumVoteType.Constant;
       db.policyHolders[i].premiumVoteValue = jStat.normal.sample(coverageUnitCostMean, CoverageUnitCostStdev);
     }
   }
 
-  setCoverageUnitsBought(db: PolicyHolderDB, tul: number): void {
+  setCoverageUnitsBought(db: SimulationDatabase, tul: number): void {
     const totalCoverageUnits = tul;
-    var arrCoverageUnits = [];
+    let arrCoverageUnits = [];
     for (let i = 0; i < db.policyHolders.length; i++) {
-      var cu_sample = jStat.normal.sample(5, 1);
+      let cu_sample = jStat.normal.sample(5, .5);
       cu_sample = Math.max(Math.min(10, cu_sample), 1);
       arrCoverageUnits[i] = cu_sample;
     }

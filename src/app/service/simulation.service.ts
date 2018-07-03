@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Period} from '../model/period';
 import {PolicyHolder} from '../model/policy-holder';
-import {PolicyHolderDB} from '../model/policy-holder-database';
+import {SimulationDatabase} from '../model/simulation-database';
 
 import {ClaimType} from '../model/enum/ClaimType';
 import {CoverageType} from '../model/enum/CoverageType';
@@ -10,6 +10,7 @@ import {ParticipationType} from '../model/enum/ParticipationType';
 import {PremiumVoteType} from '../model/enum/PremiumVoteType';
 
 declare var jStat: any;
+declare var randomWeightedSampleNoReplacement: any;
 
 @Injectable()
 export class SimulationService {
@@ -17,40 +18,42 @@ export class SimulationService {
   constructor() {
   }
 
-  simulateNextPolicyPeriod(phDB: PolicyHolderDB, periods: Period[]): Period {
+  simulateNextPolicyPeriod(db: SimulationDatabase) {
     const nextPeriod = new Period();
-    const periodIndex = periods.length;
-
-    const ph_arr = phDB.policyHolders;
-    const ph_subgroups_arr = phDB.policyHolderSubgroups;
-    phDB.premiumVoteHistory[periodIndex] = [];
-    phDB.purchasedCoverageHistory[periodIndex] = [];
-    phDB.premiumCommittedHistory[periodIndex] = [];
-    phDB.overpaymentCommittedHistory[periodIndex] = [];
-    phDB.claimSubmittedHistory[periodIndex] = [];
-    phDB.defectHistory[periodIndex] = [];
-    phDB.rebateReceivedHistory[periodIndex] = [];
-    phDB.overpaymentReturnedHistory[periodIndex] = [];
-    phDB.claimAwardHistory[periodIndex] = [];
+    db.periods.push(nextPeriod);
+    const periodIndex = db.numCompletedPeriods;
+    let ph_arr = db.policyHolders;
+    if (periodIndex !== 0) {
+      ph_arr = db.periods[periodIndex - 1].loyalists;
+    }
+    const ph_subgroups_arr = db.policyHolderSubgroups;
+    db.premiumVoteHistory[periodIndex] = Array(db.policyHolders.length).fill(0);
+    db.purchasedCoverageHistory[periodIndex] = Array(db.policyHolders.length).fill(0);
+    db.premiumCommittedHistory[periodIndex] = Array(db.policyHolders.length).fill(0);
+    db.overpaymentCommittedHistory[periodIndex] = Array(db.policyHolders.length).fill(0);
+    db.claimSubmittedHistory[periodIndex] = Array(db.policyHolders.length).fill(0);
+    db.defectHistory[periodIndex] = Array(db.policyHolders.length).fill(false);
+    db.rebateReceivedHistory[periodIndex] = Array(db.policyHolders.length).fill(0);
+    db.overpaymentReturnedHistory[periodIndex] = Array(db.policyHolders.length).fill(0);
+    db.claimAwardHistory[periodIndex] = Array(db.policyHolders.length).fill(0);
 
     // Step 1: Secretary determines premium by taking an average of all policyholders' votes
     let arrPremiums = [];
 
     for (const ph of ph_arr) {
       const premiumVote = this.simulateDecision_PremiumVote(ph);
-      phDB.premiumVoteHistory[periodIndex][ph.id] = premiumVote;
+      db.premiumVoteHistory[periodIndex][ph.id] = premiumVote;
       arrPremiums[ph.id] = premiumVote;
     }
     arrPremiums.sort(function (a, b) { return a - b; });
     arrPremiums = arrPremiums.slice(Math.floor(arrPremiums.length * .1), Math.floor(arrPremiums.length * .9));
-    const premiumMean = jStat.mean(arrPremiums);
+    const premiumMean = jStat.mean(arrPremiums);  // TODO: Fix bug where non-participants mess up calculations of average
     const premiumMedian = jStat.median(arrPremiums);
     const arrPremiumAverages = [premiumMean, premiumMedian, (premiumMean + premiumMedian) * .55];
-    const chosenPremium = arrPremiumAverages[Math.floor(Math.random() * 3)];
-//    if (periodIndex != 0 && phDB.chosenPremiumHistory[periodIndex-1] < 1) {
-//      chosenPremium *= 1.1;
-//    }
-    phDB.chosenPremiumHistory[periodIndex] = chosenPremium;
+    let chosenPremium = arrPremiumAverages[Math.floor(Math.random() * 3)];
+    if (periodIndex !== 0 && db.periods[periodIndex - 1].claimPaymentRatio < 1) {
+      chosenPremium *= 1.1;
+    }
     nextPeriod.chosenPremium = chosenPremium;
 
     // Step 2: Offer chosen premium, accept premium commitments, and note participants who opt-out
@@ -58,12 +61,12 @@ export class SimulationService {
     for (const ph of ph_arr) {
       if (this.simulateDecision_Participation(ph)) {
         const purchasedCoverage = this.simulateDecision_CoveragePurchase(ph);
-        phDB.purchasedCoverageHistory[periodIndex][ph.id] = purchasedCoverage;
-        phDB.premiumCommittedHistory[periodIndex][ph.id] = purchasedCoverage * chosenPremium;
+        db.purchasedCoverageHistory[periodIndex][ph.id] = purchasedCoverage;
+        db.premiumCommittedHistory[periodIndex][ph.id] = purchasedCoverage * chosenPremium;
         nextPeriod.totalCoverageUnits += purchasedCoverage;
         nextPeriod.totalPremiumPayment += purchasedCoverage * chosenPremium;
       } else {
-        phDB.purchasedCoverageHistory[periodIndex][ph.id] = 0;
+        db.purchasedCoverageHistory[periodIndex][ph.id] = 0;
       }
     }
 
@@ -71,71 +74,96 @@ export class SimulationService {
     for (const iter_ph_arr of ph_subgroups_arr) {
       let participantCount = 0;
       for (const ph of iter_ph_arr) {
-        if (phDB.purchasedCoverageHistory[periodIndex][ph.id] > 0) {
+        if (db.purchasedCoverageHistory[periodIndex][ph.id] > 0) {
           participantCount++;
         }
       }
       for (const ph of iter_ph_arr) {
-        if (phDB.purchasedCoverageHistory[periodIndex][ph.id] > 0) {
-          const overpayment = phDB.purchasedCoverageHistory[periodIndex][ph.id] * (1 / (participantCount - 1)) * nextPeriod.chosenPremium;
+        if (db.purchasedCoverageHistory[periodIndex][ph.id] > 0) {
+          const overpayment = db.purchasedCoverageHistory[periodIndex][ph.id] * (1 / (participantCount - 1)) * nextPeriod.chosenPremium;
           nextPeriod.totalOverpayments += overpayment;
-          phDB.overpaymentCommittedHistory[periodIndex][ph.id] = overpayment * phDB.premiumCommittedHistory[periodIndex][ph.id];
+          db.overpaymentCommittedHistory[periodIndex][ph.id] = overpayment * db.premiumCommittedHistory[periodIndex][ph.id];
         }
       }
     }
 
     // Step 4: Aggregate claims of participating policyholders during the policy period
+    // To faithfully match user input, we use an awful hack here that messes with the policyholder's decisionmaking
+    const zScore = jStat.normal.sample(0, 1);
+    const predestinedClaimantCount = Math.round((db.mean_ClaimantProportion + (zScore * db.stdev_ClaimantProportion)) * ph_arr.length);
+    const weightMap = {};
     for (const ph of ph_arr) {
-      const ph_cu = phDB.purchasedCoverageHistory[periodIndex][ph.id];
+      weightMap[ph.id] = ph.claimValue[0];
+    }
+    const predestinedClaimants = randomWeightedSampleNoReplacement(weightMap, predestinedClaimantCount);
+    let chosenClaimantsCoverage = 0;
+    for (const ph_id of predestinedClaimants) {
+      chosenClaimantsCoverage += db.purchasedCoverageHistory[periodIndex][parseInt(ph_id, 10)];
+    }
+    const predestinedValueOfAllClaims = (db.mean_Claims2TUL + (zScore * db.stdev_Claims2TUL)) * nextPeriod.totalCoverageUnits;
+    for (const ph of ph_arr) {
+      ph.claimType = ClaimType.LikelihoodAndClaimAmountButPredestination;
+      if (predestinedClaimants.indexOf(ph.id.toString()) < 0) {
+        ph.claimValue[2] = 0;
+      } else {
+        const coverageBought = db.purchasedCoverageHistory[periodIndex][ph.id];
+        ph.claimValue[2] = Math.min((coverageBought / chosenClaimantsCoverage * predestinedValueOfAllClaims) / coverageBought, 1);
+      }
+    }
+    for (const ph of ph_arr) {
+      const ph_cu = db.purchasedCoverageHistory[periodIndex][ph.id];
       if (ph_cu > 0) {
         const claimValue = this.simulateDecision_SubmitClaim(ph) * ph_cu;
-        phDB.claimSubmittedHistory[periodIndex][ph.id] = claimValue;
-        nextPeriod.tol += claimValue;
-        nextPeriod.claimantCount++;
+        db.claimSubmittedHistory[periodIndex][ph.id] = claimValue;
+        if (claimValue > 0) {
+          nextPeriod.tol += claimValue;
+          nextPeriod.claimantCount++;
+        }
       } else {
-        phDB.claimSubmittedHistory[periodIndex][ph.id] = 0;
+        db.claimSubmittedHistory[periodIndex][ph.id] = 0;
       }
     }
 
     // Step 5: Determine loyalists and defectors
     for (const ph of ph_arr) {
-      const ph_cu = phDB.purchasedCoverageHistory[periodIndex][ph.id];
+      const ph_cu = db.purchasedCoverageHistory[periodIndex][ph.id];
       if (ph_cu > 0) {
-        const defectChosen = this.simulateDecision_Defect(ph);
+        const defectChosen = this.simulateDecision_Defect(ph, db);
         if (defectChosen) {
           nextPeriod.numDefectors++;
         } else {
           nextPeriod.loyalistCoverageUnits += ph_cu;
+          nextPeriod.loyalists.push(ph);
         }
-        phDB.defectHistory[periodIndex][ph.id] = defectChosen;
+        db.defectHistory[periodIndex][ph.id] = defectChosen;
       } else {
-        phDB.defectHistory[periodIndex][ph.id] = false;
+        db.defectHistory[periodIndex][ph.id] = false;
       }
     }
 
-    nextPeriod.totalPremiumsAfterDefect = jStat.sum(phDB.premiumCommittedHistory[periodIndex]);
+    nextPeriod.totalPremiumsAfterDefect = jStat.sum(db.premiumCommittedHistory[periodIndex]);
     // Subtract premiums paid by defectors
     for (const ph of ph_arr) {
-      const defectChosen = (phDB.defectHistory[periodIndex][ph.id]);
+      const defectChosen = (db.defectHistory[periodIndex][ph.id]);
       if (defectChosen) {
-        nextPeriod.totalPremiumsAfterDefect -= phDB.premiumCommittedHistory[periodIndex][ph.id];
+        nextPeriod.totalPremiumsAfterDefect -= db.premiumCommittedHistory[periodIndex][ph.id];
       }
     }
     // Add confiscated overpayments from loyalists in a subgroup with at least one defector
     for (const iter_ph_arr of ph_subgroups_arr) {
       let defectCount = 0;
       for (const ph of iter_ph_arr) {
-        if (phDB.defectHistory[periodIndex][ph.id]) {
+        if (db.defectHistory[periodIndex][ph.id]) {
           defectCount++;
         }
-        phDB.overpaymentReturnedHistory[periodIndex][ph.id] = phDB.overpaymentCommittedHistory[periodIndex][ph.id];
+        db.overpaymentReturnedHistory[periodIndex][ph.id] = db.overpaymentCommittedHistory[periodIndex][ph.id];
       }
       if (defectCount > 0) {
         for (const ph of iter_ph_arr) {
-          if (!phDB.defectHistory[periodIndex][ph.id]) {
-            nextPeriod.totalPremiumsAfterDefect += phDB.overpaymentCommittedHistory[periodIndex][ph.id];
-            nextPeriod.confiscatedOverpayments += phDB.overpaymentCommittedHistory[periodIndex][ph.id];
-            phDB.overpaymentReturnedHistory[periodIndex][ph.id] = 0;
+          if (!db.defectHistory[periodIndex][ph.id]) {
+            nextPeriod.totalPremiumsAfterDefect += db.overpaymentCommittedHistory[periodIndex][ph.id];
+            nextPeriod.confiscatedOverpayments += db.overpaymentCommittedHistory[periodIndex][ph.id];
+            db.overpaymentReturnedHistory[periodIndex][ph.id] = 0;
           }
         }
       }
@@ -146,15 +174,16 @@ export class SimulationService {
     for (const iter_ph_arr of ph_subgroups_arr) {
       let defectCount = 0;
       for (const ph of iter_ph_arr) {
-        if (phDB.defectHistory[periodIndex][ph.id]) {
+        if (db.defectHistory[periodIndex][ph.id]) {
           defectCount++;
-          nextPeriod.totalEligibleClaims -= phDB.claimSubmittedHistory[periodIndex][ph.id];
+          nextPeriod.totalEligibleClaims -= db.claimSubmittedHistory[periodIndex][ph.id];
+          nextPeriod.claimantCount--;
         }
       }
       if (defectCount > 1) {
         for (const ph of iter_ph_arr) {
-          if (!phDB.defectHistory[periodIndex][ph.id]) {
-            nextPeriod.totalEligibleClaims -= phDB.claimSubmittedHistory[periodIndex][ph.id];
+          if (!db.defectHistory[periodIndex][ph.id]) {
+            nextPeriod.totalEligibleClaims -= db.claimSubmittedHistory[periodIndex][ph.id];
           }
         }
       }
@@ -165,15 +194,15 @@ export class SimulationService {
     for (const iter_ph_arr of ph_subgroups_arr) {
       let defectCount = 0;
       for (const ph of iter_ph_arr) {
-        if (phDB.defectHistory[periodIndex][ph.id]) {
+        if (db.defectHistory[periodIndex][ph.id]) {
           defectCount++;
         } else {
-          phDB.claimAwardHistory[periodIndex][ph.id] = phDB.claimSubmittedHistory[periodIndex][ph.id] * nextPeriod.claimPaymentRatio;
+          db.claimAwardHistory[periodIndex][ph.id] = db.claimSubmittedHistory[periodIndex][ph.id] * nextPeriod.claimPaymentRatio;
         }
       }
       if (defectCount > 1) {
         for (const ph of iter_ph_arr) {
-          phDB.claimAwardHistory[periodIndex][ph.id] = 0;
+          db.claimAwardHistory[periodIndex][ph.id] = 0;
         }
       }
     }
@@ -187,14 +216,14 @@ export class SimulationService {
       for (const iter_ph_arr of ph_subgroups_arr) {
         let defectCount = 0;
         for (const ph of iter_ph_arr) {
-          if (phDB.defectHistory[periodIndex][ph.id]) {
+          if (db.defectHistory[periodIndex][ph.id]) {
             defectCount++;
           }
         }
         if (defectCount < 2) {
           for (const ph of iter_ph_arr) {
-            if (!phDB.defectHistory[periodIndex][ph.id] && phDB.claimSubmittedHistory[periodIndex][ph.id] === 0) {
-              nextPeriod.totalRebateCoverageUnits += phDB.purchasedCoverageHistory[periodIndex][ph.id];
+            if (!db.defectHistory[periodIndex][ph.id] && db.claimSubmittedHistory[periodIndex][ph.id] === 0) {
+              nextPeriod.totalRebateCoverageUnits += db.purchasedCoverageHistory[periodIndex][ph.id];
             }
           }
         }
@@ -204,23 +233,23 @@ export class SimulationService {
       for (const iter_ph_arr of ph_subgroups_arr) {
         let defectCount = 0;
         for (const ph of iter_ph_arr) {
-          if (phDB.defectHistory[periodIndex][ph.id]) {
+          if (db.defectHistory[periodIndex][ph.id]) {
             defectCount++;
           }
         }
         if (defectCount < 2) {
           for (const ph of iter_ph_arr) {
-            if (!phDB.defectHistory[periodIndex][ph.id] && phDB.claimSubmittedHistory[periodIndex][ph.id] === 0) {
-              phDB.rebateReceivedHistory[periodIndex][ph.id] = phDB.purchasedCoverageHistory[periodIndex][ph.id] * nextPeriod.rebateRatio;
+            if (!db.defectHistory[periodIndex][ph.id] && db.claimSubmittedHistory[periodIndex][ph.id] === 0) {
+              db.rebateReceivedHistory[periodIndex][ph.id] = db.purchasedCoverageHistory[periodIndex][ph.id] * nextPeriod.rebateRatio;
             }
           }
         }
       }
     }
     nextPeriod.effectivePremium = (nextPeriod.totalPremiumPayment - nextPeriod.totalRebates) / nextPeriod.loyalistCoverageUnits;
-    nextPeriod.effectiveCost = (nextPeriod.totalPremiumPayment - nextPeriod.confiscatedOverpayments - nextPeriod.totalRebates) / (ph_arr.length - nextPeriod.numDefectors);
-    nextPeriod.averageClaimPayment = (nextPeriod.totalEligibleClaims / nextPeriod.claimantCount);
-    return nextPeriod;
+    nextPeriod.effectiveCost = (nextPeriod.totalPremiumPayment + nextPeriod.confiscatedOverpayments - nextPeriod.totalRebates) / (ph_arr.length - nextPeriod.numDefectors);
+    nextPeriod.averageClaimPayment = nextPeriod.claimantCount === 0 ? -1 : (nextPeriod.totalEligibleClaims * nextPeriod.claimPaymentRatio / nextPeriod.claimantCount);
+    db.numCompletedPeriods++;
   }
 
   simulateDecision_CoveragePurchase(p: PolicyHolder): number {
@@ -257,22 +286,25 @@ export class SimulationService {
       } else {
         return 0;
       }
+    } else if (p.claimType === ClaimType.LikelihoodAndClaimAmountButPredestination) {
+      return p.claimValue[2];
     } else if (p.claimType === ClaimType.Eval) {
       return eval(p.claimValue);
     }
     return 0;
   }
 
-  simulateDecision_Defect(p: PolicyHolder): boolean {
+  simulateDecision_Defect(p: PolicyHolder, db: SimulationDatabase): boolean {
     if (p.defectType === DefectType.Random) {
       return Math.random() < p.defectValue;
-    } else if (p.defectType === DefectType.Eval) {
-      return eval(p.defectValue);
+    } else if (p.defectType === DefectType.Function) {
+      return p.defectValue(db);
     }
     return false;
   }
 
-  generateSimulationSummary(periods: Period[]) {
+  generateSimulationSummary(db: SimulationDatabase) {
+    const periods = db.periods;
     let numClaims = 0;
     let numUnderpaidClaims = 0;
     for (const period of periods) {
@@ -281,14 +313,14 @@ export class SimulationService {
         numUnderpaidClaims += period.claimantCount;
       }
     }
-    const claimUnderpaidFrequency = numUnderpaidClaims / numClaims;
+    db.claimUnderpaidFrequency = numUnderpaidClaims / numClaims;
     let totalEligibleClaimsSum = 0;
     let claimAwardsSum = 0;
     for (const period of periods) {
       totalEligibleClaimsSum += period.totalEligibleClaims;
       claimAwardsSum += period.claimPaymentRatio * period.totalEligibleClaims;
     }
-    const claimAwardRatio = claimAwardsSum / totalEligibleClaimsSum;
+    db.claimAwardRatio = claimAwardsSum / totalEligibleClaimsSum;
     let totalElligibleUnderpaidClaimsSum = 0;
     let underpaidClaimAwardsSum = 0;
     for (const period of periods) {
@@ -297,17 +329,23 @@ export class SimulationService {
         underpaidClaimAwardsSum += period.claimPaymentRatio * period.totalEligibleClaims;
       }
     }
-    const underpaidClaimAwardRatio = underpaidClaimAwardsSum / totalElligibleUnderpaidClaimsSum;
-    let effectivePremiumAvg = 0;
-    for (const period of periods) {
-      effectivePremiumAvg += period.effectiveCost;
+    if (totalElligibleUnderpaidClaimsSum > 0) {
+      db.underpaidClaimAwardRatio = underpaidClaimAwardsSum / totalElligibleUnderpaidClaimsSum;
+    } else {
+     db.underpaidClaimAwardRatio = -1;
     }
-    effectivePremiumAvg /= periods.length;
-    let effectiveClaimAvg = 0;
+    let effectivePremiumsSum = 0;
     for (const period of periods) {
-      effectiveClaimAvg += period.averageClaimPayment;
+      effectivePremiumsSum += period.effectiveCost;
     }
-    effectiveClaimAvg /= periods.length;
-    return [claimUnderpaidFrequency, claimAwardRatio, underpaidClaimAwardRatio, effectivePremiumAvg, effectiveClaimAvg];
+    db.effectivePremiumAvg = effectivePremiumsSum / periods.length * db.cuValue;
+    let effectiveClaimsSum = 0;
+    let numClaimants = 0;
+    for (const period of periods) {
+      effectiveClaimsSum += period.totalEligibleClaims * period.claimPaymentRatio;
+      numClaimants += period.claimantCount;
+    }
+    db.effectiveClaimAvg = effectiveClaimsSum / numClaimants * db.cuValue;
   }
+
 }

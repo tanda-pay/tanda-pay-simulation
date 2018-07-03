@@ -1,12 +1,16 @@
 import {PolicyHolder} from './policy-holder';
+import {Period} from './period';
 
-export class PolicyHolderDB {
+export class SimulationDatabase {
 
   policyHolders: PolicyHolder[];
   policyHolderSubgroups: PolicyHolder[][];
 
+  cuValue: number;
+  policyPeriodLength: number;
+
+  // The following history data is accessed by arr[periodIndex][Policyholder.Id]
   premiumVoteHistory: number[][];
-  chosenPremiumHistory: number[];
   purchasedCoverageHistory: number[][];
   premiumCommittedHistory: number[][];
   overpaymentCommittedHistory: number[][];
@@ -15,6 +19,20 @@ export class PolicyHolderDB {
   rebateReceivedHistory: number[][];
   overpaymentReturnedHistory: number[][];
   claimAwardHistory: number[][];
+
+  periods: Period[];
+  numCompletedPeriods: number;
+  mean_Claims2TUL: number;
+  stdev_Claims2TUL: number;
+  mean_ClaimantProportion: number;
+  stdev_ClaimantProportion: number;
+
+  claimUnderpaidFrequency: number;
+  claimAwardRatio: number;
+  underpaidClaimAwardRatio: number;
+  effectivePremiumAvg: number;
+  effectiveClaimAvg: number;
+
 
   constructor(policyHolders: PolicyHolder[][]) {
     this.policyHolderSubgroups = policyHolders;
@@ -25,7 +43,6 @@ export class PolicyHolderDB {
       }
     }
     this.premiumVoteHistory = [];
-    this.chosenPremiumHistory = [];
     this.purchasedCoverageHistory = [];
     this.premiumCommittedHistory = [];
     this.overpaymentCommittedHistory = [];
@@ -34,5 +51,9 @@ export class PolicyHolderDB {
     this.rebateReceivedHistory = [];
     this.overpaymentReturnedHistory = [];
     this.claimAwardHistory = [];
+    this.periods = [];
+    this.numCompletedPeriods = 0;
+
+    this.policyPeriodLength = 30;
   }
 }

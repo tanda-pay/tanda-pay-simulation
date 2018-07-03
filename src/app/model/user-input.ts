@@ -6,9 +6,10 @@ export class UserInput {
   cuValue: number;
   desiredPremiumMean: number;
   desiredPremiumStdev: number;
-  ratio_Claims2TUL: number;
-  mean_claimLikelihood: number;
-  stdev_claimLikelihood: number;
+  mean_Claims2TUL: number;
+  stdev_Claims2TUL: number;
+  mean_claimProportion: number;
+  stdev_claimProportion: number;
 
   numDefectors: number;
   numCu: number;
@@ -28,16 +29,17 @@ export class UserInput {
     this.cuValue = 100;
     this.desiredPremiumMean = 5;
     this.desiredPremiumStdev = 1;
-    this.ratio_Claims2TUL = .02;
-    this.mean_claimLikelihood = .06;
-    this.stdev_claimLikelihood = .01;
+    this.mean_Claims2TUL = .02;
+    this.stdev_Claims2TUL = .01;
+    this.mean_claimProportion = .06;
+    this.stdev_claimProportion = .01;
 
     this.numDefectors = Math.round(this.numPH * this.percentageToDefect);
     this.numCu = this.tul / this.cuValue;
     this.totalPremiums = this.numPH * this.desiredPremiumMean;
     this.overpaymentIncrease = 1 / (this.avgGroupSize - 1);
-    this.tol = this.tul * this.ratio_Claims2TUL;
-    this.totalClaimCount = this.numPH * this.mean_claimLikelihood;
+    this.tol = this.tul * this.mean_Claims2TUL;
+    this.totalClaimCount = this.numPH * this.mean_claimProportion;
     this.averageClaimValue = this.cuValue * this.tol / this.totalClaimCount;
 
   }

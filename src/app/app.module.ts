@@ -1,24 +1,25 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
+import {FlexLayoutModule} from '@angular/flex-layout';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MaterialAppModule} from './ngmaterial.module';
 
 import {AppComponent} from './app.component';
 import {ExampleDialogComponent} from './component/dialog/example-dialog.component';
-import {PolicyHolderGenerationService} from './service/policy-holder-generation.service';
+import {SimulationSetupService} from './service/simulation-setup-service';
 import {SimulationService} from './service/simulation.service';
 import {UtilService} from './service/util.service';
 import {InputComponent} from './component/input/input.component';
 import {ContentComponent} from './component/content/content.component';
-import {GraphComponent} from './component/graph/graph.component';
+import {SimulationViewerComponent} from './component/simulation-viewer/simulation.viewer.component';
 import {DatePipe} from './pipe/date/date.pipe';
 
 @NgModule({
   declarations: [
     AppComponent,
     ExampleDialogComponent,
-    GraphComponent,
+    SimulationViewerComponent,
     InputComponent,
     ContentComponent,
     DatePipe,
@@ -31,10 +32,11 @@ import {DatePipe} from './pipe/date/date.pipe';
     FormsModule,
     ReactiveFormsModule,
     BrowserAnimationsModule,
-    MaterialAppModule
+    MaterialAppModule,
+    FlexLayoutModule
   ],
   providers: [
-    PolicyHolderGenerationService,
+    SimulationSetupService,
     SimulationService,
     UtilService
   ],
