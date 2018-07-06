@@ -26,8 +26,6 @@ export class SimulationSetupService {
     const desiredPremiumStdev = userInput.desiredPremiumStdev / cuValue;
 
     const probabilityToDefect = userInput.percentageToDefect;
-    const mean_Claims2TUL = userInput.mean_Claims2TUL;
-    const stdev_Claims2TUL = userInput.stdev_Claims2TUL;
     const probabilityOpenClaimMean = userInput.mean_claimProportion;
     const probabilityOpenClaimStdev = userInput.stdev_claimProportion;
 

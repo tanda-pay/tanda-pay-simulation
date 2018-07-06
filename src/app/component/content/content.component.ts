@@ -2,8 +2,9 @@ import {Component, Input} from '@angular/core';
 import {SimulationService} from '../../service/simulation.service';
 import {Period} from '../../model/period';
 import {SimulationDatabase} from '../../model/simulation-database';
-import {SimulationSetupService} from '../../service/simulation-setup-service';
+import {SimulationSetupService} from '../../service/simulation.setup.service';
 import {UserInput} from '../../model/user-input';
+import {UnitySimulationService} from '../../service/unity.simulation.service';
 
 @Component({
   selector: 'app-content',

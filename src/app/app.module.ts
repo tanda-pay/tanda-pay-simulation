@@ -7,7 +7,7 @@ import {MaterialAppModule} from './ngmaterial.module';
 
 import {AppComponent} from './app.component';
 import {ExampleDialogComponent} from './component/dialog/example-dialog.component';
-import {SimulationSetupService} from './service/simulation-setup-service';
+import {SimulationSetupService} from './service/simulation.setup.service';
 import {SimulationService} from './service/simulation.service';
 import {UtilService} from './service/util.service';
 import {InputComponent} from './component/input/input.component';

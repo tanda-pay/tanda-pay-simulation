@@ -12,20 +12,5 @@ import {SimulationDatabase} from '../../model/simulation-database';
 })
 export class SimulationViewerComponent {
   @Input() simulations: SimulationDatabase[];
-  tabs = ['First', 'Second', 'Third'];
-  selected = new FormControl(0);
   tabSelections = [];
-  arrHideSimulations = [];
-
-  addTab(selectAfterAdding: boolean) {
-    this.tabs.push('New');
-
-    if (selectAfterAdding) {
-      this.selected.setValue(this.tabs.length - 1);
-    }
-  }
-
-  removeTab(index: number) {
-    this.tabs.splice(index, 1);
-  }
 }

@@ -46,8 +46,9 @@ export class SimulationService {
       arrPremiums[ph.id] = premiumVote;
     }
     arrPremiums.sort(function (a, b) { return a - b; });
+    arrPremiums = arrPremiums.slice(arrPremiums.length - ph_arr.length); // Make sure to not include defectors
     arrPremiums = arrPremiums.slice(Math.floor(arrPremiums.length * .1), Math.floor(arrPremiums.length * .9));
-    const premiumMean = jStat.mean(arrPremiums);  // TODO: Fix bug where non-participants mess up calculations of average
+    const premiumMean = jStat.mean(arrPremiums);
     const premiumMedian = jStat.median(arrPremiums);
     const arrPremiumAverages = [premiumMean, premiumMedian, (premiumMean + premiumMedian) * .55];
     let chosenPremium = arrPremiumAverages[Math.floor(Math.random() * 3)];
@@ -113,7 +114,7 @@ export class SimulationService {
     for (const ph of ph_arr) {
       const ph_cu = db.purchasedCoverageHistory[periodIndex][ph.id];
       if (ph_cu > 0) {
-        const claimValue = this.simulateDecision_SubmitClaim(ph) * ph_cu;
+        const claimValue = this.simulateDecision_ClaimValue(ph) * ph_cu;
         db.claimSubmittedHistory[periodIndex][ph.id] = claimValue;
         if (claimValue > 0) {
           nextPeriod.tol += claimValue;
@@ -248,7 +249,7 @@ export class SimulationService {
     }
     nextPeriod.effectivePremium = (nextPeriod.totalPremiumPayment - nextPeriod.totalRebates) / nextPeriod.loyalistCoverageUnits;
     nextPeriod.effectiveCost = (nextPeriod.totalPremiumPayment + nextPeriod.confiscatedOverpayments - nextPeriod.totalRebates) / (ph_arr.length - nextPeriod.numDefectors);
-    nextPeriod.averageClaimPayment = nextPeriod.claimantCount === 0 ? -1 : (nextPeriod.totalEligibleClaims * nextPeriod.claimPaymentRatio / nextPeriod.claimantCount);
+    nextPeriod.averageClaimPayment = nextPeriod.claimantCount === 0 ? 0 : (nextPeriod.totalEligibleClaims * nextPeriod.claimPaymentRatio / nextPeriod.claimantCount);
     db.numCompletedPeriods++;
   }
 
@@ -279,7 +280,7 @@ export class SimulationService {
     return true;
   }
 
-  simulateDecision_SubmitClaim(p: PolicyHolder): number {
+  simulateDecision_ClaimValue(p: PolicyHolder): number {
     if (p.claimType === ClaimType.LikelihoodAndClaimAmount) {
       if (Math.random() < p.claimValue[0]) {
         return p.claimValue[1];

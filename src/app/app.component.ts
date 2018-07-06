@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {SimulationSetupService} from './service/simulation-setup-service';
+import {SimulationSetupService} from './service/simulation.setup.service';
 import {SimulationService} from './service/simulation.service';
 import {UserInput} from './model/user-input';
 import {SimulationDatabase} from './model/simulation-database';
