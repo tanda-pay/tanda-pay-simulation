@@ -1,5 +1,5 @@
 export class UserInput {
-  numPH: number;
+  numPh: number;
   percentageToDefect: number;
   avgGroupSize: number;
   tul: number;
@@ -19,10 +19,13 @@ export class UserInput {
   totalClaimCount: number;
   averageClaimValue: number;
 
+  numPolicyPeriods: number;
+  policyPeriodLength: number;
+
 
   constructor() {
     // set default inputs for user
-    this.numPH = 100;
+    this.numPh = 100;
     this.percentageToDefect = .03;
     this.avgGroupSize = 7;
     this.tul = 10000;
@@ -34,12 +37,15 @@ export class UserInput {
     this.mean_claimProportion = .06;
     this.stdev_claimProportion = .01;
 
-    this.numDefectors = Math.round(this.numPH * this.percentageToDefect);
+    this.numPolicyPeriods = 50;
+    this.policyPeriodLength = 45;
+
+    this.numDefectors = Math.round(this.numPh * this.percentageToDefect);
     this.numCu = this.tul / this.cuValue;
-    this.totalPremiums = this.numPH * this.desiredPremiumMean;
+    this.totalPremiums = this.numPh * this.desiredPremiumMean;
     this.overpaymentIncrease = 1 / (this.avgGroupSize - 1);
     this.tol = this.tul * this.mean_Claims2TUL;
-    this.totalClaimCount = this.numPH * this.mean_claimProportion;
+    this.totalClaimCount = this.numPh * this.mean_claimProportion;
     this.averageClaimValue = this.cuValue * this.tol / this.totalClaimCount;
 
   }

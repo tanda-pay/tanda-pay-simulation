@@ -3,6 +3,7 @@ import {CoverageType} from './enum/CoverageType';
 import {DefectType} from './enum/DefectType';
 import {ParticipationType} from './enum/ParticipationType';
 import {PremiumVoteType} from './enum/PremiumVoteType';
+import {DamageType} from './enum/DamageType';
 
 export class PolicyHolder {
   static numPolicyHolder = 0;
@@ -14,6 +15,9 @@ export class PolicyHolder {
 
   defectType: DefectType;
   defectValue: any;
+
+  damageType: DamageType;
+  damageValue: any;
 
   claimType: ClaimType;
   claimValue: any;

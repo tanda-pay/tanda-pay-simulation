@@ -1,14 +1,14 @@
 <!--<div>
         <mat-form-field> <input matInput
           placeholder="# of policyholders"
-          [(ngModel)]="userInput.numPH" (input)="userInputChanged.emit(true)" type="number"> </mat-form-field>
+          [(ngModel)]="userInput.numPh" (input)="userInputChanged.emit(true)" type="number"> </mat-form-field>
       </div>-->
 <mat-form-field>
-  <input matInput placeholder="Number of policy periods" [(ngModel)]="iterations">
+  <input matInput placeholder="Number of policy periods" [(ngModel)]="userInput.numPolicyPeriods">
 </mat-form-field>
 <br>
 <mat-form-field>
-  <input matInput placeholder="Length of a policy period" [(ngModel)]="policyPeriodLength">
+  <input matInput placeholder="Length of a policy period (days)" [(ngModel)]="userInput.policyPeriodLength">
 </mat-form-field>
 <br>
 <button (click)="runSimulation()">New Simulation</button>
@@ -34,7 +34,7 @@
   <!--</mat-horizontal-stepper>-->
 <!--</div>-->
 
-<app-simulation-viewer [simulations]="simulations"></app-simulation-viewer>
+<app-simulation-viewer [simulations]="simulations" [unitySimulations]="unitySimulations"></app-simulation-viewer>
 
 <!--<div *ngIf="summary !== undefined">-->
   <!--<div>Claims were underpaid {{summary[0] | percent:'1.0-3'}} of the time</div>-->

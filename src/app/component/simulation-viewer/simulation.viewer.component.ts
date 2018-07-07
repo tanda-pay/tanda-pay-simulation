@@ -1,6 +1,7 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {FormControl} from '@angular/forms';
-import {SimulationDatabase} from '../../model/simulation-database';
+import {TandapayState} from '../../model/tandapay-state';
+import {UnityState} from '../../model/unity-state';
 
 /**
  * @title Tag group with dynamically changing tabs
@@ -11,6 +12,7 @@ import {SimulationDatabase} from '../../model/simulation-database';
   styleUrls: ['simulation-viewer-component.css'],
 })
 export class SimulationViewerComponent {
-  @Input() simulations: SimulationDatabase[];
+  @Input() simulations: TandapayState[];
+  @Input() unitySimulations: UnityState[];
   tabSelections = [];
 }

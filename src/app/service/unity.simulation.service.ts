@@ -1,80 +1,83 @@
 import {Injectable} from '@angular/core';
-import {Timeline} from '../model/timeline';
 import {PolicyHolder} from '../model/policy-holder';
 
-import {ClaimType} from '../model/enum/ClaimType';
-import {CoverageType} from '../model/enum/CoverageType';
 import {ParticipationType} from '../model/enum/ParticipationType';
 import {UnityState} from '../model/unity-state';
+import {DamageType} from '../model/enum/DamageType';
+import {PremiumVoteType} from '../model/enum/PremiumVoteType';
 
 declare var jStat: any;
-declare var randomWeightedSampleNoReplacement: any;
 
 @Injectable()
 export class UnitySimulationService {
 
-  policyHolders: PolicyHolder[];
-  timeline: Timeline;
+  policyholders: PolicyHolder[];
   state: UnityState;
-
-  // currentDay = 0;
-  // currentPeriod = 0;
-
-  purchasedCoverageHistory: number[][] = [];
-  paidPremiumsHistory: number[][] = [];
-  claimableDamageHistory: number[][] = [];
-  CATokenRedemptionHistory: number[][] = [];
-  ethPayoutHistory: number[][] = [];
 
   constructor() {
   }
 
-  generateSimulation() {
-    for (let i = 0; i < this.timeline.dayCount; i++) {
+  generateSimulation(periodCount: number) {
+    for (let i = 0; i < periodCount * this.state.policyPeriodLength; i++) {
       this.simulateNewDay();
     }
   }
 
   simulateNewDay() {
-    // If the day marks a new policy period, policyholders buy coverage again.
-    if (this.state.currentDay % this.state.daysPerPeriod === 0) {
-      this.purchasedCoverageHistory.push([]);
-      this.paidPremiumsHistory.push([]);
+    // If the day marks a new policy period, policyholders buy coverage.
+    if (this.state.currentDay % this.state.policyPeriodLength === 0) {
 
-      this.state.arrDamagesPerPH = [];
-      this.state.arrCoveragePerPH = [];
+      let arrPremiums = [];
 
-      // Step 1: Policyholders purchase policies with a certain amount of coverage
-      for (const ph of this.policyHolders) {
+      for (const ph of this.policyholders) {
+        const premiumVote = this.simulateDecision_PremiumVote(ph);
+        arrPremiums[ph.id] = premiumVote;
+      }
+      arrPremiums.sort(function (a, b) { return a - b; });
+      arrPremiums = arrPremiums.slice(arrPremiums.length - this.policyholders.length); // Make sure to not include defectors
+      arrPremiums = arrPremiums.slice(Math.floor(arrPremiums.length * .1), Math.floor(arrPremiums.length * .9));
+      const premiumMean = jStat.mean(arrPremiums);
+      const premiumMedian = jStat.median(arrPremiums);
+      const arrPremiumAverages = [premiumMean, premiumMedian, (premiumMean + premiumMedian) * .55];
+      const chosenPremium = arrPremiumAverages[Math.floor(Math.random() * 3)];
+
+      this.state.purchasedCoverageHistory.push([]);
+      this.state.paidPremiumsHistory.push([]);
+
+      this.state.accumulatedDamagesPerPH = Array(this.policyholders.length).fill(0);
+      this.state.arrCoveragePerPH = Array(this.policyholders.length).fill(0);
+
+      for (const ph of this.policyholders) {
         if (this.simulateDecision_Participation(ph)) {
-          const num_cu = this.simulateDecision_CoveragePurchase(ph);
-          this.purchasedCoverageHistory[this.state.currentPeriod][ph.id] = num_cu;
-          this.paidPremiumsHistory[this.state.currentPeriod][ph.id] = num_cu * this.state.premium;
+          const num_cu = ph.coverageValue;
+          this.state.purchasedCoverageHistory[this.state.currentPeriod][ph.id] = num_cu;
+          this.state.paidPremiumsHistory[this.state.currentPeriod][ph.id] = num_cu * chosenPremium;
+          this.state.premiumsEscrow += num_cu * chosenPremium;
           this.issuePolicy(ph, num_cu);
         } else {
-          this.purchasedCoverageHistory[this.state.currentPeriod][ph.id] = 0;
-          this.paidPremiumsHistory[this.state.currentPeriod][ph.id] = 0;
+          this.state.purchasedCoverageHistory[this.state.currentPeriod][ph.id] = 0;
+          this.state.paidPremiumsHistory[this.state.currentPeriod][ph.id] = 0;
         }
       }
-      this.state.currentPeriod++;
     }
-    this.claimableDamageHistory.push([]);
-    this.CATokenRedemptionHistory.push([]);
-    this.ethPayoutHistory.push([]);
+
+    this.state.claimableDamageHistory.push([]);
+    this.state.CATokenRedemptionHistory.push([]);
+    this.state.ethPayoutHistory.push([]);
 
     // Step 1: Policyholders have accidents/claim-worthy events
-    for (const ph of this.policyHolders) {
-      const damages = this.simulateDecision_ClaimValue(ph);
-      this.claimableDamageHistory[this.state.currentDay][ph.id] = damages;
-      this.state.arrDamagesPerPH[ph.id] += damages;
+    for (const ph of this.policyholders) {
+      const damages = this.simulateDecision_DamageValue(ph);
+      this.state.claimableDamageHistory[this.state.currentDay][ph.id] = damages;
+      this.state.accumulatedDamagesPerPH[ph.id] += damages;
     }
 
     // Step 2: Policyholders can submit their claim for the month, nullifying the rest of their coverage
     // Step 3: Give Claim-Award Tokens to policyholders who submitted a claim, and update their daily CA redemption limit
-    for (const ph of this.policyHolders) {
+    for (const ph of this.policyholders) {
       const willSubmitClaim = this.simulateDecision_SubmitClaim(ph);
       if (willSubmitClaim) {
-        const damages = Math.min(this.state.arrDamagesPerPH[ph.id], this.state.arrCoveragePerPH[ph.id]);
+        const damages = Math.min(this.state.accumulatedDamagesPerPH[ph.id], this.state.arrCoveragePerPH[ph.id]);
         this.state.arrCoveragePerPH[ph.id] = 0;
         this.state.arrCATokensPerPH[ph.id] += damages;
         this.state.numCA_MPC -= damages;
@@ -87,19 +90,31 @@ export class UnitySimulationService {
 
     // Step 5: Policyholders' claim award tokens are simultaneously converted into ETH through the BXC
     let totalCATokenRedemption = 0;
-    for (const ph of this.policyHolders) {
+    for (const ph of this.policyholders) {
       const numCA = Math.min(this.simulateDecision_RedeemCA(ph), this.state.arrCATokensPerPH[ph.id]);
-      this.CATokenRedemptionHistory[this.state.currentDay][ph.id] = numCA;
+      this.state.CATokenRedemptionHistory[this.state.currentDay][ph.id] = numCA;
+      this.state.arrCATokensPerPH[ph.id] -= numCA;
       totalCATokenRedemption += numCA;
     }
     const totalEth = this.state.bxc.getEth(totalCATokenRedemption);
-    for (const ph of this.policyHolders) {
-      this.ethPayoutHistory[this.state.currentDay][ph.id] = totalEth * this.CATokenRedemptionHistory[this.state.currentDay][ph.id] / totalCATokenRedemption;
+    console.log(totalEth);
+    for (const ph of this.policyholders) {
+      if (totalCATokenRedemption > 0) {
+        this.state.ethPayoutHistory[this.state.currentDay][ph.id] = totalEth * this.state.CATokenRedemptionHistory[this.state.currentDay][ph.id] / totalCATokenRedemption;
+      } else {
+        this.state.ethPayoutHistory[this.state.currentDay][ph.id] = 0;
+      }
     }
 
     // Step 6: BXC gets ETH replenished from the premium escrow
     this.restoreBXC(this.state.bxc);
 
+    // If the day marks the end policy period, update records
+    if ((this.state.currentDay + 1) % this.state.policyPeriodLength === 0) {
+      this.state.currentPeriod++;
+      this.state.catastrophicPremiumsEscrow += this.state.premiumsEscrow;
+      this.state.premiumsEscrow = 0;
+    }
     this.state.currentDay++;
   }
 
@@ -138,7 +153,17 @@ export class UnitySimulationService {
     const a = this.state.numCA_MPC + jStat.sum(this.state.arrCATokensPerPH);
     const b = this.state.bxc.tokenAmount + this.state.numCA_CAT;
     const c = a; // const c = this.state.numCA_TUL + this.state.numCA_TOL;
-    return a === b && b === c;
+    console.log(a + " " + b);
+    return Math.abs(a - b) < .01;
+  }
+
+  simulateDecision_PremiumVote(ph: PolicyHolder): number {
+    if (ph.premiumVoteType === PremiumVoteType.Constant) {
+      return ph.premiumVoteValue;
+    } else if (ph.premiumVoteType === PremiumVoteType.Eval) {
+      return eval(ph.premiumVoteValue);
+    }
+    return 0;
   }
 
   simulateDecision_Participation(p: PolicyHolder): boolean {
@@ -150,32 +175,17 @@ export class UnitySimulationService {
     return true;
   }
 
-  simulateDecision_CoveragePurchase(p: PolicyHolder): number {
-    if (p.coverageType === CoverageType.Constant) {
-      return p.coverageValue;
-    } else if (p.coverageType === CoverageType.Eval) {
-      return eval(p.coverageValue);
-    }
-    return 0;
-  }
-
-  simulateDecision_ClaimValue(p: PolicyHolder): number {
-    if (p.claimType === ClaimType.LikelihoodAndClaimAmount) {
-      if (Math.random() < p.claimValue[0]) {
-        return p.claimValue[1];
-      } else {
-        return 0;
-      }
-    } else if (p.claimType === ClaimType.LikelihoodAndClaimAmountButPredestination) {
-      return p.claimValue[2];
-    } else if (p.claimType === ClaimType.Eval) {
-      return eval(p.claimValue);
+  simulateDecision_DamageValue(ph: PolicyHolder): number {
+    if (ph.damageType === DamageType.PredeterminedDamagesPerDay) {
+      return ph.damageValue[this.state.currentDay];
+    } else if (ph.damageType === DamageType.Eval) {
+      return eval(ph.damageValue);
     }
     return 0;
   }
 
   simulateDecision_SubmitClaim(p: PolicyHolder): boolean {
-    if (this.state.arrDamagesPerPH[p.id] > 0) {
+    if (this.state.accumulatedDamagesPerPH[p.id] > 0 && this.state.arrCoveragePerPH[p.id] > 0) {
       return true;
     }
     return false;
@@ -185,6 +195,28 @@ export class UnitySimulationService {
     return Math.min(this.state.arrCATokensPerPH[p.id], this.state.arrRedemptionWindows[p.id]);
   }
 
+  generateSimulationSummary() {
+    this.state.totalEthPaidIn = 0;
+    for (const day of this.state.paidPremiumsHistory) {
+      this.state.totalEthPaidIn += jStat.sum(day);
+    }
+
+    this.state.totalDamagesReported = 0;
+    for (const day of this.state.claimableDamageHistory) {
+      this.state.totalDamagesReported += jStat.sum(day);
+    }
+
+    this.state.totalCARedeemed = 0;
+    for (const day of this.state.CATokenRedemptionHistory) {
+      this.state.totalCARedeemed += jStat.sum(day);
+    }
+
+    this.state.totalEthPaidOut = 0;
+    for (const day of this.state.ethPayoutHistory) {
+      this.state.totalEthPaidOut += jStat.sum(day);
+    }
+  }
+
 }
 
 export class BancorContract {
@@ -192,15 +224,19 @@ export class BancorContract {
   tokenAmount: number;
   weight: number;
 
-  constructor(ethAmount: number, tokenAmount: number) {
+  constructor(ethAmount: number, tokenAmount: number, weight: number) {
     this.ethAmount = ethAmount;
     this.tokenAmount = tokenAmount;
+    this.weight = weight;
+    console.log(this);
   }
 
   getEth(tokensIn: number) {
-    const etherOut = this.ethAmount * Math.pow((1 - (1 - tokensIn / this.tokenAmount)), (1 / this.weight));
-    this.tokenAmount += tokensIn;
+    console.log(tokensIn);
+    const etherOut = this.ethAmount * (1 - Math.pow((1 - (tokensIn / this.tokenAmount)), (1 / this.weight)));
+    this.tokenAmount -= tokensIn;
     this.ethAmount -= etherOut;
+    console.log(etherOut);
     return etherOut;
   }
 

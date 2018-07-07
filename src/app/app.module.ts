@@ -14,6 +14,7 @@ import {InputComponent} from './component/input/input.component';
 import {ContentComponent} from './component/content/content.component';
 import {SimulationViewerComponent} from './component/simulation-viewer/simulation.viewer.component';
 import {DatePipe} from './pipe/date/date.pipe';
+import {UnitySimulationService} from './service/unity.simulation.service';
 
 @NgModule({
   declarations: [
@@ -38,6 +39,7 @@ import {DatePipe} from './pipe/date/date.pipe';
   providers: [
     SimulationSetupService,
     SimulationService,
+    UnitySimulationService,
     UtilService
   ],
   bootstrap: [AppComponent]
