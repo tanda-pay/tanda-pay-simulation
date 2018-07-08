@@ -12,7 +12,7 @@ import {TandapayState} from '../model/tandapay-state';
 declare var jStat: any;
 
 @Injectable()
-export class SimulationService {
+export class TandapaySimulationService {
 
   policyholders: PolicyHolder[];
   state: TandapayState;

@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {SimulationService} from '../../service/simulation.service';
+import {TandapaySimulationService} from '../../service/tandapay.simulation.service';
 import {SimulationSetupService} from '../../service/simulation.setup.service';
 import {UserInput} from '../../model/user-input';
 import {BancorContract, UnitySimulationService} from '../../service/unity.simulation.service';
@@ -19,7 +19,7 @@ export class ContentComponent {
 
   constructor(
     private simulationSetupService: SimulationSetupService,
-    private simulationService: SimulationService,
+    private simulationService: TandapaySimulationService,
     private unitySimulationService: UnitySimulationService
   ) {
     this.simulations = [];

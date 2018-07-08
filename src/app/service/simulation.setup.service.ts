@@ -17,32 +17,6 @@ export class SimulationSetupService {
   constructor() {
   }
 
-  // userInputToDB(userInput: UserInput): SimulationDatabase {
-  //   const numPh = userInput.numPh;
-  //   const avgGroupSize = userInput.avgGroupSize;
-  //   const cuValue = userInput.cuValue;
-  //   const tul = userInput.tul / cuValue;
-  //   const desiredPremiumMean = userInput.desiredPremiumMean / cuValue;
-  //   const desiredPremiumStdev = userInput.desiredPremiumStdev / cuValue;
-  //
-  //   const probabilityToDefect = userInput.percentageToDefect;
-  //   const probabilityOpenClaimMean = userInput.mean_claimProportion;
-  //   const probabilityOpenClaimStdev = userInput.stdev_claimProportion;
-  //
-  //   const db = this.initializeDB(numPh, avgGroupSize);
-  //   db.cuValue = userInput.cuValue;
-  //   this.setParticipation(db);
-  //   this.setPremiumVote(db, desiredPremiumMean, desiredPremiumStdev);
-  //   this.setCoverageUnitsBought(db, tul);
-  //   this.setClaim(db, probabilityOpenClaimMean, probabilityOpenClaimStdev, tul, cuValue, userInput.mean_Claims2TUL);
-  //   this.setDefect(db, probabilityToDefect);
-  //   db.mean_Claims2TUL = userInput.mean_Claims2TUL;
-  //   db.stdev_Claims2TUL = userInput.stdev_Claims2TUL;
-  //   db.mean_ClaimantProportion = userInput.mean_claimProportion;
-  //   db.stdev_ClaimantProportion = userInput.stdev_claimProportion;
-  //   return db;
-  // }
-
   userInputToPolicyholders(input: UserInput): PolicyHolder[] {
     const arrPh = [];
 
@@ -68,30 +42,7 @@ export class SimulationSetupService {
 
     return arrPh;
   }
-  //
-  // initializeDB(numPH, AvgGroupSize): SimulationDatabase {
-  //   PolicyHolder.reset();
-  //   const numGroups = (AvgGroupSize < 8 ? Math.floor(numPH / AvgGroupSize) : Math.ceil(numPH / AvgGroupSize));
-  //   const subgroups = [];
-  //   for (let i = 0; i < numGroups; i++) {
-  //     subgroups.push([]);
-  //   }
-  //   for (let i = 0; i < numPH; i++) {
-  //     const ph = new PolicyHolder();
-  //     if (i < numGroups * 4) {
-  //       subgroups[i % subgroups.length].push(ph);
-  //     } else {
-  //       let randomGroup = Math.floor(Math.random() * subgroups.length);
-  //       while (subgroups[randomGroup].length > 10) {
-  //         randomGroup = (randomGroup + 1) % numGroups;
-  //       }
-  //       subgroups[randomGroup].push(ph);
-  //     }
-  //   }
-  //   return new SimulationDatabase(subgroups);
-  // }
 
-  // setDefect(db: SimulationDatabase, defectRate): void {
   setDefect(arrPh: PolicyHolder[], defectRate: number): void {
     const count = arrPh.length;
     let numDefectors = Math.floor(count * defectRate);
@@ -224,50 +175,4 @@ export class SimulationSetupService {
     }
     return subgroups;
   }
-
-  // generateDamagesPerDay(arrPh: PolicyHolder[],
-  //                       dayCount: number,
-  //                       periodCount: number,
-  //                       mean_ClaimantProportion: number, stdev_ClaimantProportion: number,
-  //                       mean_Claims2Coverage: number, stdev_Claims2Coverage: number) {
-  //
-  //   let totalCoverageUnits = 0;
-  //   for (const ph of arrPh) {
-  //     totalCoverageUnits += ph.coverageValue;
-  //   }
-  //
-  //   const arrDamagesPerDayPerPH = [];
-  //
-  //   for (let i = 0; i < periodCount; i++) {
-  //     const zScore = jStat.normal.sample(0, 1);
-  //     const claimantCount = Math.round((mean_ClaimantProportion + (zScore * stdev_ClaimantProportion)) * arrPh.length);
-  //     const weightMap = {};
-  //     for (const ph of arrPh) {
-  //       weightMap[ph.id] = ph.claimValue[0];
-  //     }
-  //     const claimantIds = randomWeightedSampleNoReplacement(weightMap, claimantCount);
-  //     const claimants = [];
-  //     for (const id of claimantIds) {
-  //       claimants.push(arrPh[parseInt(id, 10)]);
-  //     }
-  //     let chosenClaimantsCoverage = 0;
-  //     for (const ph of claimants) {
-  //       chosenClaimantsCoverage += ph.coverageValue;
-  //     }
-  //     const valueOfAllClaims = (mean_Claims2Coverage + (zScore * stdev_Claims2Coverage)) * totalCoverageUnits;
-  //
-  //     for (let j = 0; j < dayCount; j++) {
-  //       arrDamagesPerDayPerPH.push([]);
-  //       for (const ph of arrPh) {
-  //         arrDamagesPerDayPerPH[i * dayCount + j][ph.id] = 0;
-  //       }
-  //     }
-  //     for (const ph of claimants) {
-  //       const randomDay = Math.floor(Math.random() * dayCount);
-  //       arrDamagesPerDayPerPH[i * dayCount + randomDay][ph.id] = ph.coverageValue / chosenClaimantsCoverage * valueOfAllClaims;
-  //     }
-  //
-  //   }
-  //   return arrDamagesPerDayPerPH;
-  // }
 }

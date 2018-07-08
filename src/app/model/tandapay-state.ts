@@ -1,4 +1,4 @@
-import {Period} from '../service/simulation.service';
+import {Period} from '../service/tandapay.simulation.service';
 
 export class TandapayState {
   policyPeriodLength: number;

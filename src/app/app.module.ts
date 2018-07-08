@@ -6,27 +6,19 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MaterialAppModule} from './ngmaterial.module';
 
 import {AppComponent} from './app.component';
-import {ExampleDialogComponent} from './component/dialog/example-dialog.component';
 import {SimulationSetupService} from './service/simulation.setup.service';
-import {SimulationService} from './service/simulation.service';
-import {UtilService} from './service/util.service';
+import {TandapaySimulationService} from './service/tandapay.simulation.service';
 import {InputComponent} from './component/input/input.component';
 import {ContentComponent} from './component/content/content.component';
 import {SimulationViewerComponent} from './component/simulation-viewer/simulation.viewer.component';
-import {DatePipe} from './pipe/date/date.pipe';
 import {UnitySimulationService} from './service/unity.simulation.service';
 
 @NgModule({
   declarations: [
     AppComponent,
-    ExampleDialogComponent,
     SimulationViewerComponent,
     InputComponent,
     ContentComponent,
-    DatePipe,
-  ],
-  entryComponents: [
-    ExampleDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -38,9 +30,8 @@ import {UnitySimulationService} from './service/unity.simulation.service';
   ],
   providers: [
     SimulationSetupService,
-    SimulationService,
-    UnitySimulationService,
-    UtilService
+    TandapaySimulationService,
+    UnitySimulationService
   ],
   bootstrap: [AppComponent]
 })

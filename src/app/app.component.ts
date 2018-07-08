@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {SimulationSetupService} from './service/simulation.setup.service';
-import {SimulationService} from './service/simulation.service';
+import {TandapaySimulationService} from './service/tandapay.simulation.service';
 import {UserInput} from './model/user-input';
 import {UnitySimulationService} from './service/unity.simulation.service';
 
@@ -14,7 +14,7 @@ export class AppComponent implements OnInit {
   userInput: UserInput;
 
   constructor(private simulationSetupService: SimulationSetupService,
-              private simulationService: SimulationService,
+              private simulationService: TandapaySimulationService,
               private unitySimulationService: UnitySimulationService) {
   }
 

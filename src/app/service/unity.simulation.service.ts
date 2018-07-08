@@ -97,7 +97,6 @@ export class UnitySimulationService {
       totalCATokenRedemption += numCA;
     }
     const totalEth = this.state.bxc.getEth(totalCATokenRedemption);
-    console.log(totalEth);
     for (const ph of this.policyholders) {
       if (totalCATokenRedemption > 0) {
         this.state.ethPayoutHistory[this.state.currentDay][ph.id] = totalEth * this.state.CATokenRedemptionHistory[this.state.currentDay][ph.id] / totalCATokenRedemption;
@@ -153,7 +152,6 @@ export class UnitySimulationService {
     const a = this.state.numCA_MPC + jStat.sum(this.state.arrCATokensPerPH);
     const b = this.state.bxc.tokenAmount + this.state.numCA_CAT;
     const c = a; // const c = this.state.numCA_TUL + this.state.numCA_TOL;
-    console.log(a + " " + b);
     return Math.abs(a - b) < .01;
   }
 
@@ -228,15 +226,12 @@ export class BancorContract {
     this.ethAmount = ethAmount;
     this.tokenAmount = tokenAmount;
     this.weight = weight;
-    console.log(this);
   }
 
   getEth(tokensIn: number) {
-    console.log(tokensIn);
     const etherOut = this.ethAmount * (1 - Math.pow((1 - (tokensIn / this.tokenAmount)), (1 / this.weight)));
     this.tokenAmount -= tokensIn;
     this.ethAmount -= etherOut;
-    console.log(etherOut);
     return etherOut;
   }
 
