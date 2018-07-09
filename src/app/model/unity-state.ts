@@ -2,7 +2,6 @@ import {BancorContract} from '../service/unity.simulation.service';
 
 export class UnityState {
   policyPeriodLength: number;
-  premium: number;
   redemptionWindowTiers: number[] = [];
 
   coverageUnitValue: number;
@@ -15,19 +14,15 @@ export class UnityState {
   arrCATokensPerPH: number[] = [];
   arrRedemptionWindows: number[] = [];
 
-  numCA_MPC: number = 400;
+  numCA_MPC: number;
 
   bxcStartingEth: number;
-  bxcStartingCA: number;
   bxcTargetWeight: number;
   bxc: BancorContract;
-  numCA_CAT: number = 0;
+  numCA_CAT;
 
-  numCA_TUL: number;
-  numCA_TOL: number;
-
-  premiumsEscrow: number = 0;
-  catastrophicPremiumsEscrow: number = 0;
+  premiumsEscrow: number;
+  catastrophicReserveEth: number;
 
   purchasedCoverageHistory: number[][] = [];
   paidPremiumsHistory: number[][] = [];
@@ -47,5 +42,9 @@ export class UnityState {
     this.policyPeriodLength = policyPeriodLength;
     this.coverageUnitValue = coverageUnitValue;
     this.redemptionWindowTiers = redemptionWindowTiers;
+
+    this.premiumsEscrow = 0;
+    this.catastrophicReserveEth = 0;
+    this.numCA_CAT = 0;
   }
 }

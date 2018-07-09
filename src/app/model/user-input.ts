@@ -22,6 +22,9 @@ export class UserInput {
   numPolicyPeriods: number;
   policyPeriodLength: number;
 
+  unityBxcInitialEth: number;
+  unityBxcInitialWeight: number;
+
 
   constructor() {
     // set default inputs for user
@@ -48,5 +51,7 @@ export class UserInput {
     this.totalClaimCount = this.numPh * this.mean_claimProportion;
     this.averageClaimValue = this.cuValue * this.tol / this.totalClaimCount;
 
+    this.unityBxcInitialEth = 200;
+    this.unityBxcInitialWeight = .5;
   }
 }

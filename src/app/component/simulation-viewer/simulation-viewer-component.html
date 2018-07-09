@@ -70,9 +70,10 @@
         <li>Total damages claimed by policyholders was {{sim.totalDamagesReported * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}}</li>
         <li>Total money awarded through BXC to policyholders was {{sim.totalEthPaidOut * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}} in ETH</li>
 
-        <li>The catastrophic event fund was left with {{sim.catastrophicPremiumsEscrow * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}} in ETH</li>
+        <li>The catastrophic event fund was left with {{sim.catastrophicReserveEth * sim.coverageUnitValue |
+          currency:'USD':'symbol':'1.2'}} in ETH</li>
         <li>The BXC was started with {{sim.bxcStartingEth * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}} in ETH</li>
-        <li>The BXC was left with {{sim.bxc.ethAmount * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}} in ETH</li>
+        <li>The BXC was left with {{sim.bxc.ETH * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}} in ETH</li>
 
 
       </div>

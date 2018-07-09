@@ -40,10 +40,11 @@ export class ContentComponent {
     this.unitySimulationService.state = new UnityState(this.userInput.policyPeriodLength, this.userInput.cuValue, [10, 20, 30]);
     this.unitySimulationService.state.arrCATokensPerPH =  Array(policyholders.length).fill(0);
     this.unitySimulationService.state.arrRedemptionWindows = Array(policyholders.length).fill(0);
-    this.unitySimulationService.state.bxcStartingEth = 200;
-    this.unitySimulationService.state.bxcStartingCA = 400;
-    this.unitySimulationService.state.bxcTargetWeight = .5;
-    this.unitySimulationService.state.bxc = new BancorContract(200, 400, .5);
+    const e = this.unitySimulationService.state.bxcStartingEth = this.userInput.unityBxcInitialEth;
+    const w = this.unitySimulationService.state.bxcTargetWeight = this.userInput.unityBxcInitialWeight;
+    this.unitySimulationService.state.bxc = new BancorContract(e, e / w, w);
+    this.unitySimulationService.state.numCA_MPC = e / w;
+
 
     // this.simulationService.timeline.arrDamagesPerDayPerPH = this.simulationSetupService.generateDamagesPerDay(currentDB.policyholders, this.policyPeriodLength, this.iterations, currentDB.mean_ClaimantProportion, currentDB.stdev_ClaimantProportion, currentDB.mean_Claims2TUL, currentDB.stdev_Claims2TUL)
 

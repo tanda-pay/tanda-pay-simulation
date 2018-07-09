@@ -105,13 +105,15 @@ export class UnitySimulationService {
       }
     }
 
-    // Step 6: BXC gets ETH replenished from the premium escrow
-    this.restoreBXC(this.state.bxc);
+    // Step 6: BXC gets ETH replenished from the premium escrow, and CA replenished from the CAT
+    this.state.bxc.CA += totalCATokenRedemption;
+    this.state.numCA_CAT -= totalCATokenRedemption;
+    this.restoreBXC(this.state.bxc, 1, false);
 
     // If the day marks the end policy period, update records
     if ((this.state.currentDay + 1) % this.state.policyPeriodLength === 0) {
       this.state.currentPeriod++;
-      this.state.catastrophicPremiumsEscrow += this.state.premiumsEscrow;
+      this.state.catastrophicReserveEth += this.state.premiumsEscrow;
       this.state.premiumsEscrow = 0;
     }
     this.state.currentDay++;
@@ -121,36 +123,38 @@ export class UnitySimulationService {
     this.state.arrCoveragePerPH[ph.id] = numCoverageUnits;
     this.state.numCA_MPC += numCoverageUnits;
     this.state.numCA_CAT += numCoverageUnits;
-    this.state.numCA_TUL += numCoverageUnits;
     console.assert(this.checkTripleBookkeeping(), 'Triple-entry bookkeeping failed after issuePolicy()');
   }
 
-  restoreBXC(bxc: BancorContract) {
-    let targetEth = 1 / (1 - Math.pow((1 - 1 / bxc.tokenAmount), (1 / bxc.weight)));
-    if (targetEth > this.state.premiumsEscrow + bxc.ethAmount) {
-      targetEth = this.state.premiumsEscrow + bxc.ethAmount;
-      const targetWeight = Math.log(1 - (1 / bxc.tokenAmount)) / Math.log(1 - (1 / targetEth));
-      bxc.weight = targetWeight;
+  restoreBXC(bxc: BancorContract, targetRatio: number, changeWeight: boolean) {
+    let targetEth = targetRatio / (1 - Math.pow((1 - 1 / bxc.CA), (1 / bxc.weight)));
+    if (targetEth > this.state.premiumsEscrow + bxc.ETH) {
+      targetEth = this.state.premiumsEscrow + bxc.ETH;
+      if (changeWeight) {
+        const targetWeight = Math.log(1 - (1 / bxc.CA)) / Math.log(1 - (1 / targetEth));
+        bxc.weight = targetWeight;
+      }
     }
-    const requiredEth = targetEth - bxc.ethAmount;
+    const requiredEth = targetEth - bxc.ETH;
     this.state.premiumsEscrow -= requiredEth;
     bxc.addEth(requiredEth);
     console.assert(this.checkTripleBookkeeping(), 'Triple-entry bookkeeping failed after restoreBXC()');
   }
 
   checkCatastrophe(bxc: BancorContract) {
-    const requiredCA = jStat.sum(this.state.arrCATokensPerPH) - bxc.tokenAmount;
+    const requiredCA = jStat.sum(this.state.arrCATokensPerPH) - bxc.CA;
+    const currentPrice = bxc.ETH * (1 - Math.pow((1 - 1 / bxc.CA), (1 / bxc.weight)));
     if (requiredCA > 0) {
       this.state.numCA_CAT -= requiredCA;
-      bxc.tokenAmount += requiredCA;
-      this.restoreBXC(bxc);
+      bxc.CA += requiredCA;
+      this.restoreBXC(bxc, currentPrice, true);
     }
     console.assert(this.checkTripleBookkeeping(), 'Triple-entry bookkeeping failed after checkCatastrophe()');
   }
 
   checkTripleBookkeeping(): boolean {
     const a = this.state.numCA_MPC + jStat.sum(this.state.arrCATokensPerPH);
-    const b = this.state.bxc.tokenAmount + this.state.numCA_CAT;
+    const b = this.state.bxc.CA + this.state.numCA_CAT;
     const c = a; // const c = this.state.numCA_TUL + this.state.numCA_TOL;
     return Math.abs(a - b) < .01;
   }
@@ -218,25 +222,25 @@ export class UnitySimulationService {
 }
 
 export class BancorContract {
-  ethAmount: number;
-  tokenAmount: number;
+  ETH: number;
+  CA: number;
   weight: number;
 
   constructor(ethAmount: number, tokenAmount: number, weight: number) {
-    this.ethAmount = ethAmount;
-    this.tokenAmount = tokenAmount;
+    this.ETH = ethAmount;
+    this.CA = tokenAmount;
     this.weight = weight;
   }
 
   getEth(tokensIn: number) {
-    const etherOut = this.ethAmount * (1 - Math.pow((1 - (tokensIn / this.tokenAmount)), (1 / this.weight)));
-    this.tokenAmount -= tokensIn;
-    this.ethAmount -= etherOut;
+    const etherOut = this.ETH * (1 - Math.pow((1 - (tokensIn / this.CA)), (1 / this.weight)));
+    this.CA -= tokensIn;
+    this.ETH -= etherOut;
     return etherOut;
   }
 
   addEth(ethIn: number) {
-    this.ethAmount += ethIn;
+    this.ETH += ethIn;
   }
 }
 
