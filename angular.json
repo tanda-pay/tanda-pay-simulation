@@ -24,7 +24,9 @@
               "src/styles.css"
             ],
             "scripts": [
-              "src/assets/weighted-random-select.js"
+              "src/assets/jstat.js",
+              "src/assets/weighted-random-select.js",
+              "src/assets/seeded-random.js"
             ]
           },
           "configurations": {
