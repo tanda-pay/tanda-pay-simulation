@@ -32,24 +32,24 @@
         <mat-tab *ngFor="let period of sim.periods; let period_index = index" [label]="period_index+1">
           <ng-template mat-tab-label><b><p *ngIf="period.claimPaymentRatio >= 1; else redBlock" style="color:green">{{period_index+1}}</p></b></ng-template>
           <ng-template #redBlock><p style="color:red">{{period_index+1}}</p></ng-template>
-          <!--<mat-expansion-panel>-->
-            <!--<mat-expansion-panel-header>Debug Data</mat-expansion-panel-header>-->
-            <!--<div>chosenPremium: {{period.chosenPremium}}</div>-->
-            <!--<div>tul: {{period.totalCoverageUnits}}</div>-->
-            <!--<div>tol: {{period.tol}}</div>-->
-            <!--<div>totalPremiumPayment: {{period.totalPremiumPayment}}</div>-->
-            <!--<div>totalOverpayments: {{period.totalOverpayments}}</div>-->
-            <!--<div>totalConfiscatedOverpayments: {{period.confiscatedOverpayments}}</div>-->
-            <!--<div>totalEligibleClaims: {{period.totalEligibleClaims}}</div>-->
-            <!--<div>Claimant Count: {{period.claimantCount}}</div>-->
-            <!--<div>Defector Count: {{period.numDefectors}}</div>-->
-            <!--<div>totalPremiumsAfterDefect: {{period.totalPremiumsAfterDefect}}</div>-->
-            <!--<div>Total Rebates: {{period.totalRebates}}</div>-->
-            <!--<div>Claim Payment Ratio: {{period.claimPaymentRatio}}</div>-->
-            <!--<div>EffectivePremium: {{period.effectivePremium}}</div>-->
-            <!--<div>EffectiveCost: {{period.effectiveCost}}</div>-->
-            <!--<div>EffectiveClaimPayment: {{period.averageClaimPayment}}</div>-->
-          <!--</mat-expansion-panel>-->
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>Debug Data</mat-expansion-panel-header>
+            <div>chosenPremium: {{period.chosenPremium}}</div>
+            <div>tul: {{period.totalCoverageUnits}}</div>
+            <div>tol: {{period.tol}}</div>
+            <div>totalPremiumPayment: {{period.totalPremiumPayment}}</div>
+            <div>totalOverpayments: {{period.totalOverpayments}}</div>
+            <div>totalConfiscatedOverpayments: {{period.confiscatedOverpayments}}</div>
+            <div>totalEligibleClaims: {{period.totalEligibleClaims}}</div>
+            <div>Claimant Count: {{period.claimantCount}}</div>
+            <div>Defector Count: {{period.numDefectors}}</div>
+            <div>totalPremiumsAfterDefect: {{period.totalPremiumsAfterDefect}}</div>
+            <div>Total Rebates: {{period.totalRebates}}</div>
+            <div>Claim Payment Ratio: {{period.claimPaymentRatio}}</div>
+            <div>EffectivePremium: {{period.effectivePremium}}</div>
+            <div>EffectiveCost: {{period.effectiveCost}}</div>
+            <div>EffectiveClaimPayment: {{period.averageClaimPayment}}</div>
+          </mat-expansion-panel>
           <li *ngIf="period.totalPremiumsAfterDefect > period.totalEligibleClaims; else shortageLine">Premiums <b style="color:green">({{period.totalPremiumsAfterDefect * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}})</b> - Claims <b style="color:red">({{period.totalEligibleClaims * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}})</b> had a surplus of <b style="color:green">({{(period.totalPremiumsAfterDefect - period.totalEligibleClaims) * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}})</b></li>
           <ng-template #shortageLine><li>Premiums <b style="color:green">({{period.totalPremiumsAfterDefect * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}})</b> - Claims <b style="color:red">({{period.totalEligibleClaims * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}})</b> was short by <b style="color:red">({{(period.totalEligibleClaims - period.totalPremiumsAfterDefect) * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}})</b></li></ng-template>
           <li>Claims were paid <b>{{period.claimPaymentRatio | percent:'1.0-3'}}</b> of their value</li>
@@ -65,7 +65,7 @@
   <mat-expansion-panel *ngFor="let sim of unitySimulations; let sim_index = index">
     <mat-expansion-panel-header>Unity Simulation {{sim_index+1}}</mat-expansion-panel-header>
     <div fxLayout="row" fxLayoutAlign="space-between end">
-      <div fxFlex="100">
+      <div fxFlex="50">
         <li>Total premiums paid by policyholders was {{sim.totalEthPaidIn * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}} in ETH</li>
         <li>Total damages claimed by policyholders was {{sim.totalDamagesReported * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}}</li>
         <li>Total money awarded through BXC to policyholders was {{sim.totalEthPaidOut * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}} in ETH</li>
@@ -77,6 +77,17 @@
 
 
       </div>
+      <mat-tab-group [selectedIndex]="unityDayTabSelections[sim_index]"
+                     (selectedIndexChange)="unityDayTabSelections[sim_index] = ($event)"
+                     fxFlex="40">
+        <mat-tab *ngFor="let _ of sim.purchasedCoverageHistory; let day_index = index " [label]="day_index+1">
+          <ng-template mat-tab-label><b><p *ngIf="sim.damagesPerDay[day_index * sim.policyPeriodLength] === 0; else redBlock" style="color:green">{{(day_index * sim.policyPeriodLength + 1)}}</p></b></ng-template>
+          <ng-template #redBlock><p style="color:red">{{(day_index * sim.policyPeriodLength + 1)}}</p></ng-template>
+          <li>Damages incurred this day: {{sim.damagesPerDay[day_index * sim.policyPeriodLength] * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}}</li>
+          <li>CA redeemed this day: {{sim.CARedemptionPerDay[day_index * sim.policyPeriodLength] | number:'1.0-4'}}</li>
+          <li>Eth exchanged this day: {{sim.ethPayoutPerDay[day_index * sim.policyPeriodLength] * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}}</li>
+        </mat-tab>
+      </mat-tab-group>
       <!--<mat-tab-group [selectedIndex]="tabSelections[sim_index]"-->
                      <!--(selectedIndexChange)="tabSelections[sim_index] = ($event)"-->
                      <!--fxFlex="60">-->

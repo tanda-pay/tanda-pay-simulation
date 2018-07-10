@@ -11,6 +11,14 @@ export class UserInput {
   mean_claimProportion: number;
   stdev_claimProportion: number;
 
+  majorCatastropheLikelihood: number;
+  majorCatastropheMeanDamage: number;
+  majorCatastropheStdevDamage: number;
+  minorCatastropheLikelihood: number;
+  minorCatastropheMeanDamage: number;
+  minorCatastropheStdevDamage: number;
+  catastropheEV: number;
+
   numDefectors: number;
   numCu: number;
   totalPremiums: number;
@@ -40,6 +48,15 @@ export class UserInput {
     this.mean_claimProportion = .06;
     this.stdev_claimProportion = .01;
 
+    this.majorCatastropheLikelihood = .001;
+    this.majorCatastropheMeanDamage = .5;
+    this.majorCatastropheStdevDamage = .1;
+
+    this.minorCatastropheLikelihood = .005;
+    this.minorCatastropheMeanDamage = .1;
+    this.minorCatastropheStdevDamage = .01;
+
+
     this.numPolicyPeriods = 50;
     this.policyPeriodLength = 45;
 
@@ -49,9 +66,13 @@ export class UserInput {
     this.overpaymentIncrease = 1 / (this.avgGroupSize - 1);
     this.tol = this.tul * this.mean_Claims2TUL;
     this.totalClaimCount = this.numPh * this.mean_claimProportion;
-    this.averageClaimValue = this.cuValue * this.tol / this.totalClaimCount;
+    this.averageClaimValue = this.tol / this.totalClaimCount;
+
+    this.catastropheEV = this.policyPeriodLength * (this.majorCatastropheLikelihood * this.majorCatastropheMeanDamage + this.minorCatastropheLikelihood * this.minorCatastropheMeanDamage) * this.tul;
 
     this.unityBxcInitialEth = 200;
     this.unityBxcInitialWeight = .5;
+
+
   }
 }

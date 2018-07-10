@@ -30,6 +30,11 @@ export class UnityState {
   CATokenRedemptionHistory: number[][] = [];
   ethPayoutHistory: number[][] = [];
 
+  // Data for presentation purposes only
+  noteworthyDays: number[] = [];
+  damagesPerDay: number[] = [];
+  CARedemptionPerDay: number[] = [];
+  ethPayoutPerDay: number[] = [];
   totalDamagesReported: number;
   totalEthPaidOut: number;
   totalCARedeemed: number;

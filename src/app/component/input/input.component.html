@@ -117,8 +117,6 @@
                    [ngModel]="userInput.mean_Claims2TUL*100" (ngModelChange)="userInput.mean_Claims2TUL=$event*.01" (input)="updateProjections()" type="number">
             <span matSuffix>% &nbsp;</span>
           </mat-form-field>
-        </div>
-        <div>
           <mat-form-field>
             <input matInput placeholder="Sigma % of underwritten value that will be paid out in claims"
                    [ngModel]="userInput.stdev_Claims2TUL*100" (ngModelChange)="userInput.stdev_Claims2TUL=$event*.01" (input)="updateProjections()" type="number">
@@ -126,6 +124,7 @@
           </mat-form-field>
         </div>
       </div>
+
       <div>
         Percentage of policyholders that open claims every period,<br>approximated by
         samples from a bell curve:
@@ -137,8 +136,6 @@
                  [ngModel]="userInput.mean_claimProportion*100" (ngModelChange)="userInput.mean_claimProportion=$event*.01" (input)="updateProjections()" type="number">
           <span matSuffix>% &nbsp;</span>
         </mat-form-field>
-      </div>
-      <div>
         <mat-form-field>
           <input matInput placeholder="Sigma value of bell curve"
                  [ngModel]="userInput.stdev_claimProportion*100" (ngModelChange)="userInput.stdev_claimProportion=$event*.01" (input)="updateProjections()" type="number">
@@ -151,18 +148,70 @@
       <div id="tolgraph" style="width:100%; height:200px;"></div>
       <div>
         <mat-form-field>
-          <input matInput placeholder="Total value of outstanding claims" [ngModel]="userInput.tol | currency:'USD':'symbol':'1.2'" disabled>
+          <input matInput placeholder="Total value of outstanding claims per period" [ngModel]="userInput.tol | currency:'USD':'symbol':'1.2'" disabled>
         </mat-form-field>
       </div>
       <div id="claimantcountgraph" style="width:100%; height:200px;"></div>
       <div>
         <mat-form-field>
-          <input matInput placeholder="Total number of claims" [ngModel]="userInput.totalClaimCount | number:'1.0-0'" disabled>
+          <input matInput placeholder="Total number of claims per period" [ngModel]="userInput.totalClaimCount | number:'1.0-0'" disabled>
         </mat-form-field>
       </div>
       <div>
         <mat-form-field>
           <input matInput placeholder="Average claim value" [ngModel]="userInput.averageClaimValue | currency:'USD':'symbol':'1.2'" disabled>
+        </mat-form-field>
+      </div>
+    </div>
+  </div>
+
+  <div class='parent'>
+    <div class='input-value-block'>
+      <div>
+        Additional damages caused by catastrophic events
+      </div>
+      <br>
+      <div>
+        <mat-form-field>
+          <input matInput placeholder="Daily likelihood of a major catastrophe"
+                 [ngModel]="userInput.majorCatastropheLikelihood*100" (ngModelChange)="userInput.majorCatastropheLikelihood=$event*.01" (input)="updateProjections()" type="number">
+          <span matSuffix>% &nbsp;</span>
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Mean value of the bell curve"
+                 [ngModel]="userInput.majorCatastropheMeanDamage*100" (ngModelChange)="userInput.majorCatastropheMeanDamage=$event*.01" (input)="updateProjections()" type="number">
+          <span matSuffix>% &nbsp;</span>
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Sigma value of bell curve"
+                 [ngModel]="userInput.majorCatastropheStdevDamage*100" (ngModelChange)="userInput.majorCatastropheStdevDamage=$event*.01" (input)="updateProjections()" type="number">
+          <span matSuffix>% &nbsp;</span>
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Daily likelihood of a minor catastrophe"
+                 [ngModel]="userInput.minorCatastropheLikelihood*100" (ngModelChange)="userInput.minorCatastropheLikelihood=$event*.01" (input)="updateProjections()" type="number">
+          <span matSuffix>% &nbsp;</span>
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Mean value of the bell curve"
+                 [ngModel]="userInput.minorCatastropheMeanDamage*100" (ngModelChange)="userInput.minorCatastropheMeanDamage=$event*.01" (input)="updateProjections()" type="number">
+          <span matSuffix>% &nbsp;</span>
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Sigma value of bell curve"
+                 [ngModel]="userInput.minorCatastropheStdevDamage*100" (ngModelChange)="userInput.minorCatastropheStdevDamage=$event*.01" (input)="updateProjections()" type="number">
+          <span matSuffix>% &nbsp;</span>
+        </mat-form-field>
+      </div>
+    </div>
+    <div class='separator-block'></div>
+    <div class='derived-value-block'>
+      <div>
+        <mat-form-field>
+          <input matInput placeholder="Expected value of claims caused by catastrophe each period" [ngModel]="userInput.catastropheEV | currency:'USD':'symbol':'1.2'" disabled>
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Expected value of all claims" [ngModel]="(userInput.catastropheEV + userInput.tol) | currency:'USD':'symbol':'1.2'" disabled>
         </mat-form-field>
       </div>
     </div>

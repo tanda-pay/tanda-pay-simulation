@@ -15,4 +15,5 @@ export class SimulationViewerComponent {
   @Input() simulations: TandapayState[];
   @Input() unitySimulations: UnityState[];
   tabSelections = [];
+  unityDayTabSelections = [];
 }

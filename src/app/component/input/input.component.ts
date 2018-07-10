@@ -18,10 +18,13 @@ export class InputComponent {
     this.userInput.overpaymentIncrease = 1 / (this.userInput.avgGroupSize - 1);
     this.userInput.tol = this.userInput.tul * this.userInput.mean_Claims2TUL;
     this.userInput.totalClaimCount = this.userInput.numPh * this.userInput.mean_claimProportion;
-    this.userInput.averageClaimValue = this.userInput.cuValue * this.userInput.tol / this.userInput.totalClaimCount;
+    this.userInput.averageClaimValue = this.userInput.tol / this.userInput.totalClaimCount;
     if (this.userInput.mean_Claims2TUL > this.userInput.mean_claimProportion) {
       this.userInput.mean_claimProportion = this.userInput.mean_Claims2TUL;
     }
+    this.userInput.catastropheEV = this.userInput.majorCatastropheMeanDamage * this.userInput.majorCatastropheLikelihood * this.userInput.policyPeriodLength;
+    this.userInput.catastropheEV += this.userInput.minorCatastropheMeanDamage * this.userInput.minorCatastropheLikelihood * this.userInput.policyPeriodLength;
+    this.userInput.catastropheEV *= this.userInput.policyPeriodLength * this.userInput.cuValue;
     let graphMean = this.userInput.desiredPremiumMean;
     let graphStdev = this.userInput.desiredPremiumStdev;
     let premiumAxisMax = this.userInput.cuValue / 4;

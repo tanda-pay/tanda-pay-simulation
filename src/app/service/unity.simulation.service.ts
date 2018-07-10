@@ -81,33 +81,45 @@ export class UnitySimulationService {
         this.state.arrCoveragePerPH[ph.id] = 0;
         this.state.arrCATokensPerPH[ph.id] += damages;
         this.state.numCA_MPC -= damages;
-        this.state.arrRedemptionWindows[ph.id] = damages / this.state.redemptionWindowTiers[0];
+        this.state.arrRedemptionWindows[ph.id] = this.state.arrCATokensPerPH[ph.id] / this.state.redemptionWindowTiers[0];
       }
     }
 
     // Step 4: Check for "Catastrophic Event" condition, where there is not enough CA in the BXC to match all CA in policyholders' hands
+    // TODO: Implement a condition to end catastrophic events
     this.checkCatastrophe(this.state.bxc);
 
-    // Step 5: Policyholders' claim award tokens are simultaneously converted into ETH through the BXC
+    // Step 5: Policyholders can choose the amount of CA tokens they redeem, up to a maximum amount dictated by the claim window
     let totalCATokenRedemption = 0;
+    let redemptionLimitMultiplier = 1;
+    if (this.state.premiumsEscrow === 0) {
+      redemptionLimitMultiplier = this.state.redemptionWindowTiers[0] / this.state.redemptionWindowTiers[2];
+    } else if (this.state.premiumsEscrow < jStat.sum(this.state.arrCATokensPerPH)) {
+      redemptionLimitMultiplier = this.state.redemptionWindowTiers[0] / this.state.redemptionWindowTiers[1];
+    }
     for (const ph of this.policyholders) {
-      const numCA = Math.min(this.simulateDecision_RedeemCA(ph), this.state.arrCATokensPerPH[ph.id]);
+      const numCA = Math.min(this.simulateDecision_RedeemCA(ph), this.state.arrCATokensPerPH[ph.id] * redemptionLimitMultiplier);
       this.state.CATokenRedemptionHistory[this.state.currentDay][ph.id] = numCA;
       this.state.arrCATokensPerPH[ph.id] -= numCA;
       totalCATokenRedemption += numCA;
     }
-    const totalEth = this.state.bxc.getEth(totalCATokenRedemption);
+
+    // Step 6: Policyholders' redeemed claim award tokens are simultaneously converted into ETH through the BXC
+    const redeemedEth = this.state.bxc.solveEtherOut_fromTokensIn(totalCATokenRedemption);
+    this.state.bxc.ETH -= redeemedEth;
+    this.state.bxc.CA -= totalCATokenRedemption;
     for (const ph of this.policyholders) {
       if (totalCATokenRedemption > 0) {
-        this.state.ethPayoutHistory[this.state.currentDay][ph.id] = totalEth * this.state.CATokenRedemptionHistory[this.state.currentDay][ph.id] / totalCATokenRedemption;
+        this.state.ethPayoutHistory[this.state.currentDay][ph.id] = redeemedEth * this.state.CATokenRedemptionHistory[this.state.currentDay][ph.id] / totalCATokenRedemption;
       } else {
         this.state.ethPayoutHistory[this.state.currentDay][ph.id] = 0;
       }
     }
 
-    // Step 6: BXC gets ETH replenished from the premium escrow, and CA replenished from the CAT
+    // Step 7: BXC gets ETH replenished from the premium escrow, and CA replenished from the CAT
     this.state.bxc.CA += totalCATokenRedemption;
     this.state.numCA_CAT -= totalCATokenRedemption;
+    console.assert(this.checkDoubleEntryBookkeeping(), 'Double-entry bookkeeping failed after redeeming CA');
     this.restoreBXC(this.state.bxc, 1, false);
 
     // If the day marks the end policy period, update records
@@ -123,7 +135,7 @@ export class UnitySimulationService {
     this.state.arrCoveragePerPH[ph.id] = numCoverageUnits;
     this.state.numCA_MPC += numCoverageUnits;
     this.state.numCA_CAT += numCoverageUnits;
-    console.assert(this.checkTripleBookkeeping(), 'Triple-entry bookkeeping failed after issuePolicy()');
+    console.assert(this.checkDoubleEntryBookkeeping(), 'Double-entry bookkeeping failed after issuePolicy()');
   }
 
   restoreBXC(bxc: BancorContract, targetRatio: number, changeWeight: boolean) {
@@ -138,7 +150,7 @@ export class UnitySimulationService {
     const requiredEth = targetEth - bxc.ETH;
     this.state.premiumsEscrow -= requiredEth;
     bxc.addEth(requiredEth);
-    console.assert(this.checkTripleBookkeeping(), 'Triple-entry bookkeeping failed after restoreBXC()');
+    console.assert(this.checkDoubleEntryBookkeeping(), 'Double-entry bookkeeping failed after restoreBXC()');
   }
 
   checkCatastrophe(bxc: BancorContract) {
@@ -149,10 +161,10 @@ export class UnitySimulationService {
       bxc.CA += requiredCA;
       this.restoreBXC(bxc, currentPrice, true);
     }
-    console.assert(this.checkTripleBookkeeping(), 'Triple-entry bookkeeping failed after checkCatastrophe()');
+    console.assert(this.checkDoubleEntryBookkeeping(), 'Double-entry bookkeeping failed after checkCatastrophe()');
   }
 
-  checkTripleBookkeeping(): boolean {
+  checkDoubleEntryBookkeeping(): boolean {
     const a = this.state.numCA_MPC + jStat.sum(this.state.arrCATokensPerPH);
     const b = this.state.bxc.CA + this.state.numCA_CAT;
     const c = a; // const c = this.state.numCA_TUL + this.state.numCA_TOL;
@@ -194,7 +206,7 @@ export class UnitySimulationService {
   }
 
   simulateDecision_RedeemCA(p: PolicyHolder): number {
-    return Math.min(this.state.arrCATokensPerPH[p.id], this.state.arrRedemptionWindows[p.id]);
+    return p.redemptionValue(this);
   }
 
   generateSimulationSummary() {
@@ -217,6 +229,19 @@ export class UnitySimulationService {
     for (const day of this.state.ethPayoutHistory) {
       this.state.totalEthPaidOut += jStat.sum(day);
     }
+
+    this.state.damagesPerDay = [];
+    for (let _ of this.state.claimableDamageHistory) {
+      this.state.damagesPerDay.push(jStat.sum(_));
+    }
+    this.state.CARedemptionPerDay = [];
+    for (let _ of this.state.CATokenRedemptionHistory) {
+      this.state.CARedemptionPerDay.push(jStat.sum(_));
+    }
+    this.state.ethPayoutPerDay = [];
+    for (let _ of this.state.ethPayoutHistory) {
+      this.state.ethPayoutPerDay.push(jStat.sum(_));
+    }
   }
 
 }
@@ -226,17 +251,26 @@ export class BancorContract {
   CA: number;
   weight: number;
 
+  // EtherOut = EtherSupply * (1 - (1 - (TokensIn / TokenSupply)) ^ (1 / Weight))
+
   constructor(ethAmount: number, tokenAmount: number, weight: number) {
     this.ETH = ethAmount;
     this.CA = tokenAmount;
     this.weight = weight;
   }
 
-  getEth(tokensIn: number) {
+  solveEtherOut_fromTokensIn(tokensIn: number) {
     const etherOut = this.ETH * (1 - Math.pow((1 - (tokensIn / this.CA)), (1 / this.weight)));
-    this.CA -= tokensIn;
-    this.ETH -= etherOut;
     return etherOut;
+  }
+
+  solveEtherSupply_fromExchangeRatio(exchangeRatio: number) {
+    const etherSupply = exchangeRatio / (1 - Math.pow((1 - 1 / this.CA), (1 / this.weight)));
+    return etherSupply;
+  }
+
+  solveWeight_fromExchangeRatio(exchangeRatio: number) {
+    const weight = Math.log(1 - (1 / this.CA)) / Math.log(1 - (exchangeRatio / this.ETH));
   }
 
   addEth(ethIn: number) {

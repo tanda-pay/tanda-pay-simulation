@@ -7,6 +7,8 @@ import {DamageType} from '../model/enum/DamageType';
 import {DefectType} from '../model/enum/DefectType';
 import {ParticipationType} from '../model/enum/ParticipationType';
 import {PremiumVoteType} from '../model/enum/PremiumVoteType';
+import {RedemptionType} from '../model/enum/RedemptionType';
+import {UnitySimulationService} from './unity.simulation.service';
 
 declare var jStat: any;
 declare var randomWeightedSampleNoReplacement: any;
@@ -31,13 +33,18 @@ export class SimulationSetupService {
     const desiredPremiumMean = input.desiredPremiumMean / cuValue;
     const desiredPremiumStdev = input.desiredPremiumStdev / cuValue;
 
+    const majorCatastrophe = new Catastrophe(input.majorCatastropheLikelihood, input.majorCatastropheMeanDamage, input.majorCatastropheStdevDamage);
+    const minorCatastrophe = new Catastrophe(input.minorCatastropheLikelihood, input.minorCatastropheMeanDamage, input.minorCatastropheStdevDamage);
+
     this.setParticipation(arrPh);
     this.setPremiumVote(arrPh, desiredPremiumMean, desiredPremiumStdev);
     this.setCoverageUnitsBought(arrPh, tul);
     this.setDamages(arrPh,
       input.numPolicyPeriods, input.policyPeriodLength,
       input.mean_Claims2TUL, input.stdev_Claims2TUL,
-      input.mean_claimProportion, input.stdev_claimProportion);
+      input.mean_claimProportion, input.stdev_claimProportion,
+      majorCatastrophe, minorCatastrophe);
+    this.setRedemption(arrPh);
     this.setDefect(arrPh, input.percentageToDefect);
 
     return arrPh;
@@ -84,7 +91,10 @@ export class SimulationSetupService {
              periodCount: number,
              dayCount: number,
              mean_Claims2Coverage: number, stdev_Claims2Coverage: number,
-             mean_ClaimantProportion: number, stdev_ClaimantProportion: number) {
+             mean_ClaimantProportion: number, stdev_ClaimantProportion: number,
+             majorCatastrophe: Catastrophe,
+             minorCatastrophe: Catastrophe
+             ) {
 
     let totalCoverageUnits = 0;
     for (const ph of arrPh) {
@@ -111,15 +121,29 @@ export class SimulationSetupService {
       }
       const valueOfAllClaims = (mean_Claims2Coverage + (zScore * stdev_Claims2Coverage)) * totalCoverageUnits;
 
+
       for (let j = 0; j < dayCount; j++) {
         for (const ph of arrPh) {
           ph.damageValue[i * dayCount + j] = 0;
         }
+        if (Math.random() < majorCatastrophe.dailyLikelihood) {
+          const catastropheDamage = jStat.normal.sample(majorCatastrophe.meanDamage, majorCatastrophe.stdevDamage) * totalCoverageUnits;
+          for (const ph of arrPh) {
+            ph.damageValue[i * dayCount + j] += ph.coverageValue / totalCoverageUnits * catastropheDamage;
+          }
+        } else if (Math.random() < minorCatastrophe.dailyLikelihood) {
+          const catastropheDamage = jStat.normal.sample(minorCatastrophe.meanDamage, minorCatastrophe.stdevDamage) * totalCoverageUnits;
+          for (const ph of arrPh) {
+            ph.damageValue[i * dayCount + j] += ph.coverageValue / totalCoverageUnits * catastropheDamage;
+          }
+        }
       }
+
       for (const ph of claimants) {
         const randomDay = Math.floor(Math.random() * dayCount);
-        ph.damageValue[i * dayCount + randomDay] = ph.coverageValue / chosenClaimantsCoverage * valueOfAllClaims;
+        ph.damageValue[i * dayCount + randomDay] += ph.coverageValue / chosenClaimantsCoverage * valueOfAllClaims;
       }
+
     }
   }
 
@@ -134,6 +158,33 @@ export class SimulationSetupService {
     for (const ph of arrPh) {
       ph.premiumVoteType = PremiumVoteType.Constant;
       ph.premiumVoteValue = jStat.normal.sample(coverageUnitCostMean, CoverageUnitCostStdev);
+    }
+  }
+
+  setRedemption(arrPh: PolicyHolder[]): void {
+    for (const ph of arrPh) {
+      ph.redemptionType = RedemptionType.Function;
+      ph.redemptionValue = function (simulationService: UnitySimulationService): number {
+        let willRedeem = true;
+        const current_bxc_rate = simulationService.state.bxc.solveEtherOut_fromTokensIn(1);
+        const policyPeriodLength = simulationService.state.policyPeriodLength;
+        const currentDay = simulationService.state.currentDay - simulationService.state.currentPeriod * policyPeriodLength;
+        if (current_bxc_rate < 1 - (.55 / policyPeriodLength * currentDay)) {
+          // If the exchange rate falls below the line where payments reach a 45% rate by the end of the policy period claimants always accept a payment due to lack of confidence premiums will restore the exchange rate sufficiently enough to forgo payment (loss of confidence scenario)
+          willRedeem = true;
+        } else if (currentDay >= policyPeriodLength * .9 && current_bxc_rate < .9) {
+          // When policy period is 90% finished, claimants will not accept an exchange rate payment of less than 90%
+          willRedeem = false;
+        } else if (currentDay >= policyPeriodLength * .8 && current_bxc_rate < .55) {
+          // When policy period is 80% finished, claimants will not accept an exchange rate payment of less than 55%
+          willRedeem = false;
+        }
+        if (willRedeem) {
+          return simulationService.state.arrCATokensPerPH[this.id]; // Rely on the UnitySimulationService to enforce the CA redemption limit
+        } else {
+          return 0;
+        }
+      };
     }
   }
 
@@ -174,5 +225,17 @@ export class SimulationSetupService {
       i++;
     }
     return subgroups;
+  }
+}
+
+export class Catastrophe {
+  dailyLikelihood: number;
+  meanDamage: number;
+  stdevDamage: number;
+
+  constructor(a, b, c) {
+    this.dailyLikelihood = a;
+    this.meanDamage = b;
+    this.stdevDamage = c;
   }
 }

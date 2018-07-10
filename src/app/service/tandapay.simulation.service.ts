@@ -24,7 +24,6 @@ export class TandapaySimulationService {
     for (let i = 0; i < periodCount; i++) {
       this.simulateNewPeriod();
     }
-    console.log(this.state);
   }
 
   simulateNewPeriod() {
@@ -121,7 +120,6 @@ export class TandapaySimulationService {
         const claimValue = Math.min(this.simulateDecision_DamageValue(ph), ph_cu);
         this.state.claimSubmittedHistory[this.state.currentPeriod][ph.id] = claimValue;
         if (claimValue > 0) {
-          console.log(claimValue);
           nextPeriod.tol += claimValue;
           nextPeriod.claimantCount++;
         }
@@ -258,7 +256,6 @@ export class TandapaySimulationService {
     nextPeriod.effectiveCost = (nextPeriod.totalPremiumPayment + nextPeriod.confiscatedOverpayments - nextPeriod.totalRebates) / (arrPh.length - nextPeriod.numDefectors);
     nextPeriod.averageClaimPayment = nextPeriod.claimantCount === 0 ? 0 : (nextPeriod.totalEligibleClaims * nextPeriod.claimPaymentRatio / nextPeriod.claimantCount);
     this.state.currentPeriod++;
-    console.log(nextPeriod);
   }
 
   simulateDecision_CoveragePurchase(ph: PolicyHolder): number {
