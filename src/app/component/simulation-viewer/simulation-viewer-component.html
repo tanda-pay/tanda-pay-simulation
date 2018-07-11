@@ -1,19 +1,3 @@
-<!--<div>-->
-  <!--<span class="example-input-label"> Selected tab index: </span>-->
-  <!--<mat-form-field>-->
-    <!--<input matInput type="number" [formControl]="selected">-->
-  <!--</mat-form-field>-->
-<!--</div>-->
-
-<!--<div>-->
-  <!--<button mat-raised-button-->
-          <!--class="example-add-tab-button"-->
-          <!--(click)="addTab(selectAfterAdding.checked)">-->
-    <!--Add new tab-->
-  <!--</button>-->
-  <!--<mat-checkbox #selectAfterAdding> Select tab after adding </mat-checkbox>-->
-<!--</div>-->
-
 <mat-accordion [multi]="true">
   <mat-expansion-panel *ngFor="let sim of simulations; let sim_index = index">
     <mat-expansion-panel-header>TandaPay Simulation {{sim_index+1}}</mat-expansion-panel-header>
@@ -61,48 +45,36 @@
   </mat-expansion-panel>
 </mat-accordion>
 
-<mat-accordion [multi]="true">
-  <mat-expansion-panel *ngFor="let sim of unitySimulations; let sim_index = index">
-    <mat-expansion-panel-header>Unity Simulation {{sim_index+1}}</mat-expansion-panel-header>
-    <div fxLayout="row" fxLayoutAlign="space-between end">
-      <div fxFlex="50">
-        <li>Total premiums paid by policyholders was {{sim.totalEthPaidIn * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}} in ETH</li>
-        <li>Total damages claimed by policyholders was {{sim.totalDamagesReported * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}}</li>
-        <li>Total money awarded through BXC to policyholders was {{sim.totalEthPaidOut * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}} in ETH</li>
-        <li>The catastrophic event fund was left with {{sim.catastrophicReserveEth * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}} in ETH</li>
-        <li>The BXC was started with {{sim.bxcStartingEth * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}} in ETH</li>
-        <li>The BXC was left with {{sim.bxc.ETH * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}} in ETH</li>
+<!--<mat-accordion [multi]="true">-->
+  <!--<mat-expansion-panel *ngFor="let sim of unitySimulations; let sim_index = index">-->
+    <!--<mat-expansion-panel-header>Unity Simulation {{sim_index+1}}</mat-expansion-panel-header>-->
+    <!--<div fxLayout="row" fxLayoutAlign="space-between end">-->
+      <!--<div fxFlex="50">-->
+        <!--<li>Total premiums paid by policyholders was {{sim.totalEthPaidIn * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}} in ETH</li>-->
+        <!--<li>Total damages claimed by policyholders was {{sim.totalDamagesReported * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}}</li>-->
+        <!--<li>Total money awarded through BXC to policyholders was {{sim.totalEthPaidOut * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}} in ETH</li>-->
+        <!--<li>The catastrophic event fund was left with {{sim.catastrophicReserveEth * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}} in ETH</li>-->
+        <!--<li>The BXC was started with {{sim.bxcStartingEth * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}} in ETH</li>-->
+        <!--<li>The BXC was left with {{sim.bxc.ETH * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}} in ETH</li>-->
 
 
-      </div>
+      <!--</div>-->
 
-      <mat-tab-group [selectedIndex]="unityDayTabSelections[sim_index]"
-                     (selectedIndexChange)="unityDayTabSelections[sim_index] = ($event)"
-                     fxFlex="40">
-        <mat-tab *ngFor="let _ of sim.noteworthyDays" [label]="_+1">
-          <ng-template mat-tab-label><b><p *ngIf="sim.damagesPerDay[_] === 0; else redBlock" style="color:green">{{(_ + 1)}}</p></b></ng-template>
-          <ng-template #redBlock><p style="color:red">{{(_ + 1)}}</p></ng-template>
-          <li>Damages incurred this day: {{sim.damagesPerDay[_] * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}}</li>
-          <li>CA redeemed this day: {{sim.CARedemptionPerDay[_] | number:'1.0-4'}}</li>
-          <li>Eth exchanged this day: {{sim.ethPayoutPerDay[_] * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}}</li>
-          <li>BXC's CA amount at EOD: {{sim.bxcHistory[_].CA | number:'1.0-4'}}</li>
-          <li>BXC's ETH value at EOD: {{sim.bxcHistory[_].ETH * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}}</li>
-          <li>BXC's weight at EOD: {{sim.bxcHistory[_].weight | number:'1.0-4'}}</li>
-        </mat-tab>
-      </mat-tab-group>
-      <!--<mat-tab-group [selectedIndex]="tabSelections[sim_index]"-->
-                     <!--(selectedIndexChange)="tabSelections[sim_index] = ($event)"-->
-                     <!--fxFlex="60">-->
-        <!--<mat-tab *ngFor="let period of sim.periods; let period_index = index" [label]="period_index+1">-->
-          <!--<ng-template mat-tab-label><b><p *ngIf="period.claimPaymentRatio >= 1; else redBlock" style="color:green">{{period_index+1}}</p></b></ng-template>-->
-          <!--<ng-template #redBlock><p style="color:red">{{period_index+1}}</p></ng-template>-->
-          <!--<li *ngIf="period.totalPremiumsAfterDefect > period.totalEligibleClaims; else shortageLine">Premiums <b style="color:green">({{period.totalPremiumsAfterDefect * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}})</b> - Claims <b style="color:red">({{period.totalEligibleClaims * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}})</b> had a surplus of <b style="color:green">({{(period.totalPremiumsAfterDefect - period.totalEligibleClaims) * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}})</b></li>-->
-          <!--<ng-template #shortageLine><li>Premiums <b style="color:green">({{period.totalPremiumsAfterDefect * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}})</b> - Claims <b style="color:red">({{period.totalEligibleClaims * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}})</b> was short by <b style="color:red">({{(period.totalEligibleClaims - period.totalPremiumsAfterDefect) * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}})</b></li></ng-template>-->
-          <!--<li>Claims were paid <b>{{period.claimPaymentRatio | percent:'1.0-3'}}</b> of their value</li>-->
-          <!--<li>Effective monthly premium per person: {{period.effectivePremium * sim.coverageUnitValue * 30 / sim.policyPeriodLength | currency:'USD':'symbol':'1.2'}}</li>-->
-          <!--<li>Average monthly award per claim: {{period.averageClaimPayment * sim.coverageUnitValue * 30 / sim.policyPeriodLength | currency:'USD':'symbol':'1.2'}}</li>-->
+      <!--<mat-tab-group [selectedIndex]="unityDayTabSelections[sim_index]"-->
+                     <!--(selectedIndexChange)="unityDayTabSelections[sim_index] = ($event)"-->
+                     <!--fxFlex="40">-->
+        <!--<mat-tab *ngFor="let _ of sim.noteworthyDays" [label]="_+1">-->
+          <!--<ng-template mat-tab-label><b><p *ngIf="sim.damagesPerDay[_] === 0; else redBlock" style="color:green">{{(_ + 1)}}</p></b></ng-template>-->
+          <!--<ng-template #redBlock><p style="color:red">{{(_ + 1)}}</p></ng-template>-->
+          <!--<li>Damages incurred this day: {{sim.damagesPerDay[_] * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}}</li>-->
+          <!--<li>CA redeemed this day: {{sim.CARedemptionPerDay[_] | number:'1.0-4'}}</li>-->
+          <!--<li>Eth exchanged this day: {{sim.ethPayoutPerDay[_] * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}}</li>-->
+          <!--<li>BXC's CA amount at EOD: {{sim.bxcHistory[_].CA | number:'1.0-4'}}</li>-->
+          <!--<li>BXC's ETH value at EOD: {{sim.bxcHistory[_].ETH * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}}</li>-->
+          <!--<li>BXC's weight at EOD: {{sim.bxcHistory[_].weight | number:'1.0-4'}}</li>-->
         <!--</mat-tab>-->
       <!--</mat-tab-group>-->
-    </div>
-  </mat-expansion-panel>
-</mat-accordion>
+
+    <!--</div>-->
+  <!--</mat-expansion-panel>-->
+<!--</mat-accordion>-->

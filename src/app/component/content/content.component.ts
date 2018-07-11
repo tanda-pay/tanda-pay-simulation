@@ -45,14 +45,8 @@ export class ContentComponent {
     this.unitySimulationService.state.bxc = new BancorContract(e, e / w, w);
     this.unitySimulationService.state.numCA_MPC = e / w;
 
-
-    // this.simulationService.timeline.arrDamagesPerDayPerPH = this.simulationSetupService.generateDamagesPerDay(currentDB.policyholders, this.policyPeriodLength, this.iterations, currentDB.mean_ClaimantProportion, currentDB.stdev_ClaimantProportion, currentDB.mean_Claims2TUL, currentDB.stdev_Claims2TUL)
-
-    // for (let i = 0; i < this.userInput.numPolicyPeriods; i++) {
-    //   this.simulationService.simulateNextPolicyPeriod(currentDB);
-    // }
-    this.unitySimulationService.generateSimulation(this.userInput.numPolicyPeriods);
-    this.unitySimulationService.generateSimulationSummary();
-    this.unitySimulations.push(this.unitySimulationService.state);
+    // this.unitySimulationService.generateSimulation(this.userInput.numPolicyPeriods);
+    // this.unitySimulationService.generateSimulationSummary();
+    // this.unitySimulations.push(this.unitySimulationService.state);
   }
 }
