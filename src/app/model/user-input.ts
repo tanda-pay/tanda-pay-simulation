@@ -37,7 +37,7 @@ export class UserInput {
   constructor() {
     // set default inputs for user
     this.numPh = 100;
-    this.percentageToDefect = .03;
+    this.percentageToDefect = .1;
     this.avgGroupSize = 7;
     this.tul = 10000;
     this.cuValue = 100;
@@ -48,11 +48,11 @@ export class UserInput {
     this.mean_claimProportion = .06;
     this.stdev_claimProportion = .01;
 
-    this.majorCatastropheLikelihood = .001;
+    this.majorCatastropheLikelihood = 0;
     this.majorCatastropheMeanDamage = .5;
     this.majorCatastropheStdevDamage = .1;
 
-    this.minorCatastropheLikelihood = .005;
+    this.minorCatastropheLikelihood = 0;
     this.minorCatastropheMeanDamage = .1;
     this.minorCatastropheStdevDamage = .01;
 

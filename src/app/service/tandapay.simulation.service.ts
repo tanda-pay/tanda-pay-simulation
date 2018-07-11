@@ -52,10 +52,9 @@ export class TandapaySimulationService {
     for (const ph of arrPh) {
       const premiumVote = this.simulateDecision_PremiumVote(ph);
       this.state.premiumVoteHistory[this.state.currentPeriod][ph.id] = premiumVote;
-      arrPremiums[ph.id] = premiumVote;
+      arrPremiums.push(premiumVote);
     }
     arrPremiums.sort(function (a, b) { return a - b; });
-    arrPremiums = arrPremiums.slice(arrPremiums.length - arrPh.length); // Make sure to not include defectors
     arrPremiums = arrPremiums.slice(Math.floor(arrPremiums.length * .1), Math.floor(arrPremiums.length * .9));
     const premiumMean = jStat.mean(arrPremiums);
     const premiumMedian = jStat.median(arrPremiums);

@@ -39,6 +39,7 @@
           <li>Claims were paid <b>{{period.claimPaymentRatio | percent:'1.0-3'}}</b> of their value</li>
           <li>Effective monthly premium per person: {{period.effectivePremium * sim.coverageUnitValue * 30 / sim.policyPeriodLength | currency:'USD':'symbol':'1.2'}}</li>
           <li>Average monthly award per claim: {{period.averageClaimPayment * sim.coverageUnitValue * 30 / sim.policyPeriodLength | currency:'USD':'symbol':'1.2'}}</li>
+          <li>{{period.numDefectors}} defectors this period.</li>
         </mat-tab>
       </mat-tab-group>
     </div>

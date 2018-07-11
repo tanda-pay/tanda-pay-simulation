@@ -46,21 +46,32 @@ export class SimulationSetupService {
       input.mean_claimProportion, input.stdev_claimProportion,
       majorCatastrophe, minorCatastrophe);
     this.setRedemption(arrPh);
-    this.setDefect(arrPh, input.percentageToDefect);
+    this.setDefect(arrPh, input.percentageToDefect, 3);
 
     return arrPh;
   }
 
-  setDefect(arrPh: PolicyHolder[], defectRate: number): void {
+  setDefect(arrPh: PolicyHolder[], defectRate: number, defectorCapPerPeriod: number): void {
     const count = arrPh.length;
     let numDefectors = Math.floor(count * defectRate);
     const chosenDefectors = [];
+
+    const chosenDefectorsDelay: number[] = [];
+    let defectorDelay = 0;
+    let defectorDelayAssigned = 0;
+
     while (numDefectors > 0) {
+      if (defectorDelayAssigned >= defectorCapPerPeriod) {
+        defectorDelay++;
+        defectorDelayAssigned = 0;
+      }
+      defectorDelayAssigned++;
       let random_ph = Math.floor(Math.random() * count);
       while (chosenDefectors.indexOf(random_ph) !== -1) {
         random_ph = (random_ph + 1) % count;
       }
       chosenDefectors.push(random_ph);
+      chosenDefectorsDelay.push(defectorDelay);
       numDefectors -= 1;
     }
     for (const ph of arrPh) {
@@ -71,20 +82,27 @@ export class SimulationSetupService {
       const chosenDefector = chosenDefectors[i];
       arrPh[chosenDefector].defectType = DefectType.Function;
       arrPh[chosenDefector].defectValue = function (simulation_service) {
+        if (this.memory.defectDelay > 0) {
+          this.memory.defectDelay--;
+          return false;
+        } else {
+          return true;
+        }
+        const periodLength = simulation_service.state.policyPeriodLength;
         const periodIndex = simulation_service.state.currentPeriod;
         const currentPeriod = simulation_service.state.periods[periodIndex];
         if (this.damageType === DamageType.PredeterminedDamagesPerDay) {
-          if (jStat.sum(this.damageValue) > 0) {
+          if (jStat.sum(this.damageValue.slice(periodIndex * periodLength, (periodIndex + 1) * periodLength - 1)) > 0) {
             return false;
           }
-        } else if (simulation_service.claimSubmittedHistory[periodIndex][this.id] > 0) {
-          return false;
         }
         if (currentPeriod.tol / currentPeriod.totalPremiumPayment > Math.random() * .8 + .2) {
           return true;
         }
         return false;
       };
+      arrPh[chosenDefector].memory.defectDelay = chosenDefectorsDelay[i];
+
     }
   }
 

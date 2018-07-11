@@ -32,11 +32,15 @@ export class PolicyHolder {
   premiumVoteType: PremiumVoteType;
   premiumVoteValue: any;
 
+  memory: any;
+
   // coverageUnitsBought: number;
 
   constructor() {
     this.id = PolicyHolder.numPolicyHolder;
     PolicyHolder.numPolicyHolder++;
+
+    this.memory = {};
 
     //    this.defectType = defectType;
     //    this.defectValue = defectValue;
