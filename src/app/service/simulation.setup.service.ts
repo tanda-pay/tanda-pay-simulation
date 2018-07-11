@@ -39,6 +39,7 @@ export class SimulationSetupService {
     this.setParticipation(arrPh);
     this.setPremiumVote(arrPh, desiredPremiumMean, desiredPremiumStdev);
     this.setCoverageUnitsBought(arrPh, tul);
+    this.setClaimSubmission(arrPh);
     this.setDamages(arrPh,
       input.numPolicyPeriods, input.policyPeriodLength,
       input.mean_Claims2TUL, input.stdev_Claims2TUL,
@@ -158,6 +159,27 @@ export class SimulationSetupService {
     for (const ph of arrPh) {
       ph.premiumVoteType = PremiumVoteType.Constant;
       ph.premiumVoteValue = jStat.normal.sample(coverageUnitCostMean, CoverageUnitCostStdev);
+    }
+  }
+
+  setClaimSubmission(arrPh: PolicyHolder[]) {
+    for (const ph of arrPh) {
+      ph.claimType = ClaimType.Function;
+      ph.claimValue = function (simulationService: UnitySimulationService): boolean {
+        let willSubmit = false;
+        const myCurrentDamage = simulationService.state.accumulatedDamagesPerPH[this.id];
+        const myCoverage = simulationService.state.arrCoveragePerPH[this.id];
+        const policyPeriodLength = simulationService.state.policyPeriodLength;
+        const currentDay = simulationService.state.currentDay - simulationService.state.currentPeriod * policyPeriodLength;
+        if (myCurrentDamage > myCoverage * .5) {
+          console.log(myCoverage + ' ' + myCurrentDamage);
+          willSubmit = true;
+        } else if (currentDay + 1 === policyPeriodLength) {
+          // console.log(simulationService.state.currentDay + ' ' + simulationService.state.currentPeriod)
+          willSubmit = true;
+        }
+        return willSubmit;
+      };
     }
   }
 

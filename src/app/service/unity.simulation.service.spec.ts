@@ -11,6 +11,12 @@ describe('BancorContract', () => {
         expect(ethOut).toBeLessThan(numCA);
     });
   }
+  function test_solveEtherSupply_fromExchangeRatio(b: BancorContract, exchangeRatio: number) {
+    const targetEth = b.solveEtherSupply_fromExchangeRatio(exchangeRatio);
+    it('A BXC with CA and weight (' + [b.CA, b.weight] + ') needs ' + targetEth + ' ETH to have a payout ratio of ' + exchangeRatio, function () {
+      expect(targetEth).toBeGreaterThan(exchangeRatio);
+    });
+  }
   const initialEth = 200;
   const initialCA = 400;
   const initialWeight = .5;
@@ -18,6 +24,10 @@ describe('BancorContract', () => {
   test_solveEtherOut_fromTokensIn(bxc, .5);
   for (let i = 1; i <= 400; i++) {
     test_solveEtherOut_fromTokensIn(bxc, i);
+  }
+  for (let i = 3; i <= 400; i++) {
+    bxc.CA = i;
+    test_solveEtherSupply_fromExchangeRatio(bxc, 1);
   }
   //
   // it('#getObservableValue should return value from observable',

@@ -69,23 +69,25 @@
         <li>Total premiums paid by policyholders was {{sim.totalEthPaidIn * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}} in ETH</li>
         <li>Total damages claimed by policyholders was {{sim.totalDamagesReported * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}}</li>
         <li>Total money awarded through BXC to policyholders was {{sim.totalEthPaidOut * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}} in ETH</li>
-
-        <li>The catastrophic event fund was left with {{sim.catastrophicReserveEth * sim.coverageUnitValue |
-          currency:'USD':'symbol':'1.2'}} in ETH</li>
+        <li>The catastrophic event fund was left with {{sim.catastrophicReserveEth * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}} in ETH</li>
         <li>The BXC was started with {{sim.bxcStartingEth * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}} in ETH</li>
         <li>The BXC was left with {{sim.bxc.ETH * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}} in ETH</li>
 
 
       </div>
+
       <mat-tab-group [selectedIndex]="unityDayTabSelections[sim_index]"
                      (selectedIndexChange)="unityDayTabSelections[sim_index] = ($event)"
                      fxFlex="40">
-        <mat-tab *ngFor="let _ of sim.purchasedCoverageHistory; let day_index = index " [label]="day_index+1">
-          <ng-template mat-tab-label><b><p *ngIf="sim.damagesPerDay[day_index * sim.policyPeriodLength] === 0; else redBlock" style="color:green">{{(day_index * sim.policyPeriodLength + 1)}}</p></b></ng-template>
-          <ng-template #redBlock><p style="color:red">{{(day_index * sim.policyPeriodLength + 1)}}</p></ng-template>
-          <li>Damages incurred this day: {{sim.damagesPerDay[day_index * sim.policyPeriodLength] * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}}</li>
-          <li>CA redeemed this day: {{sim.CARedemptionPerDay[day_index * sim.policyPeriodLength] | number:'1.0-4'}}</li>
-          <li>Eth exchanged this day: {{sim.ethPayoutPerDay[day_index * sim.policyPeriodLength] * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}}</li>
+        <mat-tab *ngFor="let _ of sim.noteworthyDays" [label]="_+1">
+          <ng-template mat-tab-label><b><p *ngIf="sim.damagesPerDay[_] === 0; else redBlock" style="color:green">{{(_ + 1)}}</p></b></ng-template>
+          <ng-template #redBlock><p style="color:red">{{(_ + 1)}}</p></ng-template>
+          <li>Damages incurred this day: {{sim.damagesPerDay[_] * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}}</li>
+          <li>CA redeemed this day: {{sim.CARedemptionPerDay[_] | number:'1.0-4'}}</li>
+          <li>Eth exchanged this day: {{sim.ethPayoutPerDay[_] * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}}</li>
+          <li>BXC's CA amount at EOD: {{sim.bxcHistory[_].CA | number:'1.0-4'}}</li>
+          <li>BXC's ETH value at EOD: {{sim.bxcHistory[_].ETH * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}}</li>
+          <li>BXC's weight at EOD: {{sim.bxcHistory[_].weight | number:'1.0-4'}}</li>
         </mat-tab>
       </mat-tab-group>
       <!--<mat-tab-group [selectedIndex]="tabSelections[sim_index]"-->

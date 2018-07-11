@@ -70,7 +70,7 @@ export class UserInput {
 
     this.catastropheEV = this.policyPeriodLength * (this.majorCatastropheLikelihood * this.majorCatastropheMeanDamage + this.minorCatastropheLikelihood * this.minorCatastropheMeanDamage) * this.tul;
 
-    this.unityBxcInitialEth = 200;
+    this.unityBxcInitialEth = this.numCu * .1;
     this.unityBxcInitialWeight = .5;
 
 

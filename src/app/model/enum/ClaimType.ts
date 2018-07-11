@@ -1,5 +1,4 @@
 export enum ClaimType {
-  LikelihoodAndClaimAmount,
-  LikelihoodAndClaimAmountButPredestination,
-  Eval
+  Random,
+  Function
 }

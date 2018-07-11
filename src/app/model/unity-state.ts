@@ -26,11 +26,16 @@ export class UnityState {
 
   purchasedCoverageHistory: number[][] = [];
   paidPremiumsHistory: number[][] = [];
+
   claimableDamageHistory: number[][] = [];
   CATokenRedemptionHistory: number[][] = [];
   ethPayoutHistory: number[][] = [];
 
+  bxcHistory: BancorContract[] = [];
+
   // Data for presentation purposes only
+  // Probably should have their own class
+  // UnitySimulationService.generateSimulationSummary() calculates values for these fields
   noteworthyDays: number[] = [];
   damagesPerDay: number[] = [];
   CARedemptionPerDay: number[] = [];
