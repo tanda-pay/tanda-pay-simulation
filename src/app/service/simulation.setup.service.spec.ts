@@ -3,7 +3,6 @@ import {Catastrophe, SimulationSetupService} from './simulation.setup.service';
 import {PolicyHolder} from '../model/policy-holder';
 
 declare var jStat: any;
-declare var inject_seedrandom: any;
 declare var randomWeightedSampleNoReplacement: any;
 
 
@@ -21,14 +20,11 @@ describe('DamageGeneration', () => {
   }
 
   it('After seeding Math.Random, the random samples should be predictable', function () {
-    Math['seedrandom'] = []
-    inject_seedrandom([], Math);
     Math.seedrandom('hello.');
     expect(Math.random()).toBe(0.9282578795792454);
   });
 
   it('After seeding Math.Random, the random samples should be predictable', function () {
-    inject_seedrandom([], Math);
     Math.seedrandom('hello.');
     const majorCatastrophe = new Catastrophe(.01, .5, .1);
     const minorCatastrophe = new Catastrophe(.05, .1, .01);
