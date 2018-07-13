@@ -41,11 +41,11 @@ export class UserInput {
     this.avgGroupSize = 7;
     this.tul = 10000;
     this.cuValue = 100;
-    this.desiredPremiumMean = 5;
-    this.desiredPremiumStdev = 1;
-    this.mean_Claims2TUL = .02;
-    this.stdev_Claims2TUL = .01;
-    this.mean_claimProportion = .06;
+    this.desiredPremiumMean = 14;
+    this.desiredPremiumStdev = 0;
+    this.mean_Claims2TUL = .12;
+    this.stdev_Claims2TUL = .04;
+    this.mean_claimProportion = .2;
     this.stdev_claimProportion = .01;
 
     this.majorCatastropheLikelihood = 0;

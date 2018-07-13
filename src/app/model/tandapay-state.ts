@@ -6,6 +6,9 @@ export class TandapayState {
   currentPeriod: number;
 
   coverageUnitValue: number;
+  averageTol: number;
+  stdevTol: number;
+  averageClaimants: number;
 
   subgroups: number[][] = [];
   blacklistedPolicyholders: number[] = [];
@@ -28,10 +31,13 @@ export class TandapayState {
   effectivePremiumAvg: number;
   effectiveClaimAvg: number;
 
-  constructor(policyPeriodLength, coverageUnitValue) {
+  constructor(policyPeriodLength, coverageUnitValue, averageTol, stdevTol, averageClaimants) {
     this.currentPeriod = 0;
 
     this.policyPeriodLength = policyPeriodLength;
     this.coverageUnitValue = coverageUnitValue;
+    this.averageTol = averageTol;
+    this.stdevTol = stdevTol;
+    this.averageClaimants = averageClaimants;
   }
 }

@@ -10,6 +10,7 @@ import {DamageType} from '../model/enum/DamageType';
 import {TandapayState} from '../model/tandapay-state';
 
 declare var jStat: any;
+declare var randomWeightedSampleNoReplacement: any;
 
 @Injectable()
 export class TandapaySimulationService {
@@ -47,26 +48,38 @@ export class TandapaySimulationService {
     this.state.claimAwardHistory[this.state.currentPeriod] = Array(this.policyholders.length).fill(0);
 
     // Step 1: Secretary determines premium by taking an average of all policyholders' votes
-    let arrPremiums = [];
 
+    // A decision was made to simplify. The following features are commented out:
+    // -Throwing out the highest and lowest deciles of premium votes
+    // -Random selection from three types of vote-averages, one of which gave a 10% bump
+    // -10% premium bump if we underpaid the previous period
+    //
+    // let arrPremiums = [];
+    // for (const ph of arrPh) {
+    //   const premiumVote = this.simulateDecision_PremiumVote(ph);
+    //   this.state.premiumVoteHistory[this.state.currentPeriod][ph.id] = premiumVote;
+    //   arrPremiums.push(premiumVote);
+    // }
+    // arrPremiums.sort(function (a, b) { return a - b; });
+    // arrPremiums = arrPremiums.slice(Math.floor(arrPremiums.length * .1), Math.floor(arrPremiums.length * .9));
+    // const premiumMean = jStat.mean(arrPremiums);
+    // const premiumMedian = jStat.median(arrPremiums);
+    // const arrPremiumAverages = [premiumMean, premiumMedian, (premiumMean + premiumMedian) * .55];
+    // let chosenPremium = arrPremiumAverages[Math.floor(Math.random() * 3)];
+    // if (this.state.currentPeriod !== 0 && this.state.periods[this.state.currentPeriod - 1].claimPaymentRatio < 1) {
+    //   chosenPremium *= 1.1;
+    // }
+    // nextPeriod.chosenPremium = chosenPremium;
+    const arrPremiums = [];
     for (const ph of arrPh) {
       const premiumVote = this.simulateDecision_PremiumVote(ph);
       this.state.premiumVoteHistory[this.state.currentPeriod][ph.id] = premiumVote;
       arrPremiums.push(premiumVote);
     }
-    arrPremiums.sort(function (a, b) { return a - b; });
-    arrPremiums = arrPremiums.slice(Math.floor(arrPremiums.length * .1), Math.floor(arrPremiums.length * .9));
-    const premiumMean = jStat.mean(arrPremiums);
-    const premiumMedian = jStat.median(arrPremiums);
-    const arrPremiumAverages = [premiumMean, premiumMedian, (premiumMean + premiumMedian) * .55];
-    let chosenPremium = arrPremiumAverages[Math.floor(Math.random() * 3)];
-    if (this.state.currentPeriod !== 0 && this.state.periods[this.state.currentPeriod - 1].claimPaymentRatio < 1) {
-      chosenPremium *= 1.1;
-    }
+    const chosenPremium = jStat.mean(arrPremiums);
     nextPeriod.chosenPremium = chosenPremium;
 
     // Step 2: Offer chosen premium, accept premium commitments, and note participants who opt-out
-    // var arrCollectedPremiums = [];
     for (const ph of arrPh) {
       if (this.simulateDecision_Participation(ph)) {
         const purchasedCoverage = this.simulateDecision_CoveragePurchase(ph);
@@ -95,24 +108,30 @@ export class TandapaySimulationService {
         }
       }
     }
-    // for (const subgroup of ph_subgroups_arr) {
-    //   let participantCount = 0;
-    //   for (const ph of subgroup) {
-    //     if (this.purchasedCoverageHistory[this.state.currentPeriod][ph.id] > 0) {
-    //       participantCount++;
-    //     }
-    //   }
-    //   for (const ph of subgroup) {
-    //     if (this.purchasedCoverageHistory[this.state.currentPeriod][ph.id] > 0) {
-    //       const overpayment = this.purchasedCoverageHistory[this.state.currentPeriod][ph.id] * (1 / (participantCount - 1)) * nextPeriod.chosenPremium;
-    //       nextPeriod.totalOverpayments += overpayment;
-    //       this.overpaymentCommittedHistory[this.state.currentPeriod][ph.id] = overpayment * this.premiumCommittedHistory[this.state.currentPeriod][ph.id];
-    //     }
-    //   }
-    // }
 
     // Step 4: Aggregate claims of participating policyholders during the policy period
     // To faithfully match user input, we use an awful hack here that messes with the policyholder's decisionmaking
+    const zScore = jStat.normal.sample(0, 1);
+    const predestinedClaimantCount = this.state.averageClaimants;
+    const weightMap = {};
+    for (const ph of arrPh) {
+      weightMap[ph.id] = ph.coverageValue;
+    }
+    const predestinedClaimants = randomWeightedSampleNoReplacement(weightMap, predestinedClaimantCount);
+    let chosenClaimantsCoverage = 0;
+    for (const ph_id of predestinedClaimants) {
+      chosenClaimantsCoverage += this.state.purchasedCoverageHistory[this.state.currentPeriod][parseInt(ph_id, 10)];
+    }
+    const predestinedValueOfAllClaims = (this.state.averageTol + (zScore * this.state.stdevTol)) * nextPeriod.totalCoverageUnits;
+    for (const ph of arrPh) {
+      ph.damageType = DamageType.PredeterminedDamagesPerPeriod;
+      if (predestinedClaimants.indexOf(ph.id.toString()) < 0) {
+        ph.damageValue[this.state.currentPeriod] = 0;
+      } else {
+        const coverageBought = this.state.purchasedCoverageHistory[this.state.currentPeriod][ph.id];
+        ph.damageValue[this.state.currentPeriod] = Math.min((coverageBought / chosenClaimantsCoverage * predestinedValueOfAllClaims) / coverageBought, 1);
+      }
+    }
     for (const ph of arrPh) {
       const ph_cu = this.state.purchasedCoverageHistory[this.state.currentPeriod][ph.id];
       if (ph_cu > 0) {
@@ -291,6 +310,8 @@ export class TandapaySimulationService {
         claimValue += ph.damageValue[(this.state.currentPeriod * this.state.policyPeriodLength) + i];
       }
       return claimValue;
+    } else if (ph.damageType === DamageType.PredeterminedDamagesPerPeriod) {
+      return ph.damageValue[(this.state.currentPeriod)];
     } else if (ph.damageType === DamageType.Eval) {
       return eval(ph.damageValue);
     }

@@ -13,7 +13,13 @@ import {UnityState} from '../../model/unity-state';
 })
 export class SimulationViewerComponent {
   @Input() simulations: TandapayState[];
-  @Input() unitySimulations: UnityState[];
+  @Input() unitySimulations: UnityState[]
+  @Output() simulationTabChanged = new EventEmitter<number>();
   tabSelections = [];
   unityDayTabSelections = [];
+
+  changeTab(sim_index: number, tabIndex: number) {
+    this.tabSelections[sim_index] = tabIndex;
+    this.simulationTabChanged.emit(tabIndex);
+  }
 }

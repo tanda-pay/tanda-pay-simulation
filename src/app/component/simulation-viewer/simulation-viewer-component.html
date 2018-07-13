@@ -11,7 +11,7 @@
         <li>Average monthly award per claim: {{sim.effectiveClaimAvg * 30 / sim.policyPeriodLength | currency:'USD':'symbol':'1.2'}}</li>
       </div>
       <mat-tab-group [selectedIndex]="tabSelections[sim_index]"
-                     (selectedIndexChange)="tabSelections[sim_index] = ($event)"
+                     (selectedIndexChange)="changeTab(sim_index, ($event))"
                      fxFlex="60">
         <mat-tab *ngFor="let period of sim.periods; let period_index = index" [label]="period_index+1">
           <ng-template mat-tab-label><b><p *ngIf="period.claimPaymentRatio >= 1; else redBlock" style="color:green">{{period_index+1}}</p></b></ng-template>

@@ -88,18 +88,18 @@ export class SimulationSetupService {
         } else {
           return true;
         }
-        const periodLength = simulation_service.state.policyPeriodLength;
-        const periodIndex = simulation_service.state.currentPeriod;
-        const currentPeriod = simulation_service.state.periods[periodIndex];
-        if (this.damageType === DamageType.PredeterminedDamagesPerDay) {
-          if (jStat.sum(this.damageValue.slice(periodIndex * periodLength, (periodIndex + 1) * periodLength - 1)) > 0) {
-            return false;
-          }
-        }
-        if (currentPeriod.tol / currentPeriod.totalPremiumPayment > Math.random() * .8 + .2) {
-          return true;
-        }
-        return false;
+        // const periodLength = simulation_service.state.policyPeriodLength;
+        // const periodIndex = simulation_service.state.currentPeriod;
+        // const currentPeriod = simulation_service.state.periods[periodIndex];
+        // if (this.damageType === DamageType.PredeterminedDamagesPerDay) {
+        //   if (jStat.sum(this.damageValue.slice(periodIndex * periodLength, (periodIndex + 1) * periodLength - 1)) > 0) {
+        //     return false;
+        //   }
+        // }
+        // if (currentPeriod.tol / currentPeriod.totalPremiumPayment > Math.random() * .8 + .2) {
+        //   return true;
+        // }
+        // return false;
       };
       arrPh[chosenDefector].memory.defectDelay = chosenDefectorsDelay[i];
 

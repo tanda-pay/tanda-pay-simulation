@@ -3,6 +3,9 @@
           placeholder="# of policyholders"
           [(ngModel)]="userInput.numPh" (input)="userInputChanged.emit(true)" type="number"> </mat-form-field>
       </div>-->
+
+<div id="claimsgraph" style="width:100%; height:400px;"></div>
+
 <mat-form-field>
   <input matInput placeholder="Number of policy periods" [(ngModel)]="userInput.numPolicyPeriods">
 </mat-form-field>
@@ -34,7 +37,7 @@
   <!--</mat-horizontal-stepper>-->
 <!--</div>-->
 
-<app-simulation-viewer [simulations]="simulations" [unitySimulations]="unitySimulations"></app-simulation-viewer>
+<app-simulation-viewer [simulations]="simulations" [unitySimulations]="unitySimulations" (simulationTabChanged)="onSimulationTabChanged($event)"></app-simulation-viewer>
 
 <!--<div *ngIf="summary !== undefined">-->
   <!--<div>Claims were underpaid {{summary[0] | percent:'1.0-3'}} of the time</div>-->

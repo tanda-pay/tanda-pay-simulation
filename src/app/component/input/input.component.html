@@ -74,12 +74,12 @@
                  [(ngModel)]="userInput.desiredPremiumMean" (input)="updateProjections()" type="number">
         </mat-form-field>
       </div>
-      <div>
-        <mat-form-field><span matPrefix>$ &nbsp;</span>
-          <input matInput placeholder="Sigma value of bell curve"
-                 [(ngModel)]="userInput.desiredPremiumStdev" (input)="updateProjections()" type="number">
-        </mat-form-field>
-      </div>
+      <!--<div>-->
+        <!--<mat-form-field><span matPrefix>$ &nbsp;</span>-->
+          <!--<input matInput placeholder="Sigma value of bell curve"-->
+                 <!--[(ngModel)]="userInput.desiredPremiumStdev" (input)="updateProjections()" type="number">-->
+        <!--</mat-form-field>-->
+      <!--</div>-->
       <div>
         <div>
           Average Overpayment Group Size <i
@@ -93,7 +93,7 @@
     </div>
     <div class='separator-block'></div>
     <div class='derived-value-block'>
-      <div id="premiumgraph" style="width:100%; height:200px;"></div>
+      <div id="premiumgraph" style="width:100%; height:200px; display: none;"></div>
       <div>
         <mat-form-field>
           <input matInput placeholder="Total premiums collected" [ngModel]="userInput.totalPremiums | currency:'USD':'symbol':'1.2'" disabled>
@@ -136,11 +136,11 @@
                  [ngModel]="userInput.mean_claimProportion*100" (ngModelChange)="userInput.mean_claimProportion=$event*.01" (input)="updateProjections()" type="number">
           <span matSuffix>% &nbsp;</span>
         </mat-form-field>
-        <mat-form-field>
-          <input matInput placeholder="Sigma value of bell curve"
-                 [ngModel]="userInput.stdev_claimProportion*100" (ngModelChange)="userInput.stdev_claimProportion=$event*.01" (input)="updateProjections()" type="number">
-          <span matSuffix>% &nbsp;</span>
-        </mat-form-field>
+        <!--<mat-form-field>-->
+          <!--<input matInput placeholder="Sigma value of bell curve"-->
+                 <!--[ngModel]="userInput.stdev_claimProportion*100" (ngModelChange)="userInput.stdev_claimProportion=$event*.01" (input)="updateProjections()" type="number">-->
+          <!--<span matSuffix>% &nbsp;</span>-->
+        <!--</mat-form-field>-->
       </div>
     </div>
     <div class='separator-block'></div>
@@ -151,7 +151,7 @@
           <input matInput placeholder="Total value of outstanding claims per period" [ngModel]="userInput.tol | currency:'USD':'symbol':'1.2'" disabled>
         </mat-form-field>
       </div>
-      <div id="claimantcountgraph" style="width:100%; height:200px;"></div>
+      <div id="claimantcountgraph" style="width:100%; height:200px; display: none;"></div>
       <div>
         <mat-form-field>
           <input matInput placeholder="Total number of claims per period" [ngModel]="userInput.totalClaimCount | number:'1.0-0'" disabled>
@@ -182,11 +182,11 @@
                  [ngModel]="userInput.majorCatastropheMeanDamage*100" (ngModelChange)="userInput.majorCatastropheMeanDamage=$event*.01" (input)="updateProjections()" type="number">
           <span matSuffix>% &nbsp;</span>
         </mat-form-field>
-        <mat-form-field>
-          <input matInput placeholder="Sigma value of bell curve"
-                 [ngModel]="userInput.majorCatastropheStdevDamage*100" (ngModelChange)="userInput.majorCatastropheStdevDamage=$event*.01" (input)="updateProjections()" type="number">
-          <span matSuffix>% &nbsp;</span>
-        </mat-form-field>
+        <!--<mat-form-field>-->
+          <!--<input matInput placeholder="Sigma value of bell curve"-->
+                 <!--[ngModel]="userInput.majorCatastropheStdevDamage*100" (ngModelChange)="userInput.majorCatastropheStdevDamage=$event*.01" (input)="updateProjections()" type="number">-->
+          <!--<span matSuffix>% &nbsp;</span>-->
+        <!--</mat-form-field>-->
         <mat-form-field>
           <input matInput placeholder="Daily likelihood of a minor catastrophe"
                  [ngModel]="userInput.minorCatastropheLikelihood*100" (ngModelChange)="userInput.minorCatastropheLikelihood=$event*.01" (input)="updateProjections()" type="number">
@@ -197,11 +197,11 @@
                  [ngModel]="userInput.minorCatastropheMeanDamage*100" (ngModelChange)="userInput.minorCatastropheMeanDamage=$event*.01" (input)="updateProjections()" type="number">
           <span matSuffix>% &nbsp;</span>
         </mat-form-field>
-        <mat-form-field>
-          <input matInput placeholder="Sigma value of bell curve"
-                 [ngModel]="userInput.minorCatastropheStdevDamage*100" (ngModelChange)="userInput.minorCatastropheStdevDamage=$event*.01" (input)="updateProjections()" type="number">
-          <span matSuffix>% &nbsp;</span>
-        </mat-form-field>
+        <!--<mat-form-field>-->
+          <!--<input matInput placeholder="Sigma value of bell curve"-->
+                 <!--[ngModel]="userInput.minorCatastropheStdevDamage*100" (ngModelChange)="userInput.minorCatastropheStdevDamage=$event*.01" (input)="updateProjections()" type="number">-->
+          <!--<span matSuffix>% &nbsp;</span>-->
+        <!--</mat-form-field>-->
       </div>
     </div>
     <div class='separator-block'></div>
