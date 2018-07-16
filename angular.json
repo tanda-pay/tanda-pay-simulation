@@ -26,7 +26,8 @@
             "scripts": [
               "src/assets/jstat.js",
               "src/assets/weighted-random-select.js",
-              "src/assets/seeded-random.js"
+              "src/assets/seeded-random.js",
+              "src/assets/truncated-normal-distribution.js"
             ]
           },
           "configurations": {

@@ -6,7 +6,8 @@ import {BancorContract, UnitySimulationService} from '../../service/unity.simula
 import {TandapayState} from '../../model/tandapay-state';
 import {UnityState} from '../../model/unity-state';
 
-import * as truncatedNormalDistribution from 'distributions-truncated-normal-pdf';
+// import * as truncatedNormalDistribution from 'distributions-truncated-normal-pdf';
+declare var pdf: any;
 declare var Highcharts: any;
 
 @Component({
@@ -127,7 +128,7 @@ export class ContentComponent implements OnInit {
       }
     }
     points.push(xIterator);
-    const seriesData = points.map(x => ({ x, y: truncatedNormalDistribution( x, {
+    const seriesData = points.map(x => ({ x, y: pdf( x, {
         'a': 0,
         'b': this.userInput.tul,
         'mu': mean,

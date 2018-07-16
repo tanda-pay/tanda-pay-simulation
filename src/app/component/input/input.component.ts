@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {UserInput} from '../../model/user-input';
-import * as truncatedNormalDistribution from 'distributions-truncated-normal-pdf';
+declare var pdf: any;
 declare var Highcharts: any;
 
 @Component({
@@ -71,7 +71,7 @@ export class InputComponent {
       }
     }
     points.push(xIterator);
-    const seriesData = points.map(x => ({ x, y: truncatedNormalDistribution( x, {
+    const seriesData = points.map(x => ({ x, y: pdf( x, {
         'a': 0,
         'b': tul,
         'mu': mean,
