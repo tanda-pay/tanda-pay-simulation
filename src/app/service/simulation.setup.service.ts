@@ -46,7 +46,7 @@ export class SimulationSetupService {
       input.mean_claimProportion, input.stdev_claimProportion,
       majorCatastrophe, minorCatastrophe);
     this.setRedemption(arrPh);
-    this.setDefect(arrPh, input.percentageToDefect, 3);
+    this.setDefect(arrPh, input.percentageToDefect, input.defectorCapPerPeriod);
 
     return arrPh;
   }

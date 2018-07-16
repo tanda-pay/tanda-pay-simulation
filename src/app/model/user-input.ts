@@ -1,6 +1,7 @@
 export class UserInput {
   numPh: number;
   percentageToDefect: number;
+  defectorCapPerPeriod: number;
   avgGroupSize: number;
   tul: number;
   cuValue: number;
@@ -38,6 +39,7 @@ export class UserInput {
     // set default inputs for user
     this.numPh = 100;
     this.percentageToDefect = .1;
+    this.defectorCapPerPeriod = 3;
     this.avgGroupSize = 7;
     this.tul = 10000;
     this.cuValue = 100;
