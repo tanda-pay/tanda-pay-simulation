@@ -13,6 +13,7 @@ import {
   MatTooltipModule,
   MatCheckboxModule,
   MatTabsModule,
+  MatRadioModule,
   MatGridListModule
 } from '@angular/material';
 
@@ -30,6 +31,7 @@ const modules = [
   MatTooltipModule,
   MatCheckboxModule,
   MatTabsModule,
+  MatRadioModule,
   MatGridListModule
 ];
 

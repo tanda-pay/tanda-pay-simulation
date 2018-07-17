@@ -24,6 +24,10 @@ export class AppComponent implements OnInit {
     // this.renderPolicyHolders();
   }
 
+  onScenarioSelected(input: UserInput) {
+    this.userInput = input;
+  }
+
   updateInput() {
     // this.userInput.calculateDerivedValues();
     // const period = this.simulationService.doPolicyPeriod(subgroups, null);

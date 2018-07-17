@@ -387,6 +387,27 @@ export class TandapaySimulationService {
     this.state.effectiveClaimAvg = effectiveClaimsSum / numClaimants * this.state.coverageUnitValue;
   }
 
+  wasGoalReached_AverageClaim(goal = .9): boolean {
+    const periods = this.state.periods;
+    let totalEligibleClaimsSum = 0;
+    let claimAwardsSum = 0;
+    for (const period of periods) {
+      totalEligibleClaimsSum += period.totalEligibleClaims;
+      claimAwardsSum += period.claimPaymentRatio * period.totalEligibleClaims;
+    }
+    return (claimAwardsSum / totalEligibleClaimsSum) >= goal;
+  }
+
+  wasGoalReached_NeverUnderpaySeverely(goal = .75): boolean {
+    const periods = this.state.periods;
+    for (const period of periods) {
+      if (period.claimPaymentRatio < goal) {
+        return false;
+      }
+    }
+    return true;
+  }
+
 }
 
 export class Period {

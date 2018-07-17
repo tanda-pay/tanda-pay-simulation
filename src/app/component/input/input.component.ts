@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {UserInput} from '../../model/user-input';
 declare var pdf: any;
 declare var Highcharts: any;
@@ -8,9 +8,13 @@ declare var Highcharts: any;
   templateUrl: './input.component.html',
   styleUrls: ['./input.component.css']
 })
-export class InputComponent {
+export class InputComponent implements OnInit {
   @Input() userInput: UserInput;
   @Output() userInputChanged = new EventEmitter<boolean>();
+
+  ngOnInit() {
+    this.updateProjections();
+  }
 
   updateProjections() {
     this.userInput.numDefectors = Math.round(this.userInput.numPh * this.userInput.percentageToDefect);

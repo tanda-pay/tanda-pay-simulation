@@ -1,16 +1,19 @@
 <mat-sidenav-container class="container">
-  <mat-sidenav #sidenav mode="side" class="side" [opened]="true">
-    <app-input [userInput]="userInput"></app-input>
+  <mat-sidenav #sidenav_left mode="side" class="sidenav-left" [opened]="true">
+    <app-scenario-selection (scenarioSelected)="onScenarioSelected($event); inputComponent.userInput = $event; inputComponent.updateProjections()" (simulationKickoffRequested)="contentComponent.runSimulation()"></app-scenario-selection>
+  </mat-sidenav>
+  <mat-sidenav #sidenav_right mode="side" class="sidenav-right" position="end" [opened]="true">
+    <app-input #inputComponent [userInput]="userInput"></app-input>
   </mat-sidenav>
 
   <mat-sidenav-content>
-    <div class="content-top">
-      <button mat-fab (click)="sidenav.toggle()">
+    <div class="content-top" style="display: flex; justify-content: flex-end">
+      <button mat-fab (click)="sidenav_right.toggle()">
         <mat-icon>edit</mat-icon>
       </button>
     </div>
     <div class="content-bottom">
-      <app-content [userInput]="userInput"></app-content>
+      <app-content #contentComponent [userInput]="userInput"></app-content>
       <!--<div *ngFor="let subGroup of phDB.policyHolderSubgroups">
         <i *ngFor="let policyHolder of subGroup" class="fas fa-male"
            matTooltip="id: {{policyHolder.id}}&#13;coverage: {{policyHolder.coverageValue}}&#13;premium: {{policyHolder.premiumVoteValue}}&#13;claim likelihood: {{policyHolder.claimValue[0]}}&#13;claim value: {{policyHolder.claimValue[1]}}&#13;participation rate: {{policyHolder.participationValue}}&#13;defect rate: {{policyHolder.defectValue}}"

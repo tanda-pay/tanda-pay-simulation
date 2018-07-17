@@ -1,5 +1,5 @@
-<mat-accordion [multi]="true">
-  <mat-expansion-panel *ngFor="let sim of simulations; let sim_index = index">
+<mat-accordion [multi]="true" >
+  <mat-expansion-panel *ngFor="let sim of simulations; let sim_index = index" [expanded]="true">
     <mat-expansion-panel-header>TandaPay Simulation {{sim_index+1}}</mat-expansion-panel-header>
     <div fxLayout="row" fxLayoutAlign="space-between end">
       <div fxFlex="30">

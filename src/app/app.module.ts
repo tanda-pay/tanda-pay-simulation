@@ -12,11 +12,13 @@ import {InputComponent} from './component/input/input.component';
 import {ContentComponent} from './component/content/content.component';
 import {SimulationViewerComponent} from './component/simulation-viewer/simulation.viewer.component';
 import {UnitySimulationService} from './service/unity.simulation.service';
+import {ScenarioSelectionComponent} from './component/scenario-selection/scenario.selection.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     SimulationViewerComponent,
+    ScenarioSelectionComponent,
     InputComponent,
     ContentComponent,
   ],

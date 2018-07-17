@@ -24,25 +24,17 @@
       </div>
       <div>
         <mat-form-field>
-          <input matInput placeholder="% of policyholders who will defect eventually"
-                 [ngModel]="userInput.percentageToDefect*100"
-                 (ngModelChange)="userInput.percentageToDefect=$event*.01"
-                 (input)="updateProjections()"
-                 type="number">
+          <input matInput placeholder="Number of policy periods" [(ngModel)]="userInput.numPolicyPeriods">
         </mat-form-field>
+        <br>
         <mat-form-field>
-          <input matInput placeholder="Defectors per period"
-                 [(ngModel)]="userInput.defectorCapPerPeriod"
-                 (input)="updateProjections()"
-                 type="number">
+          <input matInput placeholder="Length of a policy period (days)" [(ngModel)]="userInput.policyPeriodLength">
         </mat-form-field>
+        <br>
       </div>
     </div>
     <div class='separator-block'></div>
     <div class='derived-value-block'>
-      <mat-form-field>
-        <input matInput placeholder="Number of defectors" [ngModel]="userInput.numDefectors" disabled>
-      </mat-form-field>
     </div>
   </div>
 
@@ -70,32 +62,12 @@
   <div class='parent'>
     <div class='input-value-block'>
       <div>
-        Premiums policyholders are willing to pay,<br>approximated by
-        samples from a bell curve:
-      </div>
-      <br>
-      <div>
         <mat-form-field><span matPrefix>$ &nbsp;</span>
-          <input matInput placeholder="Mean value of the bell curve"
+          <input matInput placeholder="Premium per coverage unit"
                  [(ngModel)]="userInput.desiredPremiumMean" (input)="updateProjections()" type="number">
         </mat-form-field>
       </div>
-      <!--<div>-->
-        <!--<mat-form-field><span matPrefix>$ &nbsp;</span>-->
-          <!--<input matInput placeholder="Sigma value of bell curve"-->
-                 <!--[(ngModel)]="userInput.desiredPremiumStdev" (input)="updateProjections()" type="number">-->
-        <!--</mat-form-field>-->
-      <!--</div>-->
-      <div>
-        <div>
-          Average Overpayment Group Size <i
-          matTooltip="Info about the action"
-          class="fas fa-question-circle"></i>
-        </div>
-        <mat-slider min="4" max="11" [(ngModel)]="userInput.avgGroupSize"
-                    (input)="userInput.avgGroupSize = $event.value; updateProjections()"></mat-slider>
-        <div>{{userInput.avgGroupSize}}</div>
-      </div>
+
     </div>
     <div class='separator-block'></div>
     <div class='derived-value-block'>
@@ -103,12 +75,6 @@
       <div>
         <mat-form-field>
           <input matInput placeholder="Total premiums collected" [ngModel]="userInput.totalPremiums | currency:'USD':'symbol':'1.2'" disabled>
-        </mat-form-field>
-      </div>
-      <div>
-        <mat-form-field>
-          <input matInput placeholder="Average premium increase due to overpayment"
-                 [ngModel]="userInput.overpaymentIncrease | percent:'1.0-2'" disabled>
         </mat-form-field>
       </div>
     </div>
@@ -130,15 +96,9 @@
           </mat-form-field>
         </div>
       </div>
-
-      <div>
-        Percentage of policyholders that open claims every period,<br>approximated by
-        samples from a bell curve:
-      </div>
-      <br>
       <div>
         <mat-form-field>
-          <input matInput placeholder="Mean value of the bell curve"
+          <input matInput placeholder="Mean % of policyholders that open claims every period"
                  [ngModel]="userInput.mean_claimProportion*100" (ngModelChange)="userInput.mean_claimProportion=$event*.01" (input)="updateProjections()" type="number">
           <span matSuffix>% &nbsp;</span>
         </mat-form-field>
@@ -166,6 +126,50 @@
       <div>
         <mat-form-field>
           <input matInput placeholder="Average claim value" [ngModel]="userInput.averageClaimValue | currency:'USD':'symbol':'1.2'" disabled>
+        </mat-form-field>
+      </div>
+    </div>
+  </div>
+
+  <div class='tandapay-settings'>
+    <div class='input-value-block'>
+      <div>
+        <div>
+          Average Overpayment Group Size <i
+          matTooltip="Overpayment groups should be comprised of policyholders who are more familiar with each other,
+          who can keep each other accountable. These subgroups are punished when members defect,
+          thereby incentivizing them to discourage defecting."
+          class="fas fa-question-circle"></i>
+        </div>
+        <mat-slider min="4" max="11" [(ngModel)]="userInput.avgGroupSize"
+                    (input)="userInput.avgGroupSize = $event.value; updateProjections()"></mat-slider>
+        <div>{{userInput.avgGroupSize}}</div>
+      </div>
+      <div>
+        <mat-form-field>
+          <input matInput placeholder="% of policyholders who will defect eventually"
+                 [ngModel]="userInput.percentageToDefect*100"
+                 (ngModelChange)="userInput.percentageToDefect=$event*.01"
+                 (input)="updateProjections()"
+                 type="number">
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Defector limit per period"
+                 [(ngModel)]="userInput.defectorCapPerPeriod"
+                 (input)="updateProjections()"
+                 type="number">
+        </mat-form-field>
+      </div>
+    </div>
+    <div class='separator-block'></div>
+    <div class='derived-value-block'>
+      <div>
+        <mat-form-field>
+          <input matInput placeholder="Average premium increase due to overpayment"
+                 [ngModel]="userInput.overpaymentIncrease | percent:'1.0-2'" disabled>
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Number of defectors" [ngModel]="userInput.numDefectors" disabled>
         </mat-form-field>
       </div>
     </div>

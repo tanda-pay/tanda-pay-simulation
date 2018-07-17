@@ -109,7 +109,7 @@ export class ContentComponent implements OnInit {
   initGraph(divId, mean, stdev, premiums) {
     const xAxisMin = 0;
     const xAxisMax = this.userInput.tul;
-    const yAxisMax = .002;
+    const yAxisMax = .004;
     const stdDeviation3 = stdev * 3;
 
     const points = [];

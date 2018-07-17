@@ -1,20 +1,11 @@
 <!--<div>
         <mat-form-field> <input matInput
           placeholder="# of policyholders"
-          [(ngModel)]="userInput.numPh" (input)="userInputChanged.emit(true)" type="number"> </mat-form-field>
+          [(ngModel)]="userInput.numPh" (input)="scenarioSelected.emit(true)" type="number"> </mat-form-field>
       </div>-->
 
 <div id="claimsgraph" style="width:100%; height:400px;"></div>
 
-<mat-form-field>
-  <input matInput placeholder="Number of policy periods" [(ngModel)]="userInput.numPolicyPeriods">
-</mat-form-field>
-<br>
-<mat-form-field>
-  <input matInput placeholder="Length of a policy period (days)" [(ngModel)]="userInput.policyPeriodLength">
-</mat-form-field>
-<br>
-<button (click)="runSimulation()">New Simulation</button>
 <!--<div class="container">-->
   <!--<mat-horizontal-stepper>-->
     <!--<mat-step *ngFor="let period of currentDB.periods">-->

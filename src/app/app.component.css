@@ -10,8 +10,13 @@
   width: 900px;
 }
 
-.side {
-  width: 900px;
+.sidenav-left {
+  width: 300px;
+  background-color: #f1f1f1;
+}
+
+.sidenav-right {
+  width: 800px;
   background-color: #f1f1f1;
 }
 
