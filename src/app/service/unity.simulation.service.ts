@@ -1,11 +1,7 @@
 import {Injectable} from '@angular/core';
 import {PolicyHolder} from '../model/policy-holder';
-
-import {ParticipationType} from '../model/enum/ParticipationType';
+import {ClaimType, CoverageType, DamageType, DefectType, ParticipationType, PremiumVoteType, RedemptionType} from '../model/policy-holder';
 import {UnityState} from '../model/unity-state';
-import {DamageType} from '../model/enum/DamageType';
-import {PremiumVoteType} from '../model/enum/PremiumVoteType';
-import {ClaimType} from '../model/enum/ClaimType';
 
 declare var jStat: any;
 
@@ -31,7 +27,7 @@ export class UnitySimulationService {
       let arrPremiums = [];
 
       for (const ph of this.policyholders) {
-        const premiumVote = this.simulateDecision_PremiumVote(ph);
+        const premiumVote = ph.choosePremiumVote();
         arrPremiums[ph.id] = premiumVote;
       }
       arrPremiums.sort(function (a, b) { return a - b; });
@@ -49,8 +45,8 @@ export class UnitySimulationService {
       this.state.arrCoveragePerPH = Array(this.policyholders.length).fill(0);
 
       for (const ph of this.policyholders) {
-        if (this.simulateDecision_Participation(ph)) {
-          const num_cu = ph.coverageValue;
+        if (ph.chooseParticipation()) {
+          const num_cu = ph.chooseCoverage();
           this.state.purchasedCoverageHistory[this.state.currentPeriod][ph.id] = num_cu;
           this.state.paidPremiumsHistory[this.state.currentPeriod][ph.id] = num_cu * chosenPremium;
           this.state.premiumsEscrow += num_cu * chosenPremium;
@@ -68,7 +64,7 @@ export class UnitySimulationService {
 
     // Step 1: Policyholders have accidents/claim-worthy events
     for (const ph of this.policyholders) {
-      const damages = this.simulateDecision_DamageValue(ph);
+      const damages = ph.chooseDamageValue();
       this.state.claimableDamageHistory[this.state.currentDay][ph.id] = damages;
       this.state.accumulatedDamagesPerPH[ph.id] += damages;
     }
@@ -77,7 +73,7 @@ export class UnitySimulationService {
     // Step 3: Give Claim-Award Tokens to policyholders who submitted a claim, and update their daily CA redemption limit
     for (const ph of this.policyholders) {
       if (this.state.arrCoveragePerPH[ph.id] > 0) {
-        const willSubmitClaim = this.simulateDecision_SubmitClaim(ph);
+        const willSubmitClaim = ph.chooseSubmitClaim();
         if (willSubmitClaim) {
           const damages = Math.min(this.state.accumulatedDamagesPerPH[ph.id], this.state.arrCoveragePerPH[ph.id]);
           this.state.arrCoveragePerPH[ph.id] = 0;
@@ -101,7 +97,7 @@ export class UnitySimulationService {
       redemptionLimitMultiplier = this.state.redemptionWindowTiers[0] / this.state.redemptionWindowTiers[1];
     }
     for (const ph of this.policyholders) {
-      const numCA = Math.min(this.simulateDecision_RedeemCA(ph), this.state.arrCATokensPerPH[ph.id] * redemptionLimitMultiplier);
+      const numCA = Math.min(ph.chooseRedeemCA(), this.state.arrCATokensPerPH[ph.id] * redemptionLimitMultiplier);
       this.state.CATokenRedemptionHistory[this.state.currentDay][ph.id] = numCA;
       this.state.arrCATokensPerPH[ph.id] -= numCA;
       totalCATokenRedemption += numCA;
@@ -159,7 +155,7 @@ export class UnitySimulationService {
 
   checkCatastrophe() {
     const bxc = this.state.bxc;
-    const totalPolicyHolderCA = jStat.sum(this.state.arrCATokensPerPH)
+    const totalPolicyHolderCA = jStat.sum(this.state.arrCATokensPerPH);
     const requiredCA = totalPolicyHolderCA - bxc.CA;
     console.log('CA awarded total: ' + totalPolicyHolderCA + ' - CA in BXC: ' + bxc.CA);
     const currentPrice = bxc.ETH * (1 - Math.pow((1 - 1 / bxc.CA), (1 / bxc.weight)));
@@ -201,44 +197,44 @@ export class UnitySimulationService {
     const c = a; // const c = this.state.numCA_TUL + this.state.numCA_TOL;
     return Math.abs(a - b) < .01;
   }
-
-  simulateDecision_PremiumVote(ph: PolicyHolder): number {
-    if (ph.premiumVoteType === PremiumVoteType.Constant) {
-      return ph.premiumVoteValue;
-    } else if (ph.premiumVoteType === PremiumVoteType.Eval) {
-      return eval(ph.premiumVoteValue);
-    }
-    return 0;
-  }
-
-  simulateDecision_Participation(p: PolicyHolder): boolean {
-    if (p.participationType === ParticipationType.Random) {
-      return Math.random() < p.participationValue;
-    } else if (p.participationType === ParticipationType.Eval) {
-      return eval(p.participationValue);
-    }
-    return true;
-  }
-
-  simulateDecision_DamageValue(ph: PolicyHolder): number {
-    if (ph.damageType === DamageType.PredeterminedDamagesPerDay) {
-      return Math.max(ph.damageValue[this.state.currentDay], 0);
-    } else if (ph.damageType === DamageType.Eval) {
-      return eval(ph.damageValue);
-    }
-    return 0;
-  }
-
-  simulateDecision_SubmitClaim(p: PolicyHolder): boolean {
-    if (p.claimType === ClaimType.Function) {
-      return p.claimValue(this);
-    }
-    return false;
-  }
-
-  simulateDecision_RedeemCA(p: PolicyHolder): number {
-    return p.redemptionValue(this);
-  }
+  //
+  // simulateDecision_PremiumVote(ph: PolicyHolder): number {
+  //   if (ph.premiumVoteType === PremiumVoteType.Constant) {
+  //     return ph.premiumVoteValue;
+  //   } else if (ph.premiumVoteType === PremiumVoteType.Eval) {
+  //     return eval(ph.premiumVoteValue);
+  //   }
+  //   return 0;
+  // }
+  //
+  // simulateDecision_Participation(p: PolicyHolder): boolean {
+  //   if (p.participationType === ParticipationType.Random) {
+  //     return Math.random() < p.participationValue;
+  //   } else if (p.participationType === ParticipationType.Eval) {
+  //     return eval(p.participationValue);
+  //   }
+  //   return true;
+  // }
+  //
+  // simulateDecision_DamageValue(ph: PolicyHolder): number {
+  //   if (ph.damageType === DamageType.PredeterminedDamagesPerDay) {
+  //     return Math.max(ph.damageValue[this.state.currentDay], 0);
+  //   } else if (ph.damageType === DamageType.Eval) {
+  //     return eval(ph.damageValue);
+  //   }
+  //   return 0;
+  // }
+  //
+  // simulateDecision_SubmitClaim(p: PolicyHolder): boolean {
+  //   if (p.claimType === ClaimType.Function) {
+  //     return p.claimValue(this);
+  //   }
+  //   return false;
+  // }
+  //
+  // simulateDecision_RedeemCA(p: PolicyHolder): number {
+  //   return p.redemptionValue(this);
+  // }
 
   generateSimulationSummary() {
     this.state.totalEthPaidIn = 0;

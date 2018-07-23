@@ -1,13 +1,7 @@
 import {Injectable} from '@angular/core';
 import {PolicyHolder} from '../model/policy-holder';
+import {ClaimType, CoverageType, DamageType, DefectType, ParticipationType, PremiumVoteType, RedemptionType} from '../model/policy-holder';
 import {UserInput} from '../model/user-input';
-import {ClaimType} from '../model/enum/ClaimType';
-import {CoverageType} from '../model/enum/CoverageType';
-import {DamageType} from '../model/enum/DamageType';
-import {DefectType} from '../model/enum/DefectType';
-import {ParticipationType} from '../model/enum/ParticipationType';
-import {PremiumVoteType} from '../model/enum/PremiumVoteType';
-import {RedemptionType} from '../model/enum/RedemptionType';
 import {UnitySimulationService} from './unity.simulation.service';
 
 declare var jStat: any;
@@ -80,45 +74,24 @@ export class SimulationSetupService {
     }
     for (let i = 0; i < chosenDefectors.length; i++) {
       const chosenDefector = chosenDefectors[i];
-      arrPh[chosenDefector].defectType = DefectType.Function;
-      arrPh[chosenDefector].defectValue = function (simulation_service) {
-        if (this.memory.defectDelay > 0) {
-          this.memory.defectDelay--;
-          return false;
-        } else {
-          return true;
-        }
-        // const periodLength = simulation_service.state.policyPeriodLength;
-        // const periodIndex = simulation_service.state.currentPeriod;
-        // const currentPeriod = simulation_service.state.periods[periodIndex];
-        // if (this.damageType === DamageType.PredeterminedDamagesPerDay) {
-        //   if (jStat.sum(this.damageValue.slice(periodIndex * periodLength, (periodIndex + 1) * periodLength - 1)) > 0) {
-        //     return false;
-        //   }
-        // }
-        // if (currentPeriod.tol / currentPeriod.totalPremiumPayment > Math.random() * .8 + .2) {
-        //   return true;
-        // }
-        // return false;
-      };
-      arrPh[chosenDefector].memory.defectDelay = chosenDefectorsDelay[i];
-
+      arrPh[chosenDefector].defectType = DefectType.DefectAfterTimeElapsed;
+      arrPh[chosenDefector].defectValue = chosenDefectorsDelay[i];
     }
   }
 
   setDamages(arrPh: PolicyHolder[],
              periodCount: number,
-             dayCount: number,
+             periodLength: number,
              mean_Claims2Coverage: number, stdev_Claims2Coverage: number,
              mean_ClaimantProportion: number, stdev_ClaimantProportion: number,
              majorCatastrophe: Catastrophe,
              minorCatastrophe: Catastrophe
-             ) {
+  ) {
 
     let totalCoverageUnits = 0;
     for (const ph of arrPh) {
       totalCoverageUnits += ph.coverageValue;
-      ph.damageType = DamageType.PredeterminedDamagesPerDay;
+      ph.damageType = DamageType.PredeterminedDamages;
       ph.damageValue = [];
     }
 
@@ -140,29 +113,77 @@ export class SimulationSetupService {
       }
       const valueOfAllClaims = (mean_Claims2Coverage + (zScore * stdev_Claims2Coverage)) * totalCoverageUnits;
 
-
-      for (let j = 0; j < dayCount; j++) {
+      for (let j = 0; j < periodLength; j++) {
         for (const ph of arrPh) {
-          ph.damageValue[i * dayCount + j] = 0;
+          ph.damageValue[i * periodLength + j] = 0;
         }
-        if (Math.random() < majorCatastrophe.dailyLikelihood) {
+        if (Math.random() < majorCatastrophe.likelihood) {
           const catastropheDamage = jStat.normal.sample(majorCatastrophe.meanDamage, majorCatastrophe.stdevDamage) * totalCoverageUnits;
           for (const ph of arrPh) {
-            ph.damageValue[i * dayCount + j] += ph.coverageValue / totalCoverageUnits * catastropheDamage;
+            ph.damageValue[i * periodLength + j] += ph.coverageValue / totalCoverageUnits * catastropheDamage;
           }
-        } else if (Math.random() < minorCatastrophe.dailyLikelihood) {
+        } else if (Math.random() < minorCatastrophe.likelihood) {
           const catastropheDamage = jStat.normal.sample(minorCatastrophe.meanDamage, minorCatastrophe.stdevDamage) * totalCoverageUnits;
           for (const ph of arrPh) {
-            ph.damageValue[i * dayCount + j] += ph.coverageValue / totalCoverageUnits * catastropheDamage;
+            ph.damageValue[i * periodLength + j] += ph.coverageValue / totalCoverageUnits * catastropheDamage;
           }
         }
       }
 
       for (const ph of claimants) {
-        const randomDay = Math.floor(Math.random() * dayCount);
-        ph.damageValue[i * dayCount + randomDay] += ph.coverageValue / chosenClaimantsCoverage * valueOfAllClaims;
+        const randomDay = Math.floor(Math.random() * periodLength);
+        ph.damageValue[i * periodLength + randomDay] += ph.coverageValue / chosenClaimantsCoverage * valueOfAllClaims;
       }
 
+    }
+  }
+
+  //
+  setDamages_2(arrPh: PolicyHolder[],
+               periodCount: number,
+               dayCount: number,
+               mean_Claims2Coverage: number, stdev_Claims2Coverage: number,
+               likelihood_damagePerDay: number,
+               majorCatastrophe: Catastrophe,
+               minorCatastrophe: Catastrophe
+  ) {
+
+    let totalCoverageUnits = 0;
+    for (const ph of arrPh) {
+      totalCoverageUnits += ph.coverageValue;
+      ph.damageType = DamageType.PredeterminedDamagesPerDay;
+      ph.damageValue = [];
+      for (let i = 0; i < periodCount * dayCount; i++) {
+        let damage = 0;
+        if (Math.random() < likelihood_damagePerDay) {
+          damage = jStat.normal.sample(mean_Claims2Coverage, stdev_Claims2Coverage);
+          // Resample if out of bounds, the resulting data can be modeled by a truncated-normal-distribution
+          let retries = 5;
+          while (damage < 0 || damage > 1) {
+            if (retries < 0) {
+              damage = Math.max(damage, 0);
+              damage = Math.min(damage, 1);
+            }
+            damage = jStat.normal.sample(mean_Claims2Coverage, stdev_Claims2Coverage);
+            retries--;
+          }
+        }
+        ph.damageValue[i] = damage;
+      }
+    }
+
+    for (let p = 0; p < periodCount; p++) {
+      if (Math.random() < majorCatastrophe.likelihood) {
+        const catastropheDay = Math.floor(Math.random() * dayCount) + (p * dayCount);
+        for (const ph of arrPh) {
+          ph.damageValue[catastropheDay] += majorCatastrophe.meanDamage;
+        }
+      } else if (Math.random() < minorCatastrophe.likelihood) {
+        const catastropheDay = Math.floor(Math.random() * dayCount) + (p * dayCount);
+        for (const ph of arrPh) {
+          ph.damageValue[catastropheDay] += minorCatastrophe.meanDamage;
+        }
+      }
     }
   }
 
@@ -190,7 +211,6 @@ export class SimulationSetupService {
         const policyPeriodLength = simulationService.state.policyPeriodLength;
         const currentDay = simulationService.state.currentDay - simulationService.state.currentPeriod * policyPeriodLength;
         if (myCurrentDamage > myCoverage * .5) {
-          console.log(myCoverage + ' ' + myCurrentDamage);
           willSubmit = true;
         } else if (currentDay + 1 === policyPeriodLength) {
           // console.log(simulationService.state.currentDay + ' ' + simulationService.state.currentPeriod)
@@ -241,6 +261,7 @@ export class SimulationSetupService {
     for (const ph of arrPh) {
       ph.coverageType = CoverageType.Constant;
       ph.coverageValue = arrCoverageUnits[ph.id];
+      ph.coverageValue = tul / arrPh.length;
     }
   }
 
@@ -269,12 +290,12 @@ export class SimulationSetupService {
 }
 
 export class Catastrophe {
-  dailyLikelihood: number;
+  likelihood: number;
   meanDamage: number;
   stdevDamage: number;
 
   constructor(a, b, c) {
-    this.dailyLikelihood = a;
+    this.likelihood = a;
     this.meanDamage = b;
     this.stdevDamage = c;
   }

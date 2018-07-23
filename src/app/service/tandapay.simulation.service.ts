@@ -1,11 +1,7 @@
 import {Injectable} from '@angular/core';
 
 import {PolicyHolder} from '../model/policy-holder';
-import {CoverageType} from '../model/enum/CoverageType';
-import {DefectType} from '../model/enum/DefectType';
-import {ParticipationType} from '../model/enum/ParticipationType';
-import {PremiumVoteType} from '../model/enum/PremiumVoteType';
-import {DamageType} from '../model/enum/DamageType';
+import {ClaimType, CoverageType, DamageType, DefectType, ParticipationType, PremiumVoteType, RedemptionType} from '../model/policy-holder';
 
 import {TandapayState} from '../model/tandapay-state';
 
@@ -72,7 +68,7 @@ export class TandapaySimulationService {
     // nextPeriod.chosenPremium = chosenPremium;
     const arrPremiums = [];
     for (const ph of arrPh) {
-      const premiumVote = this.simulateDecision_PremiumVote(ph);
+      const premiumVote = ph.choosePremiumVote();
       this.state.premiumVoteHistory[this.state.currentPeriod][ph.id] = premiumVote;
       arrPremiums.push(premiumVote);
     }
@@ -81,8 +77,8 @@ export class TandapaySimulationService {
 
     // Step 2: Offer chosen premium, accept premium commitments, and note participants who opt-out
     for (const ph of arrPh) {
-      if (this.simulateDecision_Participation(ph)) {
-        const purchasedCoverage = this.simulateDecision_CoveragePurchase(ph);
+      if (ph.chooseParticipation()) {
+        const purchasedCoverage = ph.chooseCoverage();
         this.state.purchasedCoverageHistory[this.state.currentPeriod][ph.id] = purchasedCoverage;
         this.state.premiumCommittedHistory[this.state.currentPeriod][ph.id] = purchasedCoverage * chosenPremium;
         nextPeriod.totalCoverageUnits += purchasedCoverage;
@@ -111,31 +107,15 @@ export class TandapaySimulationService {
 
     // Step 4: Aggregate claims of participating policyholders during the policy period
     // To faithfully match user input, we use an awful hack here that messes with the policyholder's decisionmaking
-    const zScore = jStat.normal.sample(0, 1);
-    const predestinedClaimantCount = this.state.averageClaimants;
-    const weightMap = {};
-    for (const ph of arrPh) {
-      weightMap[ph.id] = ph.coverageValue;
-    }
-    const predestinedClaimants = randomWeightedSampleNoReplacement(weightMap, predestinedClaimantCount);
-    let chosenClaimantsCoverage = 0;
-    for (const ph_id of predestinedClaimants) {
-      chosenClaimantsCoverage += this.state.purchasedCoverageHistory[this.state.currentPeriod][parseInt(ph_id, 10)];
-    }
-    const predestinedValueOfAllClaims = (this.state.averageTol + (zScore * this.state.stdevTol)) * nextPeriod.totalCoverageUnits;
-    for (const ph of arrPh) {
-      ph.damageType = DamageType.PredeterminedDamagesPerPeriod;
-      if (predestinedClaimants.indexOf(ph.id.toString()) < 0) {
-        ph.damageValue[this.state.currentPeriod] = 0;
-      } else {
-        const coverageBought = this.state.purchasedCoverageHistory[this.state.currentPeriod][ph.id];
-        ph.damageValue[this.state.currentPeriod] = Math.min((coverageBought / chosenClaimantsCoverage * predestinedValueOfAllClaims) / coverageBought, 1);
-      }
-    }
+
     for (const ph of arrPh) {
       const ph_cu = this.state.purchasedCoverageHistory[this.state.currentPeriod][ph.id];
       if (ph_cu > 0) {
-        const claimValue = Math.min(this.simulateDecision_DamageValue(ph), ph_cu);
+        let accumulatedDamages = 0;
+        for (let d = 0; d < this.state.policyPeriodLength; d++) {
+          accumulatedDamages += ph.chooseDamageValue();
+        }
+        const claimValue = Math.min(accumulatedDamages, ph_cu);
         this.state.claimSubmittedHistory[this.state.currentPeriod][ph.id] = claimValue;
         if (claimValue > 0) {
           nextPeriod.tol += claimValue;
@@ -150,7 +130,7 @@ export class TandapaySimulationService {
     for (const ph of arrPh) {
       const ph_cu = this.state.purchasedCoverageHistory[this.state.currentPeriod][ph.id];
       if (ph_cu > 0) {
-        const defectChosen = this.simulateDecision_Defect(ph);
+        const defectChosen = ph.chooseDefect();
         if (defectChosen) {
           nextPeriod.numDefectors++;
           this.state.blacklistedPolicyholders.push(ph.id);
@@ -213,6 +193,10 @@ export class TandapaySimulationService {
       }
     }
     nextPeriod.claimPaymentRatio = Math.min(nextPeriod.totalPremiumsAfterDefect / nextPeriod.totalEligibleClaims, 1);
+    if (nextPeriod.claimPaymentRatio > (1 - (1 / (2 * this.state.coverageUnitValue * this.state.coverageUnitValue * nextPeriod.totalPremiumsAfterDefect)))) {
+      // If the claim payment ratio is close enough that the dollar values of premiums and claims appear equal, bump the ratio up to 1.
+      nextPeriod.claimPaymentRatio = 1;
+    }
     nextPeriod.totalRebates = Math.max(nextPeriod.totalPremiumsAfterDefect - nextPeriod.totalEligibleClaims, 0);
     // Award the Claims. In this code, all non-defectors are awarded their claims, and then the punished subgroups have their awards set to zero
     for (const subgroup of this.state.subgroups) {
@@ -276,71 +260,71 @@ export class TandapaySimulationService {
     this.state.currentPeriod++;
   }
 
-  simulateDecision_CoveragePurchase(ph: PolicyHolder): number {
-    if (ph.coverageType === CoverageType.Constant) {
-      return ph.coverageValue;
-    } else if (ph.coverageType === CoverageType.Eval) {
-      return eval(ph.coverageValue);
-    }
-    return 0;
-  }
-
-  simulateDecision_PremiumVote(ph: PolicyHolder): number {
-    if (ph.premiumVoteType === PremiumVoteType.Constant) {
-      return ph.premiumVoteValue;
-    } else if (ph.premiumVoteType === PremiumVoteType.Eval) {
-      return eval(ph.premiumVoteValue);
-    }
-    return 0;
-  }
-
-  simulateDecision_Participation(ph: PolicyHolder): boolean {
-    if (ph.participationType === ParticipationType.Random) {
-      return Math.random() < ph.participationValue;
-    } else if (ph.participationType === ParticipationType.Eval) {
-      return eval(ph.participationValue);
-    }
-    return true;
-  }
-
-  simulateDecision_DamageValue(ph: PolicyHolder): number {
-    if (ph.damageType === DamageType.PredeterminedDamagesPerDay) {
-      let claimValue = 0;
-      for (let i = 0; i < this.state.policyPeriodLength; i++) {
-        claimValue += ph.damageValue[(this.state.currentPeriod * this.state.policyPeriodLength) + i];
-      }
-      return claimValue;
-    } else if (ph.damageType === DamageType.PredeterminedDamagesPerPeriod) {
-      return ph.damageValue[(this.state.currentPeriod)];
-    } else if (ph.damageType === DamageType.Eval) {
-      return eval(ph.damageValue);
-    }
-    return 0;
-  }
-
-  // simulateDecision_ClaimValue(p: PolicyHolder): number {
-  //   if (p.claimType === ClaimType.LikelihoodAndClaimAmount) {
-  //     if (Math.random() < p.claimValue[0]) {
-  //       return p.claimValue[1];
-  //     } else {
-  //       return 0;
-  //     }
-  //   } else if (p.claimType === ClaimType.LikelihoodAndClaimAmountButPredestination) {
-  //     return p.claimValue[2];
-  //   } else if (p.claimType === ClaimType.Eval) {
-  //     return eval(p.claimValue);
+  // simulateDecision_CoveragePurchase(ph: PolicyHolder): number {
+  //   if (ph.coverageType === CoverageType.Constant) {
+  //     return ph.coverageValue;
+  //   } else if (ph.coverageType === CoverageType.Eval) {
+  //     return eval(ph.coverageValue);
   //   }
   //   return 0;
   // }
-
-  simulateDecision_Defect(p: PolicyHolder): boolean {
-    if (p.defectType === DefectType.Random) {
-      return Math.random() < p.defectValue;
-    } else if (p.defectType === DefectType.Function) {
-      return p.defectValue(this);
-    }
-    return false;
-  }
+  //
+  // simulateDecision_PremiumVote(ph: PolicyHolder): number {
+  //   if (ph.premiumVoteType === PremiumVoteType.Constant) {
+  //     return ph.premiumVoteValue;
+  //   } else if (ph.premiumVoteType === PremiumVoteType.Eval) {
+  //     return eval(ph.premiumVoteValue);
+  //   }
+  //   return 0;
+  // }
+  //
+  // simulateDecision_Participation(ph: PolicyHolder): boolean {
+  //   if (ph.participationType === ParticipationType.Random) {
+  //     return Math.random() < ph.participationValue;
+  //   } else if (ph.participationType === ParticipationType.Eval) {
+  //     return eval(ph.participationValue);
+  //   }
+  //   return true;
+  // }
+  //
+  // simulateDecision_DamageValue(ph: PolicyHolder): number {
+  //   if (ph.damageType === DamageType.PredeterminedDamagesPerDay) {
+  //     let claimValue = 0;
+  //     for (let i = 0; i < this.state.policyPeriodLength; i++) {
+  //       claimValue += ph.damageValue[(this.state.currentPeriod * this.state.policyPeriodLength) + i];
+  //     }
+  //     return claimValue * ph.coverageValue;
+  //   } else if (ph.damageType === DamageType.PredeterminedDamagesPerPeriod) {
+  //     return ph.damageValue[(this.state.currentPeriod)];
+  //   } else if (ph.damageType === DamageType.Eval) {
+  //     return eval(ph.damageValue);
+  //   }
+  //   return 0;
+  // }
+  //
+  // // simulateDecision_ClaimValue(p: PolicyHolder): number {
+  // //   if (p.claimType === ClaimType.LikelihoodAndClaimAmount) {
+  // //     if (Math.random() < p.claimValue[0]) {
+  // //       return p.claimValue[1];
+  // //     } else {
+  // //       return 0;
+  // //     }
+  // //   } else if (p.claimType === ClaimType.LikelihoodAndClaimAmountButPredestination) {
+  // //     return p.claimValue[2];
+  // //   } else if (p.claimType === ClaimType.Eval) {
+  // //     return eval(p.claimValue);
+  // //   }
+  // //   return 0;
+  // // }
+  //
+  // simulateDecision_Defect(p: PolicyHolder): boolean {
+  //   if (p.defectType === DefectType.Random) {
+  //     return Math.random() < p.defectValue;
+  //   } else if (p.defectType === DefectType.Function) {
+  //     return p.defectValue(this);
+  //   }
+  //   return false;
+  // }
 
   generateSimulationSummary() {
     const periods = this.state.periods;

@@ -19,7 +19,7 @@ declare var Highcharts: any;
 export class ContentComponent implements OnInit {
   // @Input() currentDB: SimulationDatabase;
   @Input() userInput: UserInput;
-  simulations: TandapayState[];
+  tandapaySimulations: TandapayState[];
   unitySimulations: UnityState[];
 
   highchart;
@@ -29,7 +29,7 @@ export class ContentComponent implements OnInit {
     private simulationService: TandapaySimulationService,
     private unitySimulationService: UnitySimulationService
   ) {
-    this.simulations = [];
+    this.tandapaySimulations = [];
     this.unitySimulations = [];
 
   }
@@ -39,9 +39,8 @@ export class ContentComponent implements OnInit {
   }
 
   onSimulationTabChanged(tabIndex) {
-    console.log('detected tab change');
-    const collectedPremiums = this.simulations[0].periods[tabIndex].totalPremiumsAfterDefect * this.simulations[0].coverageUnitValue;
-    const claims = this.simulations[0].periods[tabIndex].totalEligibleClaims * this.simulations[0].coverageUnitValue;
+    const collectedPremiums = this.tandapaySimulations[0].periods[tabIndex].totalPremiumsAfterDefect * this.tandapaySimulations[0].coverageUnitValue;
+    const claims = this.tandapaySimulations[0].periods[tabIndex].totalEligibleClaims * this.tandapaySimulations[0].coverageUnitValue;
     this.updateGraph(collectedPremiums, claims);
   }
 
@@ -235,12 +234,12 @@ export class ContentComponent implements OnInit {
     // const currentDB = this.simulationSetupService.userInputToDB(this.userInput);
     const policyholders = this.simulationSetupService.userInputToPolicyholders(this.userInput);
     this.simulationService.policyholders = policyholders;
-    this.simulationService.state = new TandapayState(this.userInput.policyPeriodLength, this.userInput.cuValue, this.userInput.mean_Claims2TUL, this.userInput.stdev_Claims2TUL, this.userInput.totalClaimCount);
+    this.simulationService.state = new TandapayState(this.userInput.policyPeriodLength, this.userInput.cuValue, this.userInput.mean_Claims2TUL, this.userInput.stdev_Claims2TUL, this.userInput.estimatedClaimCount);
     this.simulationService.state.subgroups = this.simulationSetupService.generateSubgroups(policyholders, this.userInput.avgGroupSize);
     this.simulationService.generateSimulation(this.userInput.numPolicyPeriods);
     this.simulationService.generateSimulationSummary();
-    // this.simulations.push(this.simulationService.state);
-    this.simulations[0] = this.simulationService.state;
+    // this.tandapaySimulations.push(this.simulationService.state);
+    this.tandapaySimulations[0] = this.simulationService.state;
 
     this.unitySimulationService.policyholders = policyholders;
     this.unitySimulationService.state = new UnityState(this.userInput.policyPeriodLength, this.userInput.cuValue, [10, 20, 30]);

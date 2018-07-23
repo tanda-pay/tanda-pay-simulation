@@ -17,19 +17,7 @@ export class InputComponent implements OnInit {
   }
 
   updateProjections() {
-    this.userInput.numDefectors = Math.round(this.userInput.numPh * this.userInput.percentageToDefect);
-    this.userInput.numCu = this.userInput.tul / this.userInput.cuValue;
-    this.userInput.totalPremiums = this.userInput.numCu * this.userInput.desiredPremiumMean;
-    this.userInput.overpaymentIncrease = 1 / (this.userInput.avgGroupSize - 1);
-    this.userInput.tol = this.userInput.tul * this.userInput.mean_Claims2TUL;
-    this.userInput.totalClaimCount = this.userInput.numPh * this.userInput.mean_claimProportion;
-    this.userInput.averageClaimValue = this.userInput.tol / this.userInput.totalClaimCount;
-    if (this.userInput.mean_Claims2TUL > this.userInput.mean_claimProportion) {
-      this.userInput.mean_claimProportion = this.userInput.mean_Claims2TUL;
-    }
-    this.userInput.catastropheEV = this.userInput.majorCatastropheMeanDamage * this.userInput.majorCatastropheLikelihood * this.userInput.policyPeriodLength;
-    this.userInput.catastropheEV += this.userInput.minorCatastropheMeanDamage * this.userInput.minorCatastropheLikelihood * this.userInput.policyPeriodLength;
-    this.userInput.catastropheEV *= this.userInput.policyPeriodLength * this.userInput.cuValue;
+    this.userInput.updateDerivedValues();
     // let graphMean = this.userInput.desiredPremiumMean;
     // let graphStdev = this.userInput.desiredPremiumStdev;
     // let premiumAxisMax = this.userInput.cuValue / 4;
@@ -37,12 +25,12 @@ export class InputComponent implements OnInit {
     //   premiumAxisMax = this.userInput.cuValue;
     // }
     // this.initGraph('premiumgraph', graphMean, graphStdev, 0, premiumAxisMax);
-    const graphMean = this.userInput.mean_Claims2TUL * this.userInput.tul;
+    const graphMean = this.userInput.estimatedTOL;
     const graphStdev = this.userInput.stdev_Claims2TUL * this.userInput.tul;
     let claimValueAxisMax = this.userInput.tul;
-    // if (claimValueAxisMax < graphMean + 2 * graphStdev) {
-    //   claimValueAxisMax = this.userInput.tul;
-    // }
+    if (claimValueAxisMax < graphMean + 2 * graphStdev) {
+      claimValueAxisMax = this.userInput.tul;
+    }
     this.drawBellCurveForTOL('tolgraph', graphMean, graphStdev, claimValueAxisMax, this.userInput.totalPremiums);
     // graphMean = this.userInput.mean_claimProportion * this.userInput.numPh;
     // graphStdev = this.userInput.stdev_claimProportion * this.userInput.numPh;

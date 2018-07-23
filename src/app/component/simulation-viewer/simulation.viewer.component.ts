@@ -12,8 +12,8 @@ import {UnityState} from '../../model/unity-state';
   styleUrls: ['simulation-viewer-component.css'],
 })
 export class SimulationViewerComponent {
-  @Input() simulations: TandapayState[];
-  @Input() unitySimulations: UnityState[]
+  @Input() tandapaySimulations: TandapayState[];
+  @Input() unitySimulations: UnityState[];
   @Output() simulationTabChanged = new EventEmitter<number>();
   tabSelections = [];
   unityDayTabSelections = [];
