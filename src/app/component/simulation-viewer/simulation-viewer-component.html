@@ -3,6 +3,7 @@
     <mat-expansion-panel-header>TandaPay Simulation {{sim_index+1}}</mat-expansion-panel-header>
     <div fxLayout="row" fxLayoutAlign="space-between end">
       <div fxFlex="30">
+        <li>{{sim.totalEligibleClaimsSum * sim.coverageUnitValue | currency:'USD':'symbol':'1.2'}} worth of damages occurred.</li>
         <li>Claims were underpaid {{sim.claimUnderpaidFrequency | percent:'1.0-3'}} of the time</li>
         <li>On average claims were paid {{sim.claimAwardRatio | percent:'1.0-3'}} of their value</li>
         <li *ngIf="sim.underpaidClaimAwardRatio !== -1">When claims were not paid out in full, on average they were paid {{sim.underpaidClaimAwardRatio | percent:'1.0-3'}} of their value</li>

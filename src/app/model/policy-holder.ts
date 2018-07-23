@@ -1,4 +1,3 @@
-
 export class PolicyHolder {
   static numPolicyHolder = 0;
 
@@ -25,6 +24,7 @@ export class PolicyHolder {
   premiumVoteType: PremiumVoteType;
   premiumVoteValue: any;
 
+  state: any;
   knowledge: any;
 
 
@@ -73,14 +73,9 @@ export class PolicyHolder {
       }
       return this.damageValue[this.knowledge['damageIndex']++];
     } else if (this.damageType === DamageType.PredeterminedDamagesPerDay) {
-      const policyPeriodLength = this.knowledge.state.policyPeriodLength;
-      let claimValue = 0;
-      for (let i = 0; i < policyPeriodLength; i++) {
-        claimValue += this.damageValue[(this.knowledge.state.currentPeriod * policyPeriodLength) + i];
-      }
-      return claimValue * this.coverageValue;
+      return this.damageValue[this.state.currentDay];
     } else if (this.damageType === DamageType.PredeterminedDamagesPerPeriod) {
-      return this.damageValue[this.knowledge.state.currentPeriod];
+      return this.damageValue[this.state.currentPeriod];
     } else if (this.damageType === DamageType.Function) {
       return this.damageValue();
     }
@@ -90,6 +85,19 @@ export class PolicyHolder {
   chooseSubmitClaim(): boolean {
     if (this.claimType === ClaimType.Function) {
       return this.claimValue();
+    } else if (this.claimType === ClaimType.Strategy) {
+      // Strategy: Submit claim if damages exceed 50% of coverage OR if it is the last day of the policy period
+      let willSubmit = false;
+      const myCurrentDamage = this.state.accumulatedDamagesPerPH[this.id];
+      const myCoverage = this.state.arrCoveragePerPH[this.id];
+      const policyPeriodLength = this.state.policyPeriodLength;
+      const currentDay = this.state.currentDay - this.state.currentPeriod * policyPeriodLength;
+      if (myCurrentDamage > myCoverage * .5) {
+        willSubmit = true;
+      } else if (currentDay + 1 === policyPeriodLength) {
+        willSubmit = true;
+      }
+      return willSubmit;
     }
     return false;
   }
@@ -97,6 +105,26 @@ export class PolicyHolder {
   chooseRedeemCA(): number {
     if (this.redemptionType === RedemptionType.Random) {
       return Math.random();
+    } else if (this.redemptionType === RedemptionType.Strategy) {
+      let willRedeem = true;
+      const current_bxc_rate = this.state.bxc.solveCurrentExchangeRate();
+      const policyPeriodLength = this.state.policyPeriodLength;
+      const currentDay = this.state.currentDay - this.state.currentPeriod * policyPeriodLength;
+      if (current_bxc_rate < 1 - (.55 / policyPeriodLength * currentDay)) {
+        // If the exchange rate falls below the line where payments reach a 45% rate by the end of the policy period claimants always accept a payment due to lack of confidence premiums will restore the exchange rate sufficiently enough to forgo payment (loss of confidence scenario)
+        willRedeem = true;
+      } else if (currentDay >= policyPeriodLength * .9 && current_bxc_rate < .9) {
+        // When policy period is 90% finished, claimants will not accept an exchange rate payment of less than 90%
+        willRedeem = false;
+      } else if (currentDay >= policyPeriodLength * .8 && current_bxc_rate < .55) {
+        // When policy period is 80% finished, claimants will not accept an exchange rate payment of less than 55%
+        willRedeem = false;
+      }
+      if (willRedeem) {
+        return this.state.arrCATokensPerPH[this.id]; // Rely on the UnitySimulationService to enforce the CA redemption limit
+      } else {
+        return 0;
+      }
     } else if (this.redemptionType === RedemptionType.Function) {
       return this.redemptionValue();
     }
@@ -120,6 +148,7 @@ export class PolicyHolder {
 
 export enum ClaimType {
   Random,
+  Strategy,
   Function
 }
 
@@ -153,6 +182,7 @@ export enum DamageType {
 
 export enum RedemptionType {
   Random,
+  Strategy,
   Function
 }
 

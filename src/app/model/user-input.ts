@@ -60,7 +60,7 @@ export class UserInput {
     this.numPolicyPeriods = 50;
     this.policyPeriodLength = 45;
 
-    this.unityBxcInitialEth = this.numCu * .1;
+    this.unityBxcInitialEth = this.tul / this.cuValue * .1;
     this.unityBxcInitialWeight = .5;
 
   }

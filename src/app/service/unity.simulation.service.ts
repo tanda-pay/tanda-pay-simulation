@@ -1,6 +1,5 @@
 import {Injectable} from '@angular/core';
 import {PolicyHolder} from '../model/policy-holder';
-import {ClaimType, CoverageType, DamageType, DefectType, ParticipationType, PremiumVoteType, RedemptionType} from '../model/policy-holder';
 import {UnityState} from '../model/unity-state';
 
 declare var jStat: any;
@@ -157,8 +156,7 @@ export class UnitySimulationService {
     const bxc = this.state.bxc;
     const totalPolicyHolderCA = jStat.sum(this.state.arrCATokensPerPH);
     const requiredCA = totalPolicyHolderCA - bxc.CA;
-    console.log('CA awarded total: ' + totalPolicyHolderCA + ' - CA in BXC: ' + bxc.CA);
-    const currentPrice = bxc.ETH * (1 - Math.pow((1 - 1 / bxc.CA), (1 / bxc.weight)));
+    const currentPrice = bxc.solveCurrentExchangeRate();
     if (requiredCA > 0) {
       console.log('CATASTROPHE on day ' + this.state.currentDay)
       this.state.numCA_CAT -= requiredCA;
@@ -305,6 +303,10 @@ export class BancorContract {
     // const weight = Math.log(1 - (1 / this.CA)) / Math.log(1 - (exchangeRatio / this.ETH));
     const weight = this.ETH / (exchangeRatio * this.CA);
     return weight;
+  }
+
+  solveCurrentExchangeRate() {
+    return this.ETH / (this.CA * this.weight);
   }
 
   addEth(ethIn: number) {

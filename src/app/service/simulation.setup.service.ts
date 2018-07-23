@@ -13,7 +13,7 @@ export class SimulationSetupService {
   constructor() {
   }
 
-  userInputToPolicyholders(input: UserInput): PolicyHolder[] {
+  processUserInput(input: UserInput): PolicyHolder[] {
     const arrPh = [];
 
     PolicyHolder.reset();
@@ -91,7 +91,7 @@ export class SimulationSetupService {
     let totalCoverageUnits = 0;
     for (const ph of arrPh) {
       totalCoverageUnits += ph.coverageValue;
-      ph.damageType = DamageType.PredeterminedDamages;
+      ph.damageType = DamageType.PredeterminedDamagesPerDay;
       ph.damageValue = [];
     }
 
@@ -203,48 +203,13 @@ export class SimulationSetupService {
 
   setClaimSubmission(arrPh: PolicyHolder[]) {
     for (const ph of arrPh) {
-      ph.claimType = ClaimType.Function;
-      ph.claimValue = function (simulationService: UnitySimulationService): boolean {
-        let willSubmit = false;
-        const myCurrentDamage = simulationService.state.accumulatedDamagesPerPH[this.id];
-        const myCoverage = simulationService.state.arrCoveragePerPH[this.id];
-        const policyPeriodLength = simulationService.state.policyPeriodLength;
-        const currentDay = simulationService.state.currentDay - simulationService.state.currentPeriod * policyPeriodLength;
-        if (myCurrentDamage > myCoverage * .5) {
-          willSubmit = true;
-        } else if (currentDay + 1 === policyPeriodLength) {
-          // console.log(simulationService.state.currentDay + ' ' + simulationService.state.currentPeriod)
-          willSubmit = true;
-        }
-        return willSubmit;
-      };
+      ph.claimType = ClaimType.Strategy;
     }
   }
 
   setRedemption(arrPh: PolicyHolder[]): void {
     for (const ph of arrPh) {
-      ph.redemptionType = RedemptionType.Function;
-      ph.redemptionValue = function (simulationService: UnitySimulationService): number {
-        let willRedeem = true;
-        const current_bxc_rate = simulationService.state.bxc.solveEtherOut_fromTokensIn(1);
-        const policyPeriodLength = simulationService.state.policyPeriodLength;
-        const currentDay = simulationService.state.currentDay - simulationService.state.currentPeriod * policyPeriodLength;
-        if (current_bxc_rate < 1 - (.55 / policyPeriodLength * currentDay)) {
-          // If the exchange rate falls below the line where payments reach a 45% rate by the end of the policy period claimants always accept a payment due to lack of confidence premiums will restore the exchange rate sufficiently enough to forgo payment (loss of confidence scenario)
-          willRedeem = true;
-        } else if (currentDay >= policyPeriodLength * .9 && current_bxc_rate < .9) {
-          // When policy period is 90% finished, claimants will not accept an exchange rate payment of less than 90%
-          willRedeem = false;
-        } else if (currentDay >= policyPeriodLength * .8 && current_bxc_rate < .55) {
-          // When policy period is 80% finished, claimants will not accept an exchange rate payment of less than 55%
-          willRedeem = false;
-        }
-        if (willRedeem) {
-          return simulationService.state.arrCATokensPerPH[this.id]; // Rely on the UnitySimulationService to enforce the CA redemption limit
-        } else {
-          return 0;
-        }
-      };
+      ph.redemptionType = RedemptionType.Strategy;
     }
   }
 

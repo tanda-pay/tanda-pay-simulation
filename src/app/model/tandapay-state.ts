@@ -4,6 +4,7 @@ export class TandapayState {
   policyPeriodLength: number;
 
   currentPeriod: number;
+  currentDay: number;
 
   coverageUnitValue: number;
   averageTol: number;
@@ -25,6 +26,7 @@ export class TandapayState {
   overpaymentReturnedHistory: number[][] = [];
   claimAwardHistory: number[][] = [];
 
+  totalEligibleClaimsSum: number;
   claimUnderpaidFrequency: number;
   claimAwardRatio: number;
   underpaidClaimAwardRatio: number;
@@ -33,6 +35,7 @@ export class TandapayState {
 
   constructor(policyPeriodLength, coverageUnitValue, averageTol, stdevTol, averageClaimants) {
     this.currentPeriod = 0;
+    this.currentDay = 0;
 
     this.policyPeriodLength = policyPeriodLength;
     this.coverageUnitValue = coverageUnitValue;

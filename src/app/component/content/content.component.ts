@@ -26,7 +26,7 @@ export class ContentComponent implements OnInit {
 
   constructor(
     private simulationSetupService: SimulationSetupService,
-    private simulationService: TandapaySimulationService,
+    private tandapaySimulationService: TandapaySimulationService,
     private unitySimulationService: UnitySimulationService
   ) {
     this.tandapaySimulations = [];
@@ -231,25 +231,21 @@ export class ContentComponent implements OnInit {
     const graphStdev = this.userInput.stdev_Claims2TUL * this.userInput.tul;
     this.highchart = this.initGraph('claimsgraph', graphMean, graphStdev, this.userInput.totalPremiums);
 
-    // const currentDB = this.simulationSetupService.userInputToDB(this.userInput);
-    const policyholders = this.simulationSetupService.userInputToPolicyholders(this.userInput);
-    this.simulationService.policyholders = policyholders;
-    this.simulationService.state = new TandapayState(this.userInput.policyPeriodLength, this.userInput.cuValue, this.userInput.mean_Claims2TUL, this.userInput.stdev_Claims2TUL, this.userInput.estimatedClaimCount);
-    this.simulationService.state.subgroups = this.simulationSetupService.generateSubgroups(policyholders, this.userInput.avgGroupSize);
-    this.simulationService.generateSimulation(this.userInput.numPolicyPeriods);
-    this.simulationService.generateSimulationSummary();
-    // this.tandapaySimulations.push(this.simulationService.state);
-    this.tandapaySimulations[0] = this.simulationService.state;
+    const policyholders = this.simulationSetupService.processUserInput(this.userInput);
 
-    this.unitySimulationService.policyholders = policyholders;
-    this.unitySimulationService.state = new UnityState(this.userInput.policyPeriodLength, this.userInput.cuValue, [10, 20, 30]);
-    this.unitySimulationService.state.arrCATokensPerPH =  Array(policyholders.length).fill(0);
-    this.unitySimulationService.state.arrRedemptionWindows = Array(policyholders.length).fill(0);
-    const e = this.unitySimulationService.state.bxcStartingEth = this.userInput.unityBxcInitialEth;
-    const w = this.unitySimulationService.state.bxcTargetWeight = this.userInput.unityBxcInitialWeight;
-    this.unitySimulationService.state.bxc = new BancorContract(e, e / w, w);
-    this.unitySimulationService.state.numCA_MPC = e / w;
+    this.tandapaySimulationService.policyholders = policyholders;
+    this.tandapaySimulationService.state = new TandapayState(this.userInput.policyPeriodLength, this.userInput.cuValue, this.userInput.mean_Claims2TUL, this.userInput.stdev_Claims2TUL, this.userInput.estimatedClaimCount);
+    for (const ph of policyholders) {
+      ph.state = this.tandapaySimulationService.state;
+    }
+    this.tandapaySimulationService.state.subgroups = this.simulationSetupService.generateSubgroups(policyholders, this.userInput.avgGroupSize);
+    this.tandapaySimulationService.generateSimulation(this.userInput.numPolicyPeriods);
+    this.tandapaySimulationService.generateSimulationSummary();
 
+    this.tandapaySimulations[0] = this.tandapaySimulationService.state; // this.tandapaySimulations.push(this.simulationService.state);
+
+    // Very rudimentary "animation" showing the sequence of TandaPay policy periods
+    //
     // for (let i = 0; i < this.userInput.numPolicyPeriods; i++) {
     //   const period = this.simulationService.state.periods[i];
     //   const premiums = period.totalPremiumsAfterDefect * this.userInput.cuValue;
@@ -258,8 +254,20 @@ export class ContentComponent implements OnInit {
     //   setTimeout(function() { callback(highchart, premiums, claims); }, 2000 * i);
     // }
 
+    // this.unitySimulationService.policyholders = policyholders;
+    // this.unitySimulationService.state = new UnityState(this.userInput.policyPeriodLength, this.userInput.cuValue, [10, 20, 30]);
+    // for (const ph of policyholders) {
+    //   ph.state = this.unitySimulationService.state;
+    // }
+    // this.unitySimulationService.state.arrCATokensPerPH =  Array(policyholders.length).fill(0);
+    // this.unitySimulationService.state.arrRedemptionWindows = Array(policyholders.length).fill(0);
+    // const e = this.unitySimulationService.state.bxcStartingEth = this.userInput.unityBxcInitialEth;
+    // const w = this.unitySimulationService.state.bxcTargetWeight = this.userInput.unityBxcInitialWeight;
+    // console.log('eth: ' + e + ' weight: ' + w)
+    // this.unitySimulationService.state.bxc = new BancorContract(e, e / w, w);
+    // this.unitySimulationService.state.numCA_MPC = e / w;
     // this.unitySimulationService.generateSimulation(this.userInput.numPolicyPeriods);
     // this.unitySimulationService.generateSimulationSummary();
-    // this.unitySimulations.push(this.unitySimulationService.state);
+    // this.unitySimulations[0] = this.unitySimulationService.state; // this.unitySimulations.push(this.unitySimulationService.state);
   }
 }

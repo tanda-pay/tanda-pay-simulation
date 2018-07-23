@@ -1,8 +1,6 @@
 import {Injectable} from '@angular/core';
 
 import {PolicyHolder} from '../model/policy-holder';
-import {ClaimType, CoverageType, DamageType, DefectType, ParticipationType, PremiumVoteType, RedemptionType} from '../model/policy-holder';
-
 import {TandapayState} from '../model/tandapay-state';
 
 declare var jStat: any;
@@ -106,13 +104,12 @@ export class TandapaySimulationService {
     }
 
     // Step 4: Aggregate claims of participating policyholders during the policy period
-    // To faithfully match user input, we use an awful hack here that messes with the policyholder's decisionmaking
-
     for (const ph of arrPh) {
       const ph_cu = this.state.purchasedCoverageHistory[this.state.currentPeriod][ph.id];
       if (ph_cu > 0) {
         let accumulatedDamages = 0;
         for (let d = 0; d < this.state.policyPeriodLength; d++) {
+          this.state.currentDay = this.state.currentPeriod * this.state.policyPeriodLength + d;
           accumulatedDamages += ph.chooseDamageValue();
         }
         const claimValue = Math.min(accumulatedDamages, ph_cu);
@@ -136,7 +133,6 @@ export class TandapaySimulationService {
           this.state.blacklistedPolicyholders.push(ph.id);
         } else {
           nextPeriod.loyalistCoverageUnits += ph_cu;
-          // nextPeriod.loyalists.push(ph);
         }
         this.state.defectHistory[this.state.currentPeriod][ph.id] = defectChosen;
       } else {
@@ -260,72 +256,6 @@ export class TandapaySimulationService {
     this.state.currentPeriod++;
   }
 
-  // simulateDecision_CoveragePurchase(ph: PolicyHolder): number {
-  //   if (ph.coverageType === CoverageType.Constant) {
-  //     return ph.coverageValue;
-  //   } else if (ph.coverageType === CoverageType.Eval) {
-  //     return eval(ph.coverageValue);
-  //   }
-  //   return 0;
-  // }
-  //
-  // simulateDecision_PremiumVote(ph: PolicyHolder): number {
-  //   if (ph.premiumVoteType === PremiumVoteType.Constant) {
-  //     return ph.premiumVoteValue;
-  //   } else if (ph.premiumVoteType === PremiumVoteType.Eval) {
-  //     return eval(ph.premiumVoteValue);
-  //   }
-  //   return 0;
-  // }
-  //
-  // simulateDecision_Participation(ph: PolicyHolder): boolean {
-  //   if (ph.participationType === ParticipationType.Random) {
-  //     return Math.random() < ph.participationValue;
-  //   } else if (ph.participationType === ParticipationType.Eval) {
-  //     return eval(ph.participationValue);
-  //   }
-  //   return true;
-  // }
-  //
-  // simulateDecision_DamageValue(ph: PolicyHolder): number {
-  //   if (ph.damageType === DamageType.PredeterminedDamagesPerDay) {
-  //     let claimValue = 0;
-  //     for (let i = 0; i < this.state.policyPeriodLength; i++) {
-  //       claimValue += ph.damageValue[(this.state.currentPeriod * this.state.policyPeriodLength) + i];
-  //     }
-  //     return claimValue * ph.coverageValue;
-  //   } else if (ph.damageType === DamageType.PredeterminedDamagesPerPeriod) {
-  //     return ph.damageValue[(this.state.currentPeriod)];
-  //   } else if (ph.damageType === DamageType.Eval) {
-  //     return eval(ph.damageValue);
-  //   }
-  //   return 0;
-  // }
-  //
-  // // simulateDecision_ClaimValue(p: PolicyHolder): number {
-  // //   if (p.claimType === ClaimType.LikelihoodAndClaimAmount) {
-  // //     if (Math.random() < p.claimValue[0]) {
-  // //       return p.claimValue[1];
-  // //     } else {
-  // //       return 0;
-  // //     }
-  // //   } else if (p.claimType === ClaimType.LikelihoodAndClaimAmountButPredestination) {
-  // //     return p.claimValue[2];
-  // //   } else if (p.claimType === ClaimType.Eval) {
-  // //     return eval(p.claimValue);
-  // //   }
-  // //   return 0;
-  // // }
-  //
-  // simulateDecision_Defect(p: PolicyHolder): boolean {
-  //   if (p.defectType === DefectType.Random) {
-  //     return Math.random() < p.defectValue;
-  //   } else if (p.defectType === DefectType.Function) {
-  //     return p.defectValue(this);
-  //   }
-  //   return false;
-  // }
-
   generateSimulationSummary() {
     const periods = this.state.periods;
     let numClaims = 0;
@@ -343,6 +273,7 @@ export class TandapaySimulationService {
       totalEligibleClaimsSum += period.totalEligibleClaims;
       claimAwardsSum += period.claimPaymentRatio * period.totalEligibleClaims;
     }
+    this.state.totalEligibleClaimsSum = totalEligibleClaimsSum;
     this.state.claimAwardRatio = claimAwardsSum / totalEligibleClaimsSum;
     let totalElligibleUnderpaidClaimsSum = 0;
     let underpaidClaimAwardsSum = 0;

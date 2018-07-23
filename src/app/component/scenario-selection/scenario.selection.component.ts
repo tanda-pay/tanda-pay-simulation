@@ -30,6 +30,8 @@ export class ScenarioSelectionComponent implements OnInit {
       this.userInput = this.getScenario3();
     }
     this.userInput.updateDerivedValues();
+    this.userInput.unityBxcInitialEth = this.userInput.numCu * .1;
+    this.userInput.unityBxcInitialWeight = .5;
   }
 
   getScenario1() {
