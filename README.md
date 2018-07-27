@@ -1,30 +1,11 @@
-# TandaPaySimulation
+The TandaPay simulation's number-crunching logic is found in src/app/service/tandapay.simulation.service.ts. The rules of TandaPay are laid out in that script, and it depends on src/app/model/policy-holder.ts and src/app/model/tandapay-state.ts to store state and model decisions.
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.7.3.
+-policy-holder.ts contains the PolicyHolder class, which encapsulates the decisions/unique attributes of the TandaPay policyholders. When the simulation needs policyholder's to make a decision, it calls functions from this class.
 
-Angular Material setup: followed https://appdividend.com/2018/01/18/angular-5-material-tutorial-scratch/
-manual change version numbers to match angular core
+-tandapay-state.ts contains the TandapayState class, which is just a class that contains fields that tandapay.simulation.service.ts cares about. An array of PolicyHolder objects and an instance of a TandapayState should completely store all of the information of a TandaPay simulation.
 
-## Development server
+-src/app/model/user-input.ts has a class which contains fields for all of the settings that goes into initializing a simulation
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+-src/app/service/simulation.setup.service.ts processes a userInput instance an initializes policyholders and simulation state accordingly
 
-## Code scaffolding
-
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
-
-## Build
-
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `-prod` flag for a production build.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+The rest of the repository contains Angular modules/building-blocks for binding the web application to the settings and simulation data.
