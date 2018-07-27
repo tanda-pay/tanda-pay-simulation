@@ -1,5 +1,5 @@
-import {BancorContract, UnitySimulationService} from './unity.simulation.service';
-import {Catastrophe, SimulationSetupService} from './simulation.setup.service';
+
+import {SimulationSetupService} from './simulation.setup.service';
 import {PolicyHolder} from '../model/policy-holder';
 
 declare var jStat: any;

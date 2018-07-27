@@ -2,9 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 import {TandapaySimulationService} from '../../service/tandapay.simulation.service';
 import {SimulationSetupService} from '../../service/simulation.setup.service';
 import {UserInput} from '../../model/user-input';
-import {BancorContract, UnitySimulationService} from '../../service/unity.simulation.service';
 import {TandapayState} from '../../model/tandapay-state';
-import {UnityState} from '../../model/unity-state';
 
 // import * as truncatedNormalDistribution from 'distributions-truncated-normal-pdf';
 declare var pdf: any;
@@ -20,18 +18,14 @@ export class ContentComponent implements OnInit {
   // @Input() currentDB: SimulationDatabase;
   @Input() userInput: UserInput;
   tandapaySimulations: TandapayState[];
-  unitySimulations: UnityState[];
 
   highchart;
 
   constructor(
     private simulationSetupService: SimulationSetupService,
     private tandapaySimulationService: TandapaySimulationService,
-    private unitySimulationService: UnitySimulationService
   ) {
     this.tandapaySimulations = [];
-    this.unitySimulations = [];
-
   }
 
   ngOnInit() {

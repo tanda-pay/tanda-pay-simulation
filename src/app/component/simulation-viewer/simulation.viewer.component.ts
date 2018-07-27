@@ -1,7 +1,6 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {TandapayState} from '../../model/tandapay-state';
-import {UnityState} from '../../model/unity-state';
 
 /**
  * @title Tag group with dynamically changing tabs
@@ -13,7 +12,6 @@ import {UnityState} from '../../model/unity-state';
 })
 export class SimulationViewerComponent {
   @Input() tandapaySimulations: TandapayState[];
-  @Input() unitySimulations: UnityState[];
   @Output() simulationTabChanged = new EventEmitter<number>();
   tabSelections = [];
   unityDayTabSelections = [];

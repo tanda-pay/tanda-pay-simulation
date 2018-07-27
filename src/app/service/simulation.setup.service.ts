@@ -2,7 +2,6 @@ import {Injectable} from '@angular/core';
 import {PolicyHolder} from '../model/policy-holder';
 import {ClaimType, CoverageType, DamageType, DefectType, ParticipationType, PremiumVoteType, RedemptionType} from '../model/policy-holder';
 import {UserInput} from '../model/user-input';
-import {UnitySimulationService} from './unity.simulation.service';
 
 declare var jStat: any;
 declare var randomWeightedSampleNoReplacement: any;
