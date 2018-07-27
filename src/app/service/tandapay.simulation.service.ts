@@ -110,7 +110,7 @@ export class TandapaySimulationService {
         let accumulatedDamages = 0;
         for (let d = 0; d < this.state.policyPeriodLength; d++) {
           this.state.currentDay = this.state.currentPeriod * this.state.policyPeriodLength + d;
-          accumulatedDamages += ph.chooseDamageValue();
+          accumulatedDamages += ph.chooseDamage();
         }
         const claimValue = Math.min(accumulatedDamages, ph_cu);
         this.state.claimSubmittedHistory[this.state.currentPeriod][ph.id] = claimValue;
