@@ -63,7 +63,7 @@ export class UnitySimulationService {
 
     // Step 1: Policyholders have accidents/claim-worthy events
     for (const ph of this.policyholders) {
-      const damages = ph.chooseDamageValue();
+      const damages = ph.chooseDamage();
       this.state.claimableDamageHistory[this.state.currentDay][ph.id] = damages;
       this.state.accumulatedDamagesPerPH[ph.id] += damages;
     }
@@ -84,7 +84,6 @@ export class UnitySimulationService {
     }
 
     // Step 4: Check for "Catastrophic Event" condition, where there is not enough CA in the BXC to match all CA in policyholders' hands
-    // TODO: Implement a condition to end catastrophic events
     this.checkCatastrophe();
 
     // Step 5: Policyholders can choose the amount of CA tokens they redeem, up to a maximum amount dictated by the claim window
@@ -124,7 +123,7 @@ export class UnitySimulationService {
     this.restoreBXC();
 
     this.state.bxcHistory.push(new BancorContract(this.state.bxc.ETH, this.state.bxc.CA, this.state.bxc.weight));
-    // If the day marks the end policy period, update records
+    // If the day marks the end policy period, take leftover ETH from the escrow and put it into the CAT
     if ((this.state.currentDay + 1) % this.state.policyPeriodLength === 0) {
       this.state.currentPeriod++;
       this.state.catastrophicReserveEth += this.state.premiumsEscrow;
@@ -195,44 +194,6 @@ export class UnitySimulationService {
     const c = a; // const c = this.state.numCA_TUL + this.state.numCA_TOL;
     return Math.abs(a - b) < .01;
   }
-  //
-  // simulateDecision_PremiumVote(ph: PolicyHolder): number {
-  //   if (ph.premiumVoteType === PremiumVoteType.Constant) {
-  //     return ph.premiumVoteValue;
-  //   } else if (ph.premiumVoteType === PremiumVoteType.Eval) {
-  //     return eval(ph.premiumVoteValue);
-  //   }
-  //   return 0;
-  // }
-  //
-  // simulateDecision_Participation(p: PolicyHolder): boolean {
-  //   if (p.participationType === ParticipationType.Random) {
-  //     return Math.random() < p.participationValue;
-  //   } else if (p.participationType === ParticipationType.Eval) {
-  //     return eval(p.participationValue);
-  //   }
-  //   return true;
-  // }
-  //
-  // simulateDecision_DamageValue(ph: PolicyHolder): number {
-  //   if (ph.damageType === DamageType.PredeterminedDamagesPerDay) {
-  //     return Math.max(ph.damageValue[this.state.currentDay], 0);
-  //   } else if (ph.damageType === DamageType.Eval) {
-  //     return eval(ph.damageValue);
-  //   }
-  //   return 0;
-  // }
-  //
-  // simulateDecision_SubmitClaim(p: PolicyHolder): boolean {
-  //   if (p.claimType === ClaimType.Function) {
-  //     return p.claimValue(this);
-  //   }
-  //   return false;
-  // }
-  //
-  // simulateDecision_RedeemCA(p: PolicyHolder): number {
-  //   return p.redemptionValue(this);
-  // }
 
   generateSimulationSummary() {
     this.state.totalEthPaidIn = 0;

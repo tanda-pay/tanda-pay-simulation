@@ -66,16 +66,9 @@ export class PolicyHolder {
     return true;
   }
 
-  chooseDamageValue(): number {
-    if (this.damageType === DamageType.PredeterminedDamages) {
-      if (!('damageIndex' in this.knowledge)) {
-        this.knowledge['damageIndex'] = 0;
-      }
-      return this.damageValue[this.knowledge['damageIndex']++];
-    } else if (this.damageType === DamageType.PredeterminedDamagesPerDay) {
+  chooseDamage(): number {
+    if (this.damageType === DamageType.PredeterminedDamagesPerDay) {
       return this.damageValue[this.state.currentDay];
-    } else if (this.damageType === DamageType.PredeterminedDamagesPerPeriod) {
-      return this.damageValue[this.state.currentPeriod];
     } else if (this.damageType === DamageType.Function) {
       return this.damageValue();
     }
@@ -174,9 +167,7 @@ export enum PremiumVoteType {
 }
 
 export enum DamageType {
-  PredeterminedDamages,
   PredeterminedDamagesPerDay, // damageValue field is an array that maps each day to a damage value
-  PredeterminedDamagesPerPeriod, // damageValue field is an array that maps each period to a damage value
   Function
 }
 
